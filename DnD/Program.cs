@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using DnD.Areas.Identity.Data;
 namespace DnD
 {
     public class Program
@@ -5,6 +8,11 @@ namespace DnD
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var connectionString = builder.Configuration.GetConnectionString("DB_DnDContextConnection") ?? throw new InvalidOperationException("Connection string 'DB_DnDContextConnection' not found.");
+
+            builder.Services.AddDbContext<DB_DnDContext>(options => options.UseNpgsql(connectionString));
+
+            builder.Services.AddDefaultIdentity<SampleUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DB_DnDContext>();
 
             // Add services to the container.
             builder.Services.AddRazorPages();
