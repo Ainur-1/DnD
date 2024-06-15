@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.Enums;
+﻿namespace Domain.Entities;
 
 /// <summary>
 /// Represents dice.
@@ -9,6 +9,8 @@ public enum Dice
     OneD3,
     OneD4,
     OneD6,
+    OneD8,
+    OneD12
 }
 
 public static class DiceExtensions
@@ -21,5 +23,5 @@ public static class DiceExtensions
             Dice.OneD4 => 4,
             Dice.OneD6 => 6,
             _ => throw new ArgumentOutOfRangeException(nameof(dice), dice, "Unknown dice.")
-        };    
+        };
 }

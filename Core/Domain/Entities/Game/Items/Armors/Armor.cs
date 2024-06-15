@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities.Items.Armors;
+﻿using Domain.Entities.Game.Items;
+
+namespace Domain.Entities.Items.Armors;
 
 public class Armor : Item
 {

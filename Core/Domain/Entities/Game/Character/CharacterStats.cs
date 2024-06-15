@@ -1,6 +1,4 @@
-﻿using Domain.Entities.Enums;
-
-namespace Domain.Entities.Character;
+﻿namespace Domain.Entities.Character;
 
 public class CharacterStats
 {

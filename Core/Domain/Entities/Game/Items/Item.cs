@@ -1,9 +1,10 @@
-﻿
-namespace Domain.Entities.Items;
+﻿namespace Domain.Entities.Game.Items;
 
 public abstract class Item
 {
     public string Name { get; protected set; }
+
+    public string? IconUrl { get; protected set; }
 
     public float WeightInPounds { get; protected set; }
 

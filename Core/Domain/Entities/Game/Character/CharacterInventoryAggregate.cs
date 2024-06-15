@@ -1,4 +1,4 @@
-﻿using Domain.Entities.Items;
+﻿using Domain.Entities.Game.Items;
 
 namespace Domain.Entities.Character;
 

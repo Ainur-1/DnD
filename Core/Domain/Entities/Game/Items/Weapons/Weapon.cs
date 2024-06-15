@@ -1,4 +1,4 @@
-﻿using Domain.Entities.Enums;
+﻿using Domain.Entities.Game.Items;
 
 namespace Domain.Entities.Items.Weapons;
 
