@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DnD.Areas.Identity.Data;
 
-public class DB_DnDContext : IdentityDbContext<ApplicationUser>
+public class DB_DnDContext : IdentityDbContext<User>
 {
     public DB_DnDContext(DbContextOptions<DB_DnDContext> options)
         : base(options)
     {
     }
-
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -22,9 +22,9 @@ public class DB_DnDContext : IdentityDbContext<ApplicationUser>
     }
 }
 
-public class ApplicationUserEntityConfiguration : IEntityTypeConfiguration<ApplicationUser>
+public class ApplicationUserEntityConfiguration : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<ApplicationUser> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.Property(x => x.UserName).HasMaxLength(100);
         builder.Property(x => x.Name).HasMaxLength(100);

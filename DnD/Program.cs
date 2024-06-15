@@ -12,7 +12,7 @@ namespace DnD
 
             builder.Services.AddDbContext<DB_DnDContext>(options => options.UseNpgsql(connectionString));
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DB_DnDContext>();
+            builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DB_DnDContext>();
 
             // Add services to the container.
             builder.Services.AddRazorPages();

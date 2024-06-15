@@ -2,7 +2,7 @@
 
 namespace DnD.Areas.Identity.Data;
 
-public class ApplicationUser: IdentityUser
+public class User: IdentityUser
 {
     public string? Name { get; set; }
     
