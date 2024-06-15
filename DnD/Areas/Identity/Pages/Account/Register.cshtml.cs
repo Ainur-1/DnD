@@ -24,17 +24,17 @@ namespace DnD.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<SampleUser> _signInManager;
-        private readonly UserManager<SampleUser> _userManager;
-        private readonly IUserStore<SampleUser> _userStore;
-        private readonly IUserEmailStore<SampleUser> _emailStore;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserStore<ApplicationUser> _userStore;
+        private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
-            UserManager<SampleUser> userManager,
-            IUserStore<SampleUser> userStore,
-            SignInManager<SampleUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            IUserStore<ApplicationUser> userStore,
+            SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
@@ -79,12 +79,14 @@ namespace DnD.Areas.Identity.Pages.Account
 
             [Required]
             [StringLength(100, ErrorMessage = "Максимум 100 символов")]
-            [Display(Name = "Nickname")]
-            public string Nickname { get; set; }
+            [Display(Name = "UserName")]
+            public string UserName { get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            /// 
+
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -126,8 +128,7 @@ namespace DnD.Areas.Identity.Pages.Account
                 var user = CreateUser();
 
                 user.Name = Input.Name;
-                user.Nickname = Input.Nickname;
-                
+                user.UserName = Input.UserName;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -169,27 +170,27 @@ namespace DnD.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private SampleUser CreateUser()
+        private ApplicationUser CreateUser()
         {
             try
             {
-                return Activator.CreateInstance<SampleUser>();
+                return Activator.CreateInstance<ApplicationUser>();
             }
             catch
             {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(SampleUser)}'. " +
-                    $"Ensure that '{nameof(SampleUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                     $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
             }
         }
 
-        private IUserEmailStore<SampleUser> GetEmailStore()
+        private IUserEmailStore<ApplicationUser> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<SampleUser>)_userStore;
+            return (IUserEmailStore<ApplicationUser>)_userStore;
         }
     }
 }

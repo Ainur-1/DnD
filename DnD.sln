@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnD", "DnD\DnD.csproj", "{D3E6B5C4-3003-4B33-AE20-85EA25D7D02C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnD", "DnD\DnD.csproj", "{D3E6B5C4-3003-4B33-AE20-85EA25D7D02C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAcces", "DataAcces\DataAcces.csproj", "{4FC4E52F-A79A-44B5-85F9-7438717AE7C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D3E6B5C4-3003-4B33-AE20-85EA25D7D02C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3E6B5C4-3003-4B33-AE20-85EA25D7D02C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3E6B5C4-3003-4B33-AE20-85EA25D7D02C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FC4E52F-A79A-44B5-85F9-7438717AE7C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FC4E52F-A79A-44B5-85F9-7438717AE7C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FC4E52F-A79A-44B5-85F9-7438717AE7C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FC4E52F-A79A-44B5-85F9-7438717AE7C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
