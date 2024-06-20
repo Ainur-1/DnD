@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using DnD.Areas.Identity.Data;
+using DataAccess;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using DnD.Areas.Identity.Pages.Account;
+using AspNetCore.Identity.MongoDbCore.Models;
+
 namespace DnD
 {
     public class Program
@@ -8,14 +13,23 @@ namespace DnD
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var connectionString = builder.Configuration.GetConnectionString("DB_DnDContextConnection") ?? throw new InvalidOperationException("Connection string 'DB_DnDContextConnection' not found.");
 
-            builder.Services.AddDbContext<DB_DnDContext>(options => options.UseNpgsql(connectionString));
+            var mongoDbSettings = builder.Configuration.GetSection(nameof(MongoDbConfig)).Get<MongoDbConfig>();
+            builder.Services
+                .AddIdentity<User, UserRole>(options =>
+                {
+                    options.SignIn.RequireConfirmedEmail = false; //Отключена подтверждения почты и аккаунта (Временно)
+                    options.SignIn.RequireConfirmedAccount = false;
+                })
+                .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.ConnectionString, mongoDbSettings.Name)
+                .AddDefaultTokenProviders()
+                .AddDefaultUI();
 
-            builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DB_DnDContext>();
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 
             var app = builder.Build();
 
@@ -32,6 +46,7 @@ namespace DnD
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapRazorPages();

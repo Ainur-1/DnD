@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using DnD.Areas.Identity.Data;
+using System.Security.Policy;
 
 namespace DnD.Areas.Identity.Pages.Account
 {
@@ -130,12 +131,14 @@ namespace DnD.Areas.Identity.Pages.Account
                 user.Name = Input.Name;
                 user.UserName = Input.UserName;
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
+
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -150,9 +153,21 @@ namespace DnD.Areas.Identity.Pages.Account
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
+
+                    /*Метка
+                    
+                    В это части кода не работает потдверждения почты (Наверное) 
+                    
+                    Console.WriteLine($"UserId: {userId}");
+                    Console.WriteLine($"Code: {code}");
+                    Console.WriteLine($"ReturnUrl: {returnUrl}");
+                    Console.WriteLine($"RequireConfirmedAccount: {_userManager.Options.SignIn.RequireConfirmedAccount}");
+
+                    */
+                 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                       return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     }
                     else
                     {

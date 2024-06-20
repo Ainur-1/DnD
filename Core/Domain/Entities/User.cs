@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AspNetCore.Identity.MongoDbCore.Models;
+using Microsoft.AspNetCore.Identity;
+using MongoDbGenericRepository.Attributes;
 
 namespace DnD.Areas.Identity.Data;
 
-public class User: IdentityUser
+[CollectionName("Users")]
+public class User: MongoIdentityUser<Guid>
 {
     public string? Name { get; set; }
     
