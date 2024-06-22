@@ -1,34 +1,34 @@
-namespace DnD
+﻿using DataAccess.DependencyInjection;
+using DnD.Data;
+
+namespace DnD;
+
+public class Program
 {
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+        var configuration = builder.Configuration;
+        var services = builder.Services;
+
+        services.RegisterDatabaseServices(configuration.GetSection(nameof(MongoDbSettings))?.Get<MongoDbSettings>() ?? throw new ArgumentNullException($"Provide {nameof(MongoDbSettings)}."));
+
+        builder.Services.AddRazorPages();
+
+        var app = builder.Build();
+
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        
+        app.MapRazorPages();
+
+
+        if (configuration.IsDataSeedRequested())
         {
-            var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-            builder.Services.AddRazorPages();
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.MapRazorPages();
-
-            app.Run();
+            await app.MigrateDatabaseAsync();
         }
+
+        await app.RunAsync();
     }
 }
