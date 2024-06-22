@@ -51,6 +51,7 @@ public static class ServiceCollectionExtensions
         BsonSerializer.RegisterSerializer(new EnumSerializer<WeaponAttackType>(BsonType.String));
         BsonSerializer.RegisterSerializer(new EnumSerializer<WeaponDamageType>(BsonType.String));
         BsonSerializer.RegisterSerializer(new EnumSerializer<WeaponProficiencyType>(BsonType.String));
+        BsonSerializer.RegisterSerializer(new EnumSerializer<WeaponProperty>(BsonType.String));
         BsonSerializer.RegisterSerializer(new EnumSerializer<AccessType>(BsonType.String));
         BsonSerializer.RegisterSerializer(new DiceMongoSerializer());
 
@@ -114,6 +115,13 @@ public static class ServiceCollectionExtensions
             cm.AutoMap();
             cm.MapIdProperty(x => x.Id)
                 .SetIsRequired(true);
+        });
+
+        BsonClassMap.RegisterClassMap<RaceTraitWithOptions>(cm =>
+        {
+            cm.AutoMap();
+            cm.MapProperty(x => x.Options)
+                .SetIgnoreIfNull(true);
         });
     }
 

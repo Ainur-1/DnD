@@ -34,7 +34,10 @@ public class ItemJsonConverter : JsonConverter<Item>
             var type = knownItemsTypes.FirstOrDefault(x => x.Name == typeName) ?? throw new NotSupportedException(UNKNOWNTYPE_MESSAGE);
 
             //todo: not optimal to parse string and then ToString() and call global deserializer
-            return JsonConvert.DeserializeObject(jObject.Root.ToString(), type) as Item ?? throw new NotSupportedException(UNKNOWNTYPE_MESSAGE);
+            return JsonConvert.DeserializeObject(jObject.Root.ToString(), type, new JsonSerializerSettings
+            {
+                ContractResolver = new ProtectedSetContractResolver()
+            }) as Item ?? throw new NotSupportedException(UNKNOWNTYPE_MESSAGE);
         }
 
         throw new NotSupportedException(UNKNOWNTYPE_MESSAGE);

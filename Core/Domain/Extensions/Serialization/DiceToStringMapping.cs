@@ -15,6 +15,7 @@ public static class DiceToStringMapping
         [Dice.OneD10] = "1d10",
         [Dice.OneD12] = "1d12",
         [Dice.TwoD6] = "2d6",
+        [Dice.TwoD10] = "2d10",
     };
 
     public static readonly IReadOnlyDictionary<string, Dice> StringToDiceMap = DiceToStringMap

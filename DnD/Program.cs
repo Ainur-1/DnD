@@ -1,12 +1,10 @@
 using DataAccess.DependencyInjection;
 using DnD.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using DnD.Areas.Identity.Data;
 using DataAccess;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using DnD.Areas.Identity.Pages.Account;
-using AspNetCore.Identity.MongoDbCore.Models;
 
 namespace DnD;
 
@@ -17,22 +15,24 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var configuration = builder.Configuration;
         var services = builder.Services;
-      
+
+        var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings))?.Get<MongoDbSettings>() ?? throw new ArgumentNullException($"Provide {nameof(MongoDbSettings)}.");
+
         services
                 .AddIdentity<User, UserRole>(options =>
                 {
                     options.SignIn.RequireConfirmedEmail = false; 
                     options.SignIn.RequireConfirmedAccount = false;
                 })
-                .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.ConnectionString, mongoDbSettings.Name)
+                .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
                 .AddDefaultTokenProviders()
                 .AddDefaultUI();
 
         services.AddRazorPages();
-        services.AddTransient<IEmailSender, EmailSender>();      
-      
+        services.AddTransient<IEmailSender, EmailSender>();
 
-        services.RegisterDatabaseServices(configuration.GetSection(nameof(MongoDbSettings))?.Get<MongoDbSettings>() ?? throw new ArgumentNullException($"Provide {nameof(MongoDbSettings)}."));
+
+        services.RegisterDatabaseServices(mongoDbSettings);
 
         builder.Services.AddRazorPages();
 
