@@ -2,10 +2,9 @@
 
 public class CharacterManagement
 {
-
     public Guid JoinedPartyId { get; set; }
 
-    public User Owner { get; set; }
+    public Guid OwnerId { get; set; }
 
     public int ActualLevel { get; set; }
 

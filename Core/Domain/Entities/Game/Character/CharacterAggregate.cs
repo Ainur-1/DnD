@@ -1,8 +1,9 @@
 ﻿namespace Domain.Entities.Character;
 
-// This entity is not stored in db (if postgresql approach)
 public class CharacterAggregate
 {
+    public Guid Id { get; protected set; }
+
     public CharacterPersonality Personality { get; protected set; }
 
     public CharacterStats Stats { get; protected set; }
@@ -11,7 +12,5 @@ public class CharacterAggregate
 
     public CharacterInventoryAggregate Inventory { get; protected set; }
 
-    //public CharacterDynamicProperties? InGameStats { get; protected set; }
-
-    //todo: impllement character methods (Join party, Die, etc)
+    public CharacterDynamicProperties? InGameStats { get; protected set; }
 }

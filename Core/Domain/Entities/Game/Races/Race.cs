@@ -21,4 +21,6 @@ public class Race : RaceBase
     /// Sub races adjustments
     /// </summary>
     public SubRaceInfo[]? SubRacesAdjustments { get; set; }
+
+    protected Race() { }
 }
