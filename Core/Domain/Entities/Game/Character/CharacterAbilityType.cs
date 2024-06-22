@@ -1,5 +1,9 @@
-﻿namespace Domain.Entities.Character;
+﻿using Newtonsoft.Json.Converters;
+using Newtonsoft.Json;
 
+namespace Domain.Entities.Character;
+
+[JsonConverter(typeof(StringEnumConverter))]
 public enum CharacterAbilityType
 {
     Strength,

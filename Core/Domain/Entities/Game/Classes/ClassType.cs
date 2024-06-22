@@ -1,5 +1,9 @@
-﻿namespace Domain.Entities.Classes;
+﻿using Newtonsoft.Json.Converters;
+using Newtonsoft.Json;
 
+namespace Domain.Entities.Classes;
+
+[JsonConverter(typeof(StringEnumConverter))]
 public enum ClassType
 {
     Barbarian = 1,

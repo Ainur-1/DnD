@@ -2,6 +2,7 @@
 
 namespace DataAccess;
 
-public interface IDndDatabase : IMongoDatabase
+public record DndDatabase
 {
+    public IMongoDatabase Database { get; init; }
 }

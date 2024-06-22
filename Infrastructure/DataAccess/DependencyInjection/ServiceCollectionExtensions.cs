@@ -16,12 +16,12 @@ public static class ServiceCollectionExtensions
     private static void AddDatabaseProvider(IServiceCollection serviceCollection, MongoDbSettings mongoDbSettings)
     {
         serviceCollection.AddSingleton<IMongoClient>(new MongoClient(mongoDbSettings.GetConnectionString()));
-        serviceCollection.AddScoped<IDndDatabase>(sp =>
+        serviceCollection.AddScoped<DndDatabase>(sp =>
         {
             var client = sp.GetService<IMongoClient>()!;
-            var database = (IDndDatabase)client.GetDatabase(Constants.DATABASE_NAME);
+            var database = client.GetDatabase(Constants.DATABASE_NAME);
 
-            return database;
+            return new DndDatabase { Database = database };
         });
     }
 

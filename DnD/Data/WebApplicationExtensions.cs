@@ -1,10 +1,9 @@
 ﻿using DataAccess;
 using Domain.Entities.Classes;
 using Domain.Entities.Game.Items;
-using Domain.Entities.Game.Items.Serialization;
 using Domain.Entities.Races;
-using MongoDB.Driver;
-using System.Text.Json;
+using Domain.Extensions.Serialization;
+using Newtonsoft.Json;
 
 namespace DnD.Data;
 
@@ -27,7 +26,7 @@ public static class WebApplicationExtensions
         var serviceProvider = scope.ServiceProvider;
         try
         {
-            var database = serviceProvider.GetService<IDndDatabase>() ?? throw new NotImplementedException("Could not resolve database.");
+            var database = serviceProvider.GetService<DndDatabase>()?.Database ?? throw new NotImplementedException("Could not resolve database.");
 
             const string CLASS_COLLECTION = Constants.CLASSES_COLLECTION_NAME;
             const string ITEM_COLLECTION = Constants.ITEMS_COLLECTION_NAME;
@@ -79,14 +78,12 @@ public static class WebApplicationExtensions
     private static async Task<DataSeedDto> GetDataSeedDtoAsync()
     {
         var pathToDataSeed = Path.Combine(Directory.GetCurrentDirectory(), "Data", DATASEED_FILE).ToString();
-        using var fileStream = File.OpenRead(pathToDataSeed);
-        var options = new JsonSerializerOptions
-        {
-            Converters = { new ItemJsonConverter() },
-            WriteIndented = true
-        };
+        var json = await File.ReadAllTextAsync(pathToDataSeed);
 
-        var dataSeed = await JsonSerializer.DeserializeAsync<DataSeedDto>(fileStream, options);
+        var jsonSettings = new JsonSerializerSettings();
+        jsonSettings.Converters.Add(new ItemJsonConverter());
+
+        var dataSeed = JsonConvert.DeserializeObject<DataSeedDto>(json, jsonSettings);
 
         return dataSeed ?? throw new InvalidOperationException("Could not find correct data seed.");
     }
