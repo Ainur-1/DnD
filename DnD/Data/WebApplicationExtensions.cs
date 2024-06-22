@@ -80,7 +80,10 @@ public static class WebApplicationExtensions
         var pathToDataSeed = Path.Combine(Directory.GetCurrentDirectory(), "Data", DATASEED_FILE).ToString();
         var json = await File.ReadAllTextAsync(pathToDataSeed);
 
-        var jsonSettings = new JsonSerializerSettings();
+        var jsonSettings = new JsonSerializerSettings()
+        {
+            ContractResolver = new ProtectedSetContractResolver()
+        };
         jsonSettings.Converters.Add(new ItemJsonConverter());
 
         var dataSeed = JsonConvert.DeserializeObject<DataSeedDto>(json, jsonSettings);

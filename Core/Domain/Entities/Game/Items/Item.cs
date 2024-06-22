@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities.Game.Items;
+﻿using Newtonsoft.Json;
+
+namespace Domain.Entities.Game.Items;
 
 public abstract class Item
 {
