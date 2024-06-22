@@ -1,6 +1,11 @@
-﻿namespace Domain.Entities;
+using AspNetCore.Identity.MongoDbCore.Models;
+using Microsoft.AspNetCore.Identity;
+using MongoDbGenericRepository.Attributes;
 
-[Obsolete]
-public class User
+namespace DnD.Areas.Identity.Data;
+
+[CollectionName("Users")]
+public class User: MongoIdentityUser<Guid>
 {
+    public string? Name { get; set; }
 }
