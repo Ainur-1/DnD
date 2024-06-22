@@ -10,13 +10,11 @@ public class Weapon : Item
 
     public WeaponProficiencyType ProficiencyType { get; protected set; }
 
-    public int? RangeInFoots { get; protected set; }
-
     public int? NormalDistanceInFoots { get; protected set; }
 
     public int? CriticalDistanceInFoots { get; protected set; }
 
-    public WeaponProperty[] Properties { get; protected set; } = Array.Empty<WeaponProperty>();
+    public WeaponProperty[]? Properties { get; protected set; }
 
     public Dice HitDice { get; protected set; }
 
@@ -25,4 +23,6 @@ public class Weapon : Item
     /// <see cref="WeaponProperty"/>
     /// </summary>
     public Dice? AlternateHitDice { get; protected set; }
+
+    public override string ItemType => nameof(Weapon);
 }

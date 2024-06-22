@@ -12,9 +12,11 @@ public class Armor : Item
 
     public int? RequiredStrength { get; protected set; }
 
-    public bool Disadvantage { get; protected set; }
+    public bool HasStealthDisadvantage { get; protected set; }
 
-    public int MaxPossibleDexterityModifier { get; protected set; }
+    public int? MaxPossibleDexterityModifier { get; protected set; }
+
+    public override string ItemType => nameof(Armor);
 
     protected Armor() { }
 
@@ -24,7 +26,7 @@ public class Armor : Item
         if (ArmorType == ArmorType.Shield)
             return 2;
 
-        return BaseArmorClass + Math.Min(MaxPossibleDexterityModifier, characterDexterityModifier);
+        return BaseArmorClass + MaxPossibleDexterityModifier == null ? characterDexterityModifier : Math.Min(MaxPossibleDexterityModifier!.Value, characterDexterityModifier);
     }
 
     public int CalculateSpeedExpenses(int characterStrength)
