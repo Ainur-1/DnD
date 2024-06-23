@@ -36,7 +36,29 @@ public class Program
 
         builder.Services.AddRazorPages();
 
+        if (builder.Environment.IsDevelopment())
+        {
+            services.AddCors(options =>
+            {
+                var allowHosts = configuration.GetValue<string[]>("CorsHost") ?? ["http://localhost:3000"];
+                options.AddPolicy("DevFrontEnds",
+                    builder =>
+                        builder.WithOrigins(allowHosts)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials()
+                            .SetIsOriginAllowed(origin => true)
+                );
+            });
+        }
+
+
         var app = builder.Build();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseCors("DevFrontEnds");
+        }
 
         app.UseRouting();
         app.UseAuthentication();
