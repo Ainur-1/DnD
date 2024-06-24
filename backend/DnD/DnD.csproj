@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
+    <ProjectReference Include="..\GameHub_V1\GameHub_V1.csproj" />
     <ProjectReference Include="..\Infrastructure\DataAccess\DataAccess.csproj" />
   </ItemGroup>
    

@@ -10,7 +10,7 @@ public record MongoDbSettings
 
     public int Port { get; init; } = 27017;
 
-    public string GetConnectionString() => string.Format("mongodb://{0}{1}:{2}", NoCredentialsProvided() ? string.Empty : $"{Username}:{Password}", Host, Port);
+    public string GetConnectionString() => string.Format("mongodb://{0}{1}:{2}", NoCredentialsProvided() ? string.Empty : $"{Username}:{Password}@", Host, Port);
 
     private bool NoCredentialsProvided() => string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password);
 }
