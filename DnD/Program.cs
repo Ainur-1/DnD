@@ -5,6 +5,11 @@ using DataAccess;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using DnD.Areas.Identity.Pages.Account;
 using AspNetCore.Identity.MongoDbCore.Models;
+using DnD.GameHubs;
+using DnD.Pages.Shared;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.WebAssembly;
+using Microsoft.AspNetCore.Components.WebAssembly.Server;
 
 namespace DnD
 {
@@ -26,8 +31,15 @@ namespace DnD
                 .AddDefaultUI();
 
 
+            builder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();
+
+            builder.Services.AddSignalR();
+
             // Add services to the container.
             builder.Services.AddRazorPages();
+            //builder.Services.AddRazorComponents();
+            builder.Services.AddServerSideBlazor();
+
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
@@ -50,7 +62,14 @@ namespace DnD
             app.UseAuthorization();
 
             app.MapRazorPages();
+            app.MapBlazorHub();
+            app.MapFallbackToPage("/_Host");
 
+            app.MapHub<GameHub>("/gamehub");
+
+            //app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddAdditionalAssemblies(typeof(DnD.Pages.Shared._Imports).Assembly);
+
+            //app.MapRazorPages();
             app.Run();
         }
     }
