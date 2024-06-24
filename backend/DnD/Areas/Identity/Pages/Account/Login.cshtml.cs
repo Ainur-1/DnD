@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using DnD.Areas.Identity.Data;
+using DnD.GameHubs.Pages;
 
 namespace DnD.Areas.Identity.Pages.Account
 {
@@ -117,7 +118,10 @@ namespace DnD.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+
+                    //return LocalRedirect(returnUrl);
+                    //return LocalRedirect("/Lobby");
+                    return LocalRedirect("/Lobby");
                 }
                 if (result.RequiresTwoFactor)
                 {
