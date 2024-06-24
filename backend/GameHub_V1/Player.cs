@@ -1,6 +1,6 @@
 ﻿//using DnD.Areas.Identity.Data;
 
-namespace DnD.GameHubs
+namespace GameHub
 {
     public class Player//// User
     {

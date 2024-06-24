@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "Infrastructure\DataAccess\DataAccess.csproj", "{68A7A46D-C8FE-4CE0-ABC8-FF55E046C856}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHub_V1", "GameHub_V1\GameHub_V1.csproj", "{0FB27C90-3A42-4C37-8D6D-1C531E333E3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHub", "GameHub_V1\GameHub.csproj", "{0FB27C90-3A42-4C37-8D6D-1C531E333E3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

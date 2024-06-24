@@ -1,5 +1,5 @@
 ﻿
-namespace DnD.GameHubs
+namespace GameHub
 {
     public class GameRoom
     {

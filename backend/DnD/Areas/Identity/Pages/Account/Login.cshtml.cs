@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using DnD.Areas.Identity.Data;
-//using DnD.GameHubs.Pages;
 
 namespace DnD.Areas.Identity.Pages.Account
 {

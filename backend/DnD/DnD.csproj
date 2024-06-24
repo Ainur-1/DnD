@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <Content Remove="Areas\Identity\Pages\Account\Index.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Lobby.razor" />
+    <Content Remove="Areas\Identity\Pages\Room.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,7 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
-    <ProjectReference Include="..\GameHub_V1\GameHub_V1.csproj" />
+    <ProjectReference Include="..\GameHub_V1\GameHub.csproj" />
     <ProjectReference Include="..\Infrastructure\DataAccess\DataAccess.csproj" />
   </ItemGroup>
    
@@ -40,6 +42,8 @@
     <UpToDateCheckInput Remove="Areas\Identity\Pages\Account\Index.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\Index.cshtml" />
     <None Include="Areas\Identity\Pages\Account\Index.cshtml" />
+    <None Include="Pages\Lobby.razor" />
+    <None Include="Pages\Room.razor" />
   </ItemGroup>
 
 </Project>
