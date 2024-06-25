@@ -67,6 +67,7 @@ public class Program
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseStaticFiles();
 
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
