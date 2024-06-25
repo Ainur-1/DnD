@@ -1,9 +1,8 @@
 import { ReactNode } from "react";
-import { CharacterInfoBase } from "../model/characterBase";
 import { Box, Typography, Grid, useTheme } from '@mui/material';
 import { ReactChildrenProps } from "@/shared/types/reactChildrenProps";
-import unknownCharacterImage from "./unknown.png";
 import { QuestionMark } from "@mui/icons-material";
+import { CharacterInfoBase } from "../model/types";
 
 
 interface CharacterImageProps {
@@ -12,14 +11,13 @@ interface CharacterImageProps {
 
 function CharacterImage({base64Image}: CharacterImageProps) {
     const theme = useTheme();
-    const imageSrc = base64Image == null ? unknownCharacterImage : `data:image;base64,${base64Image}`;
 
     if (base64Image == null) {
         return <QuestionMark style={{color: theme.palette.grey.A100}} />
     }
 
     return <img
-        src={imageSrc}
+        src={`data:image;base64,${base64Image}`}
         alt="Character"
         style={{ height: '100%', width: '100%', objectFit: 'cover' }}
     />
