@@ -1,10 +1,10 @@
 using DataAccess.DependencyInjection;
 using DnD.Data;
 using Microsoft.AspNetCore.Identity;
-using DnD.Areas.Identity.Data;
 using DataAccess;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using DnD.Areas.Identity.Pages.Account;
+using Domain.Entities.User;
 
 
 namespace DnD;

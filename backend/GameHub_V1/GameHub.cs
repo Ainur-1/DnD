@@ -1,4 +1,6 @@
 ﻿using AspNetCore.Identity.MongoDbCore.Models;
+using Microsoft.AspNetCore.Authorization;
+
 //using DnD.Areas.Identity.Data;
 //using DnD.Areas.Identity.Pages;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace GameHub;
 
+[Authorize]
 public class GameHub: Hub
 {
     private static readonly List<GameRoom> _rooms = new ();
