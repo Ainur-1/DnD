@@ -17,7 +17,10 @@ const theme = createTheme({
         },
         success: {
             main: "#008600",
-
+        },
+        grey: {
+            A100: "#5d5c5b",
+            A200: "#bcbbac"
         }
     },
     typography: {
