@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="blazor\" />
     <Folder Include="Pages\" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
 ﻿@using GameHub
+@using GameHub.blazor
 @using Microsoft.AspNetCore.Components.WebAssembly.Server
 @using DnD.Pages.Shared
 @using Microsoft.AspNetCore.SignalR.Client
@@ -6,6 +7,7 @@
 @using System.Net
 @page "/Lobby"
 @inject NavigationManager NavigationManager
+@inject HubConnectionService service
 
 <h3>Lobby</h3>
 
@@ -54,37 +56,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-        .WithUrl(NavigationManager.ToAbsoluteUri("/gamehub"), options =>
-                             {
-                                 options.UseDefaultCredentials = true;
-                                 var cookieCount = Cookies.Count();
-                                 var cookieContainer = new CookieContainer(cookieCount);
-                                 foreach (var cookie in Cookies)
-                                     cookieContainer.Add(new Cookie(
-                                         cookie.Key,
-                                         WebUtility.UrlEncode(cookie.Value),
-                                         path: "/",
-                                         domain: NavigationManager.ToAbsoluteUri("/").Host));
-                                 options.Cookies = cookieContainer;
-
-                             foreach (var header in Cookies)
-                                     options.Headers.Add(header.Key, header.Value);
-
-                                 options.HttpMessageHandlerFactory = (input) =>
-                                 {
-                                     var clientHandler = new HttpClientHandler
-                                         {
-                                             PreAuthenticate = true,
-                                             CookieContainer = cookieContainer,
-                                             UseCookies = true,
-                                             UseDefaultCredentials = true,
-                                         };
-                                     return clientHandler;
-                                 };
-                             })
-                             .WithAutomaticReconnect()
-                             .Build();
+        hubConnection = service.HubConnection;
 
         hubConnection.On<List<GameRoom>>("Rooms", (roomList) =>
         {
@@ -92,8 +64,6 @@ else
             rooms = roomList;
             InvokeAsync(StateHasChanged);
         });
-
-        await hubConnection.StartAsync();
     }
 
     private async Task CreateRoom()

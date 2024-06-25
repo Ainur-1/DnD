@@ -5,6 +5,9 @@ using DataAccess;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using DnD.Areas.Identity.Pages.Account;
 using Domain.Entities.User;
+using Microsoft.AspNetCore.Components.Server.Circuits;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using GameHub.blazor;
 
 
 namespace DnD;
@@ -34,7 +37,8 @@ public class Program
         services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddServerSideBlazor();
         
-
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<CircuitHandler, InitializeCircuitHandler>());
+        services.AddScoped<HubConnectionService>();
 
         services.RegisterDatabaseServices(mongoDbSettings);
 
