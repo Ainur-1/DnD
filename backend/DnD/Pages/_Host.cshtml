@@ -1,10 +1,18 @@
 ﻿@page "/blazor"
 @using DnD.Pages.Shared
-
+@inject IHttpContextAccessor httpContextAccessor
 @{
     Layout = "_Layout";
+}
+@{
+    var remoteIpAddress = httpContextAccessor.HttpContext.Connection?.RemoteIpAddress.ToString();
+    var cookieCollection = httpContextAccessor.HttpContext.Request.Cookies;
+    var cookies = new Dictionary<string, string>();
+    cookieCollection.ToList().ForEach(x => cookies.Add(x.Key, x.Value));
 }
 
 <app>
     @(await Html.RenderComponentAsync<App>(RenderMode.Server))
 </app>
+<component type="typeof(App)" render-mode="Server" param-Cookies="cookies" param-RemoteIpAddress=remoteIpAddress/>
+<script src="_framework/blazor.server.js"></script>

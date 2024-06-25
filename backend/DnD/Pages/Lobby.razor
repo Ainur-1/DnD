@@ -3,6 +3,7 @@
 @using DnD.Pages.Shared
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.AspNetCore.Components.Web
+@using System.Net
 @page "/Lobby"
 @inject NavigationManager NavigationManager
 
@@ -36,8 +37,14 @@ else
     </CascadingValue>
 
 }
-
 @code {
+    [Parameter]
+    public Dictionary<string, string> Cookies { get; set; }
+
+    [Parameter]
+    public string RemoteIpAddress { get; set; }
+
+
     private HubConnection? hubConnection;
     private string playerName = string.Empty;
     private string currentRoomName = string.Empty;
@@ -48,8 +55,36 @@ else
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-        .WithUrl(NavigationManager.ToAbsoluteUri("/gamehub"))
-        .Build();
+        .WithUrl(NavigationManager.ToAbsoluteUri("/gamehub"), options =>
+                             {
+                                 options.UseDefaultCredentials = true;
+                                 var cookieCount = Cookies.Count();
+                                 var cookieContainer = new CookieContainer(cookieCount);
+                                 foreach (var cookie in Cookies)
+                                     cookieContainer.Add(new Cookie(
+                                         cookie.Key,
+                                         WebUtility.UrlEncode(cookie.Value),
+                                         path: "/",
+                                         domain: NavigationManager.ToAbsoluteUri("/").Host));
+                                 options.Cookies = cookieContainer;
+
+                             foreach (var header in Cookies)
+                                     options.Headers.Add(header.Key, header.Value);
+
+                                 options.HttpMessageHandlerFactory = (input) =>
+                                 {
+                                     var clientHandler = new HttpClientHandler
+                                         {
+                                             PreAuthenticate = true,
+                                             CookieContainer = cookieContainer,
+                                             UseCookies = true,
+                                             UseDefaultCredentials = true,
+                                         };
+                                     return clientHandler;
+                                 };
+                             })
+                             .WithAutomaticReconnect()
+                             .Build();
 
         hubConnection.On<List<GameRoom>>("Rooms", (roomList) =>
         {
