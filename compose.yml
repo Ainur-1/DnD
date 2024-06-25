@@ -1,0 +1,35 @@
+version: "3.9"
+  
+services:
+  mongo:
+    image: mongo
+    container_name: dnd_mongo
+    ports:
+      - 27018:27017
+    volumes:
+      - ./volumes/mongo:/data/db
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    container_name: dnd_backend
+    ports:
+      - 8080:8080
+    environment:
+      - EnableDataSeed=true
+      - MongoDbSettings__Host=host.docker.internal
+      - MongoDbSettings__Port=27018
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CorsHost=["http://localhost:3000/"]
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend/DnD
+      dockerfile: ./Dockerfile
+    container_name: dnd_frontend
+    ports:
+      - 3000:3000
+    
