@@ -1,3 +1,3 @@
-import BurgerMenu from "./burgerMenu";
+import AppBar from "./ui/appbar";
 
-export {BurgerMenu};
+export {AppBar};

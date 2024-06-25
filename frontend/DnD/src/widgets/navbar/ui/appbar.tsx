@@ -1,4 +1,4 @@
-import AppBar from '@mui/material/AppBar';
+import { AppBar as MaterialAppBar} from '@mui/material';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -6,6 +6,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from './drawer';
 import { useState } from 'react';
 import { useAuthReducer } from '@/features/auth';
+import { Typography } from '@mui/material';
+import { ProfileAppbarButton } from './appBarProfileButton';
 
 function AppBarWithDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -15,7 +17,7 @@ function AppBarWithDrawer() {
   const openDrawer = () => setIsDrawerOpen(true);
 
   return <>
-    <AppBar position="static">
+    <MaterialAppBar position="static">
       <Toolbar>
         <IconButton
           size="large"
@@ -27,13 +29,17 @@ function AppBarWithDrawer() {
         >
           <MenuIcon />
         </IconButton>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          {document.title}    
+        </Typography>
+        <ProfileAppbarButton/>
       </Toolbar>
-    </AppBar>
+    </MaterialAppBar>
     <Drawer isOpen={isDrawerOpen} close={closeDrawer}/>
   </>
 }
 
-export default function BurgerMenu() {
+export default function AppBar() {
 
   const { state } = useAuthReducer(); 
 
