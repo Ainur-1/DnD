@@ -67,7 +67,7 @@ public static class WebApplicationExtensions
             const string pattern = "Error while database migrating on startup: {ex}.";
 
             if (logger == null)
-                Console.Error.WriteLine(pattern);
+                Console.Error.WriteLine(pattern.Replace("{ex}", ex.Message));
             else
                 logger?.LogCritical(pattern, ex);
 

@@ -30,8 +30,6 @@ public class Program
 
         services.AddRazorPages();
         services.AddTransient<IEmailSender, EmailSender>();
-
-
         services.RegisterDatabaseServices(mongoDbSettings);
 
         builder.Services.AddRazorPages();
