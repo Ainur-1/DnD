@@ -1,3 +1,3 @@
-import ShortCharacterInfo from "./ui/characterCardTop";
+import CharacterCard from "./ui/characterCard";
 
-export { ShortCharacterInfo };
+export { CharacterCard };

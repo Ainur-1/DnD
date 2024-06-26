@@ -2,10 +2,10 @@ import { CardActions, useTheme } from "@mui/material";
 import { Box, Card, CardContent } from "@mui/material";
 import ShortCharacterInfo, { CharacterImage, ImageOverlay } from "./characterCardTop";
 import { ReactNode } from "react";
-import { CharacterInfoBase } from "../model/types";
+import { Personality } from "../model/types";
 
 interface CharacterCardProps {
-    characterInfo: CharacterInfoBase;
+    characterInfo: Personality;
     cardActions?: ReactNode;
     imageOverlayChildren?: ReactNode | null;
 }

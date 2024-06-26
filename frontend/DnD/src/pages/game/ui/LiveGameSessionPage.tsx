@@ -1,80 +1,40 @@
-import { ShortCharacterInfo } from "@/entities/character";
-import CharacterCard from "@/entities/character/ui/characterCard";
-import { InGameLiveOverlay } from "@/entities/character/ui/characterCardTopOverlays";
-import CharacterPersonalityDescription from "@/entities/character/ui/characterPersonalityDescription";
-import InventoryItemCard from "@/entities/item/ui/inventoryItem";
-import Carousel from "@/shared/ui/Carousel";
-import { CharacterControlBar } from "@/widgets/game";
-import EquippedItemsList from "@/widgets/game/ui/equippedItemsList";
-import { DeadUserControlBar, GameMasterControlBar, UserControlBar } from "@/widgets/game/ui/gameControls";
-import { Button, Card, CardContent, Container, Stack } from "@mui/material";
+import ChangePageTitle from "@/shared/ui/changePageTitle";
+import { GameController, GameLoader } from "@/widgets/game";
+import { Container } from "@mui/material";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 export default function LiveGameSessionPage() {
+   const { partyId } = useParams();
+   const [isLoaded, setIsLoaded] = useState(false);
+   const [failure, setFailure] = useState(false);
 
-    const character = {
-        characterName: "Бард Хрон",
-        characterRace: "Высший Эльф",
-        characterClass: "Воин",
-        characterLevel: 2,
-    }
+   const reset = () => {
+      setFailure(false);
+      setIsLoaded(false);
+   };
 
-    const data = 
-        { 
-            age: 55,
-            aligment: "Трудолюбивый",
-            background: "",
-            bonds: ["Печенье", "Девушки"],
-            classFeatures: [],
-            flaws: [],
-            languages: ["Русский", "Эльфиский", "Английский"],
-            otherTraits: ["gdfgdfgd", "dgdfgdfgfd", "dfgdfgdfgdg"],
-            raceTraits: [{
-                name: "Темное зрение",
-                description: "Видеть в темноте"
-            }], 
-         };
+   const onFailure = () => {
+      setFailure(true);
+      setIsLoaded(true);
+   }
 
+   const onSuccess = () => {
+      setFailure(false);
+      setIsLoaded(true);
+   }
 
-         const inventoryList =[{
-            title: "Молот дварфа",
-            count: 2 
-         },
-         {
-            title: "Молот дварфа",
-            count: 2 
-         },
-         {
-            title: "Молот дварфа",
-            count: 2 
-         },
-         {
-            title: "Молот дварфа",
-            count: 2 
-         },
-         {
-            title: "Молот дварфа",
-            count: 2 
-         },
-        ];
+   //todo: get partyid, check if exists, get info, set connection, get character id and then start
 
-        const getNode = (item: {title: string, count: number}, index: number) => {
-         return <div key={index}>
-            {item.title}
-            {item.count}
-         </div>
-        }
-
-    return <div>
-            <Carousel items={inventoryList} constructNode={getNode}>
-               
-            </Carousel>
-            {/*
-                           <CharacterCard characterInfo={character} imageOverlayChildren={<InGameLiveOverlay showCharacterInfo={()=>alert()}  hp={5} armor={10} initiativeBonus={2} proficiencyBonus={2} speed={30} tempHp={0}/>} >
-                           </CharacterCard>
-                           <Container>
-                               <UserControlBar findMeButtonInfo={buttonInfo} ineventoryButtonInfo={buttonInfo} characterId={""} />
-                           </Container>
-            */}
-
-    </div>
+   return <>
+      <ChangePageTitle title="Отряд"/>
+      <Container>
+         {!isLoaded && <GameLoader onFailure={onFailure} onLoaded={onSuccess} partyId={partyId} />}
+         {isLoaded && <>
+            {failure && <GameController/>}
+            {!failure && <div>Ошибка{/*todo: обработка ошибки перенаправление на страницу с ошибкой*/}</div>}
+         </>
+         }
+      </Container>
+   </>
 }

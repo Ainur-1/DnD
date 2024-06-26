@@ -1,6 +1,6 @@
-import { ClassFeature, InventoryItem, RaceTrait } from "@/shared/types/domainTypes"
+import { ClassFeature, RaceTrait } from "@/shared/types/domainTypes"
 
-export type CharacterInfoBase = {
+export type Personality = {
     characterName: string | "",
     characterRace: string,
     characterClass: string,
@@ -8,7 +8,7 @@ export type CharacterInfoBase = {
     characterImageBase64?: string | null,
 }
 
-export type CharacterPersonalityAdditions = {
+export type PersonalityAdditions = {
     age: number,
     aligment: string,
     bonds: string[],
@@ -20,38 +20,50 @@ export type CharacterPersonalityAdditions = {
     languages: string[],
 }
 
-export type BaseCharacterModifiers = {
-    proficiencyBonus: number;
+export type FullPersonality = Personality & PersonalityAdditions;
+
+export type Abilities = {
     strengthAbility: number;
     dexterityAbility: number;
     constitutionAbility: number;
     intelligenceAbility: number;
     wisdomAbility: number;
     charismaAbility: number;
+} 
+
+export type AbilityModifiers = {
     strengthModifier: number;
     dexterityModifier: number;
     constitutionModifier: number;
     intelligenceModifier: number;
     wisdomModifier: number;
     charismaModifier: number;
-    acrobaticsSkillModifier: number;
-    investigationSkillModifier: number;
-    athleticsSkillModifier: number;
-    perceptionSkillModifier: number;
-    survivalSkillModifier: number;
-    performanceSkillModifier: number;
-    persuasionSkillModifier: number;
-    historySkillModifier: number;
-    handSleightSkillModifier: number;
-    arcanaSkillModifier: number;
-    medicineSkillModifier: number;
-    deceptionSkillModifier: number;
-    natureSkillModifier: number;
-    insightSkillModifier: number;
-    religionSkillModifier: number;
-    stealthSkillModifier: number;
-    intimidationSkillModifier: number;
-    animalHandingSkillModifier: number;
+}
+
+export type FullAbility = Abilities & AbilityModifiers;
+
+export type SkillModifiers = {
+    acrobaticsModifier: number;
+    investigationModifier: number;
+    athleticsModifier: number;
+    perceptionModifier: number;
+    survivalModifier: number;
+    performanceModifier: number;
+    persuasionModifier: number;
+    historyModifier: number;
+    handSleightModifier: number;
+    arcanaModifier: number;
+    medicineModifier: number;
+    deceptionModifier: number;
+    natureModifier: number;
+    insightModifier: number;
+    religionModifier: number;
+    stealthModifier: number;
+    intimidationModifier: number;
+    animalHandingModifier: number;
+}
+
+export type SavingThrowsModifiers = {
     strengthSavingThrowModifier: number;
     dexteritySavingThrowModifier: number;
     constitutionSavingThrowModifier: number;
@@ -60,44 +72,48 @@ export type BaseCharacterModifiers = {
     charismaSavingThrowModifier: number;
 }
 
+export type DeathSaves = {
+    successCount: number,
+    failureCount: number
+}
+
 export type BaseCharacterStats = {
     maxHp: number,
     baseArmor: number,
-    hpDice: string,
     baseSpeed: number,
+    hpDice: string,
     hpDiceMaxCount: number,
-}
-
-export type CharacterSavingThrows = {
-    successCount: number,
-    failureCount: number
+    proficiencyBonus: number,
 }
 
 type DynamicHp = {
     hp: number,
     tempHp: number,
-    hitDicesLeft: number,
+
 }
+
 
 export type DynamicStats = {
-    speed: number,
+    actualSpeed: number,
     initiativeModifier: number,
     inspirationBonus: number,
-    armor: number,
-} & DynamicHp & CharacterSavingThrows;
-
-export type CharacterWallet = {
-    cooper: number,
-    gold: number,
-    electrum: number,
-    silver: number,
-    platinum: number,
-    sumInGold: number
+    actualHp: number,
+    tempHp: number;
 }
 
-export type CharacterInventory = {
-    weight: number,
-    wallet: CharacterWallet,
-    items: InventoryItem[]
+export type MainStats = {
+    initiativeModifier: number,
+    armorClass: number,
+    inspirationBonus: number,
+    proficiencyBonus: number,
+    speed: number,
+    currentHp: number,
+    tempHp: number,
 }
+
+export type HitDices = {
+    hitDice: string,
+    hitDiceLeft: number,
+}
+
 

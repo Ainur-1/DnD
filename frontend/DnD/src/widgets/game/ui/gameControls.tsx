@@ -1,18 +1,20 @@
 import { Box, Button, Grid, Stack } from "@mui/material";
 import { ButtonProps, ButtonPropsWithChildren } from "../model/widgetTypes";
-import { ReactNode } from "react";
 import SavingThrowsDisplay from "./savingThrowsDisplay";
 import EquippedItemsList from "./equippedItemsList";
+import useGameReducer from "@/features/game";
+import { DeathSaves } from "@/entities/character/model/types";
 
 interface UserControlBarProps {
-    characterId: string,
     findMeButtonInfo: ButtonProps
     ineventoryButtonInfo: ButtonProps
 }
 
 const controlMinHeight = 300;
 
-export function UserControlBar({findMeButtonInfo, characterId, ineventoryButtonInfo}: UserControlBarProps) {
+function UserControlBar({findMeButtonInfo, ineventoryButtonInfo}: UserControlBarProps) {
+    const { state } = useGameReducer();
+    const characterId = state.gameInfo.userCharacterId;
 
     return <Grid container height={controlMinHeight} spacing={2}>
             <Grid item xs={4}>
@@ -34,17 +36,35 @@ export function UserControlBar({findMeButtonInfo, characterId, ineventoryButtonI
 }
 
 interface DeadUserControlBar {
-    successCount: number | null,
-    failuresCount: number | null,
-    changeSuccessCount: (value: number | null) => void,
-    changeFailuresCount: (value: number | null) => void,
 }
 
-export function DeadUserControlBar({successCount, failuresCount, changeSuccessCount, changeFailuresCount}: DeadUserControlBar) {
+function DeadUserControlBar({}: DeadUserControlBar) {
+    const { state } = useGameReducer();
+
+    const deathSaves = state.gameInfo.deathSaves ?? {
+        failureCount: 0,
+        successCount: 0,
+    };
+
+    //todo: useUpdateDeathSaves mutation
+    async function updateDeathSaves(deathSaves: DeathSaves) {
+
+    }
+
+    async function changeSuccessCount(number: number | null) {
+        const value = number ?? 0;
+        
+    } 
+
+    async function changeFailuresCount(number: number | null) {
+        const value = number ?? 0;
+        
+    } 
+
     return <Stack height={controlMinHeight}>
         <SavingThrowsDisplay 
-            successCount={successCount} 
-            failuresCount={failuresCount} 
+            successCount={deathSaves.successCount} 
+            failuresCount={deathSaves.failureCount} 
             changeSuccessCount={changeSuccessCount} 
             changeFailuresCount={changeFailuresCount} />
     </Stack>
@@ -54,10 +74,38 @@ interface GameMasterControlBarProps {
     fightButtonInfo: ButtonPropsWithChildren
 }
 
-export function GameMasterControlBar({fightButtonInfo}: GameMasterControlBarProps) {
+function GameMasterControlBar({fightButtonInfo}: GameMasterControlBarProps) {
     return <Stack height={controlMinHeight}>
         <Button variant="contained" disabled={fightButtonInfo.disabled} onClick={fightButtonInfo.onClick}>
             {fightButtonInfo.children}
         </Button>
     </Stack>
+}
+
+interface ControlBarProps {
+    handleFightButtonClick: () => void, 
+    findMyCharacter: () => void,
+    openInventory: () => void,
+
+}
+
+export default function BottomControlBar({handleFightButtonClick, findMyCharacter, openInventory}: ControlBarProps) {
+    const { state } = useGameReducer();
+    const isGameMaster = state.isUserGameMaster;
+    const game = state.gameInfo;
+
+    return <>
+        {isGameMaster && <GameMasterControlBar fightButtonInfo={{
+            children: `${game.isFighting ? "Завершить": "Начать" } битву`,
+            onClick: handleFightButtonClick,
+        }} />}
+        {!isGameMaster && <>
+            {game.deathSaves && <DeadUserControlBar />}
+            {!game.deathSaves && <UserControlBar findMeButtonInfo={{
+                onClick: findMyCharacter,
+            }} ineventoryButtonInfo={{
+                onClick: openInventory
+            }} />}
+        </>}
+    </>
 }
