@@ -1,9 +1,7 @@
 import InventoryItemCard from "@/entities/item/ui/inventoryItem";
 import { IconButton, List, ListItem, Paper, Skeleton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
-import { useEffect } from "react";
-import { useInventoryItemsQuery, useInventoryReducer, useUpdateInventoryItemMutation } from "@/features/inventory";
-import { setCharacterId } from "@/features/inventory/model/inventorySlice";
+import { useInventoryItemsQuery, useUpdateInventoryItemMutation } from "@/features/inventory";
 
 interface EquippedItemsListProps {
     characterId: string
@@ -11,20 +9,18 @@ interface EquippedItemsListProps {
 
 export default function EquippedItemsList({characterId}: EquippedItemsListProps) {
 
-    const { data, isLoading: queryIsLoading  } = useInventoryItemsQuery({
+    const { data, isLoading: queryIsLoading } = useInventoryItemsQuery({
         characterId
     });
 
-    const [updateInventoryItem, { isLoading: mutationIsLoading, isSuccess }] = useUpdateInventoryItemMutation();
-
-    const { items, setItems, resetState, updateItem } = useInventoryReducer();
+    const [updateInventoryItem, { isLoading: mutationIsLoading }] = useUpdateInventoryItemMutation();
 
     async function onUnUseButtonClick(itemId: string) {
-        if (mutationIsLoading) {
+        if (mutationIsLoading || !data) {
             return;
         }
 
-        const foundItem = items.find(x => x.id === itemId);
+        const foundItem = data.items.find(x => x.id === itemId);
         if (foundItem == undefined) {
             return;
         }
@@ -40,29 +36,14 @@ export default function EquippedItemsList({characterId}: EquippedItemsListProps)
             delete: false,
             item: updatedItem
         });
-
-        if (isSuccess) {
-            updateItem(updatedItem);
-        }
     }
 
-    useEffect(() => {
-        if (data?.items) {
-            setItems(data?.items);
-        }
-    }, [data]);
-
-    useEffect(() => {
-        resetState();
-        setCharacterId(characterId);
-    }, []);
-
     return <Paper style={{height: 200, overflow: 'auto'}}>
-        { (queryIsLoading || items.length == 0) && <Skeleton animation="wave" variant="rounded" width="auto" height="100%"/>}
+        { (queryIsLoading || !data || data.items.length == 0) && <Skeleton animation="wave" variant="rounded" width="auto" height="100%"/>}
         {
-            items.length > 0 &&
+            data && data.items.length > 0 &&
             <List>
-                {items
+                {data.items
                     .filter(item => item.inUse)
                     .map(item => <ListItem key={item.id}>
                     <InventoryItemCard 

@@ -5,6 +5,7 @@ import { UpdateInventoryItemMutationResult, UpdateInventoryItemMutationVariables
 export const inventoryApi = createApi({
     reducerPath: 'inventory/api',
     baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    tagTypes: ['InventoryItems'],
     endpoints: (build) => ({
         inventoryItems: build.query<InventoryItemsQueryResult, InventoryItemsQueryVariables>({
             query: (body) => ({
@@ -12,6 +13,7 @@ export const inventoryApi = createApi({
                 method: "GET",
                 body
             }),
+            providesTags: ['InventoryItems']
         }),
         updateInventoryItem: build.mutation<UpdateInventoryItemMutationResult, UpdateInventoryItemMutationVariables>({
             query: (body) => ({
@@ -19,6 +21,7 @@ export const inventoryApi = createApi({
                 method: "Post",
                 body
             }),
+            invalidatesTags: ['InventoryItems']
         }),
     })
 });
