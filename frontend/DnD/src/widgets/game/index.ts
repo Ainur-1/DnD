@@ -1,3 +1,3 @@
-import CharacterControlBar, { RestrictedCharacterControlBar } from "./ui/buttons";
+import CharacterControlBar, { RestrictedCharacterControlBar, GameMasterCharacterControlBar } from "./ui/characterControl";
 
-export {RestrictedCharacterControlBar, CharacterControlBar}
+export {RestrictedCharacterControlBar, CharacterControlBar, GameMasterCharacterControlBar};
