@@ -64,8 +64,7 @@ export default function LiveGameSessionPage() {
             <CharacterCard characterInfo={character} >
             </CharacterCard>
             <Container>
-                <UserControlBar findMeButtonInfo={buttonInfo} ineventoryButtonInfo={buttonInfo} inventoryListWidget={inventoryList} />
-                <InventoryItemCard cardHeight={32} title={"Молот дварфа"} count={2} />
+                <UserControlBar findMeButtonInfo={buttonInfo} ineventoryButtonInfo={buttonInfo} characterId={""} />
             </Container>
     </div>
 }

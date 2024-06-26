@@ -2,16 +2,17 @@ import { Box, Button, Grid, Stack } from "@mui/material";
 import { ButtonProps, ButtonPropsWithChildren } from "../model/widgetTypes";
 import { ReactNode } from "react";
 import SavingThrowsDisplay from "./savingThrowsDisplay";
+import EquippedItemsList from "./equippedItemsList";
 
 interface UserControlBarProps {
+    characterId: string,
     findMeButtonInfo: ButtonProps
-    ineventoryButtonInfo: ButtonProps,
-    inventoryListWidget: ReactNode
+    ineventoryButtonInfo: ButtonProps
 }
 
 const controlMinHeight = 300;
 
-export function UserControlBar({findMeButtonInfo, inventoryListWidget, ineventoryButtonInfo}: UserControlBarProps) {
+export function UserControlBar({findMeButtonInfo, characterId, ineventoryButtonInfo}: UserControlBarProps) {
 
     return <Grid container height={controlMinHeight} spacing={2}>
             <Grid item xs={4}>
@@ -26,7 +27,7 @@ export function UserControlBar({findMeButtonInfo, inventoryListWidget, ineventor
             </Grid>
             <Grid item xs={8}>
                 <Box height="100%">
-                    {inventoryListWidget}
+                    <EquippedItemsList characterId={characterId}/>
                 </Box>
             </Grid>
         </Grid>
