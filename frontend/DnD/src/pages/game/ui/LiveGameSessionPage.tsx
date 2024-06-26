@@ -2,7 +2,8 @@ import { ShortCharacterInfo } from "@/entities/character";
 import CharacterCard from "@/entities/character/ui/characterCard";
 import CharacterPersonalityDescription from "@/entities/character/ui/characterPersonalityDescription";
 import { CharacterControlBar } from "@/widgets/game";
-import { Button, Card, CardContent, Stack } from "@mui/material";
+import { DeadUserControlBar, GameMasterControlBar, UserControlBar } from "@/widgets/game/ui/gameControls";
+import { Button, Card, CardContent, Container, Stack } from "@mui/material";
 
 export default function LiveGameSessionPage() {
 
@@ -29,11 +30,15 @@ export default function LiveGameSessionPage() {
             }], 
          };
 
-    const buttonBar = <CharacterControlBar />
-     
+         const title = <>Начать бой</>
 
     return <div>
-            <CharacterCard characterInfo={character} cardActions={buttonBar}>
+            <CharacterCard characterInfo={character} >
             </CharacterCard>
+            <Container>
+                <UserControlBar findMeButtonInfo={{onClick: () => {}}} ineventoryButtonInfo={{onClick: () => {}}} />
+                <DeadUserControlBar failuresCount={0} successCount={0} changeSuccessCount={(v) => {}} changeFailuresCount={(v) => {}} />
+                <GameMasterControlBar fightButtonInfo={{children: title, onClick: () => {}} } />
+            </Container>
     </div>
 }
