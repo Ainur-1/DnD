@@ -1,5 +1,6 @@
 import { ShortCharacterInfo } from "@/entities/character";
 import CharacterCard from "@/entities/character/ui/characterCard";
+import { InGameLiveOverlay } from "@/entities/character/ui/characterCardTopOverlays";
 import CharacterPersonalityDescription from "@/entities/character/ui/characterPersonalityDescription";
 import InventoryItemCard from "@/entities/item/ui/inventoryItem";
 import { CharacterControlBar } from "@/widgets/game";
@@ -60,8 +61,9 @@ export default function LiveGameSessionPage() {
          },
         ]}  />
 
+        const stats = {hp: 5, initiativeBonus: 2, armor:12, proficiencyBonus:2, speed:3 }
     return <div>
-            <CharacterCard characterInfo={character} >
+            <CharacterCard characterInfo={character} imageOverlayChildren={<InGameLiveOverlay showCharacterInfo={()=>alert()}  hp={5} armor={10} initiativeBonus={2} proficiencyBonus={2} speed={30} tempHp={0}/>} >
             </CharacterCard>
             <Container>
                 <UserControlBar findMeButtonInfo={buttonInfo} ineventoryButtonInfo={buttonInfo} characterId={""} />

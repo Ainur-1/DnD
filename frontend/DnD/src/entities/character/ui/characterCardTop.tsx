@@ -23,8 +23,9 @@ export function ImageOverlay({children}: ReactChildrenProps) {
             width: '100%',
             height: '100%',
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: "end",
+            flexDirection: "column",
+            justifyContent: 'end',
+            alignItems: "center",
             zIndex: 10,
         }}
     >
