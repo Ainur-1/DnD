@@ -2,7 +2,7 @@ import { TextField, FormControlLabel, Checkbox, Button, Grid } from "@mui/materi
 import FormBox from "./FormBox";
 import { useState } from "react";
 import { containsWhitespace } from "../model/utils";
-import { useSignInMutation } from "@/features/auth/api/api";
+import { useSignInMutation } from "@/features/auth";
 import { useAuthReducer } from "@/features/auth";
 import Link from "@/shared/ui/styledLink";
 

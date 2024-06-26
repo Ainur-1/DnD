@@ -1,7 +1,9 @@
 import { ShortCharacterInfo } from "@/entities/character";
 import CharacterCard from "@/entities/character/ui/characterCard";
 import CharacterPersonalityDescription from "@/entities/character/ui/characterPersonalityDescription";
+import InventoryItemCard from "@/entities/item/ui/inventoryItem";
 import { CharacterControlBar } from "@/widgets/game";
+import EquippedItemsList from "@/widgets/game/ui/equippedItemsList";
 import { DeadUserControlBar, GameMasterControlBar, UserControlBar } from "@/widgets/game/ui/gameControls";
 import { Button, Card, CardContent, Container, Stack } from "@mui/material";
 
@@ -32,13 +34,38 @@ export default function LiveGameSessionPage() {
 
          const title = <>Начать бой</>
 
+         const buttonInfo = {
+            onClick: () => {},
+         }
+
+         const inventoryList = <EquippedItemsList items={[{
+            title: "Молот дварфа",
+            count: 2 
+         },
+         {
+            title: "Молот дварфа",
+            count: 2 
+         },
+         {
+            title: "Молот дварфа",
+            count: 2 
+         },
+         {
+            title: "Молот дварфа",
+            count: 2 
+         },
+         {
+            title: "Молот дварфа",
+            count: 2 
+         },
+        ]}  />
+
     return <div>
             <CharacterCard characterInfo={character} >
             </CharacterCard>
             <Container>
-                <UserControlBar findMeButtonInfo={{onClick: () => {}}} ineventoryButtonInfo={{onClick: () => {}}} />
-                <DeadUserControlBar failuresCount={0} successCount={0} changeSuccessCount={(v) => {}} changeFailuresCount={(v) => {}} />
-                <GameMasterControlBar fightButtonInfo={{children: title, onClick: () => {}} } />
+                <UserControlBar findMeButtonInfo={buttonInfo} ineventoryButtonInfo={buttonInfo} inventoryListWidget={inventoryList} />
+                <InventoryItemCard cardHeight={32} title={"Молот дварфа"} count={2} />
             </Container>
     </div>
 }
