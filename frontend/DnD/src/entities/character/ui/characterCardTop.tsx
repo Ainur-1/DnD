@@ -1,29 +1,22 @@
-import { ReactNode } from "react";
-import { Box, Typography, Grid, useTheme } from '@mui/material';
+import { Box, Typography, Grid, useTheme, CardMedia } from '@mui/material';
 import { ReactChildrenProps } from "@/shared/types/reactChildrenProps";
 import { QuestionMark } from "@mui/icons-material";
-import { CharacterInfoBase } from "../model/types";
-
 
 interface CharacterImageProps {
     base64Image?: string | null,
 }
 
-function CharacterImage({base64Image}: CharacterImageProps) {
+export function CharacterImage({base64Image}: CharacterImageProps) {
     const theme = useTheme();
 
     if (base64Image == null) {
         return <QuestionMark style={{color: theme.palette.grey.A100}} />
     }
-
-    return <img
-        src={`data:image;base64,${base64Image}`}
-        alt="Character"
-        style={{ height: '100%', width: '100%', objectFit: 'cover' }}
-    />
+    
+    return <CardMedia component="img" sx={{height: 150}} src={`data:image;base64,${base64Image}`}/>
 }
 
-function ImageOverlay({children}: ReactChildrenProps) {
+export function ImageOverlay({children}: ReactChildrenProps) {
     return <Box
         sx={{
             position: "absolute",
@@ -40,75 +33,43 @@ function ImageOverlay({children}: ReactChildrenProps) {
 }
 
 interface CharacterCardTopProps {
-    characterInfo : CharacterInfoBase,
-    imageOverlayChildren?: ReactNode | null,
+    name: string,
+    race: string,
+    className: string,
+    level: string,
 }
 
 const alrightTextSx = {
     textAlign: "end"
 }
 
-export const ShortCharacterInfo = ({characterInfo, imageOverlayChildren}: CharacterCardTopProps) => {
-    const theme = useTheme(); 
-    const { 
-    characterName, 
-    characterRace, 
-    characterClass, 
-    characterLevel, 
-    characterImageBase64,
-    } = characterInfo;
-
-
+export const ShortCharacterInfo = ({name, race, className, level}: CharacterCardTopProps) => {
 
   return (
-    <Box sx={
-        {
-            width: 250,
-        }
-    }>
-      <Box
-        sx={{
-          height: 150,
-          backgroundColor: theme.palette.grey.A200,
-          display: 'flex',
-          position: "relative",
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <CharacterImage base64Image={characterImageBase64} />
-        {
-            imageOverlayChildren && 
-                <ImageOverlay> 
-                    {imageOverlayChildren}
-                </ImageOverlay> 
-        }
-      </Box>
       <Box sx={{ padding: 2 }}>
         <Grid container spacing={1}>
           <Grid item xs={6}>
             <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: 17 }}>
-              {characterName}
+              {name}
             </Typography>
           </Grid>
           <Grid item xs={6} >
             <Typography variant="body2" color="text.secondary" sx={alrightTextSx}>
-              {characterRace}
+              {race}
             </Typography>
           </Grid>
           <Grid item xs={6}>
             <Typography variant="body2" color="text.secondary">
-              Lvl. {characterLevel}
+              Lvl. {level}
             </Typography>
           </Grid>
           <Grid item xs={6}>
             <Typography variant="body2" color="text.secondary" sx={alrightTextSx}>
-              {characterClass}
+              {className}
             </Typography>
           </Grid>
         </Grid>
       </Box>
-    </Box>
   );
 };
 
