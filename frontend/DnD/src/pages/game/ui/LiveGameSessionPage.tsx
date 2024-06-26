@@ -1,6 +1,7 @@
 import { ShortCharacterInfo } from "@/entities/character";
 import CharacterCard from "@/entities/character/ui/characterCard";
 import CharacterPersonalityDescription from "@/entities/character/ui/characterPersonalityDescription";
+import { CharacterControlBar } from "@/widgets/game";
 import { Button, Card, CardContent, Stack } from "@mui/material";
 
 export default function LiveGameSessionPage() {
@@ -27,10 +28,12 @@ export default function LiveGameSessionPage() {
                 description: "Видеть в темноте"
             }], 
          };
+
+    const buttonBar = <CharacterControlBar />
      
 
     return <div>
-            <CharacterCard characterInfo={character}>
+            <CharacterCard characterInfo={character} cardActions={buttonBar}>
             </CharacterCard>
     </div>
 }
