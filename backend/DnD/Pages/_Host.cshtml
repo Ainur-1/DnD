@@ -11,8 +11,9 @@
     cookieCollection.ToList().ForEach(x => cookies.Add(x.Key, x.Value));
 }
 
-<app>
-    @(await Html.RenderComponentAsync<App>(RenderMode.Server))
-</app>
-<component type="typeof(App)" render-mode="WebAssembly" param-Cookies="cookies" param-RemoteIpAddress=remoteIpAddress/>
+@* <app>
+    @(await Html.RenderComponentAsync<App>(RenderMode.WebAssembly))
+</app> *@
+
+<component type="typeof(App)" render-mode="Server" param-Cookies="cookies" param-RemoteIpAddress=remoteIpAddress/>
 <script src="_framework/blazor.server.js"></script>

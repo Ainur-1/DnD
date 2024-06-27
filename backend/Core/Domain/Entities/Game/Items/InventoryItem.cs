@@ -4,6 +4,7 @@ namespace Domain.Entities.Game.Items;
 
 public class InventoryItem
 {
+    public string Id { get; set; }
     public int Count { get; protected set; }
 
     public bool InUse { get; protected set; }
