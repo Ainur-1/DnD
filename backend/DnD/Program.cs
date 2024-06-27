@@ -1,10 +1,12 @@
+using DataAccess;
 using DataAccess.DependencyInjection;
+using DnD.Areas.Identity.Data;
+using DnD.Areas.Identity.Pages.Account;
 using DnD.Data;
 using Microsoft.AspNetCore.Identity;
-using DnD.Areas.Identity.Data;
-using DataAccess;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using DnD.Areas.Identity.Pages.Account;
+using DnD.GraphQL;
+using DnD.GraphQL.Services;
 
 namespace DnD;
 
@@ -21,7 +23,7 @@ public class Program
         services
                 .AddIdentity<User, UserRole>(options =>
                 {
-                    options.SignIn.RequireConfirmedEmail = false; 
+                    options.SignIn.RequireConfirmedEmail = false;
                     options.SignIn.RequireConfirmedAccount = false;
                 })
                 .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
@@ -31,6 +33,7 @@ public class Program
         services.AddRazorPages();
         services.AddTransient<IEmailSender, EmailSender>();
         services.RegisterDatabaseServices(mongoDbSettings);
+        services.AddMongoCollections();
 
         builder.Services.AddRazorPages();
 
@@ -50,6 +53,12 @@ public class Program
             });
         }
 
+        builder.Services.AddGraphQLServer()
+            .AddGraphQLServer()
+            .AddQueryType<Query>()
+            .AddMutationType<Mutation>()
+            .AddFiltering()
+            .AddSorting();
 
         var app = builder.Build();
 
@@ -61,7 +70,7 @@ public class Program
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
-        
+        app.MapGraphQL();
         app.MapRazorPages();
 
         if (configuration.IsDataSeedRequested())
