@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GameState } from "./types";
 
-const initialState: GameState | null = null;
+const initialState: GameState
+
 
 const gameSlice = createSlice({
     name: 'game',
@@ -9,6 +10,8 @@ const gameSlice = createSlice({
     reducers: {
         init(state, action: PayloadAction<GameState>) {
             state = action.payload;
+
+
         },
         reset(state) {
             state = initialState;
