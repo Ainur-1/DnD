@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Contracs\Contracs.csproj" />
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Services.Abstractions\Services.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

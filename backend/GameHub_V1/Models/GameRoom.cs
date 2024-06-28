@@ -1,23 +1,29 @@
-﻿
+﻿using GameHub.Dtos;
+using System.Collections.Concurrent;
 using System.Numerics;
 
-namespace GameHub
+namespace GameHub.Models
 {
     public class GameRoom
     {
 
         //маппинг персонаж-конекшен айди
         //public string RoomId => Game.Id;
-        public string RoomId { get; set; }
 
+        //герой которому предлагают (цель) - АЙДИ ПРЕДОЛЖЕНИЯ - ПРЕДЛОЖЕНИЕ О ПРЕДМЕТЕ
+
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, InventoryItemSuggestion>> _connectionRoomMapping = new();
+        
+        public bool IsFight => SortedInitciativeScores != null;
+        public (Guid CharacterId, int Score)[]? SortedInitciativeScores { get; set; }    
+        public string RoomId { get; set; }
         public string RoomName { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatorName { get; set; }
         public string AccessCode { get; set; }
-        public GameDnD Game { get; set; } = new();
-
         public List<Player> Players { get; set; } = new();
         public Guid GameMasterId { get; set; }
+
 
         public GameRoom(string roomId, string roomName, string creatorName, string accesscode, Guid gameMasterId)
         {
