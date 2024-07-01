@@ -92,24 +92,23 @@ type DynamicHp = {
 
 }
 
+export type ProficiencyAndInitiative = {
+    initiativeModifier: number,
+    proficiencyBonus: number,
+}
+
 
 export type DynamicStats = {
-    actualSpeed: number,
-    initiativeModifier: number,
-    inspirationBonus: number,
-    actualHp: number,
-    tempHp: number;
-}
-
-export type MainStats = {
-    initiativeModifier: number,
-    armorClass: number,
-    inspirationBonus: number,
-    proficiencyBonus: number,
-    speed: number,
-    currentHp: number,
+    hp: number,
     tempHp: number,
-}
+    armorClass: number,
+    inspiration: number,
+    speed: number,
+    hitDicesLeftCount: number,
+    isDead: boolean,
+    isDying: boolean,
+    deathSaves: DeathSaves | null
+} & ProficiencyAndInitiative;
 
 export type HitDices = {
     hitDice: string,

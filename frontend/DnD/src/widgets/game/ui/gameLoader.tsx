@@ -39,42 +39,29 @@ export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderPro
         notifyProgress(33);
         // get character
         const userIsGameMaster = false;
-        const roomCode = "650-065";
+        const accessCode = "650-065";
         const characterId = "sdfsfs";
-        const inGameCharacters: GameCharacter[] = [{
-            id: characterId,
-            mainStats: {
-                armorClass: 15,
-                currentHp: 16,
-                initiativeModifier: 2,
-                inspirationBonus: 0,
-                proficiencyBonus: 2,
-                speed: 30,
-                tempHp: 0
-            },
-            personality: {
-                characterClass: "Воин",
-                characterLevel: 1,
-                characterName: "Хабиб Муслимов",
-                characterRace: "Высший Эльф",
-            }
-        }];
+        const inGameCharacters: GameCharacter[] = [];
         try{
             const connection = await openConnection();
-            notifyProgress(97);
+            notifyProgress(70);
+            const roomState = await connection.invoke<GameState | null>("JoinRoom", partyId, accessCode);
+            notifyProgress(85);
             const initialState: GameState = {
                 connection: connection,
                 isUserGameMaster: userIsGameMaster,
                 partyId: partyId as string,
-                roomCode: roomCode,
+                roomCode: accessCode,
                 gameInfo: {
                     userCharacterId: characterId,
                     partyCharacters: inGameCharacters,
                     isFighting: false,
-                }
+                },
+                fatalErrorOccured: false
             };
-
             init(initialState);
+            
+            notifyProgress(100);
         } catch {
             onFailure();
         }

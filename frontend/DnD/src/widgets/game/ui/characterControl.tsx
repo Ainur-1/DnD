@@ -1,6 +1,10 @@
 import { ReactChildrenProps } from "@/shared/types/reactChildrenProps";
 import { Button, Container, Stack } from "@mui/material";
 import { ButtonProps, ButtonPropsWithChildren } from "../model/widgetTypes";
+import useGameReducer from "@/features/game";
+import { useState } from "react";
+import { updateCharacter } from "@/features/game/model/gameSlice";
+import { DamageFormDialog, HealFormDialog, SuggestFormDialog } from "./formDialogs";
 
 const OutlinedButton = ({onClick, children, disabled}: ButtonPropsWithChildren) =>
     <Button variant="outlined" onClick={onClick} disabled={disabled}>
@@ -35,23 +39,23 @@ function ButtonBar({children}: ReactChildrenProps) {
     </Container>
 }
 
-interface RestrictedCharacterControlBarProps {
+interface RestrictedControlBarProps {
     suggestButtonInfo: ButtonProps,
 }
 
-export function RestrictedCharacterControlBar({suggestButtonInfo}: RestrictedCharacterControlBarProps) {
+function RestrictedControlBar({suggestButtonInfo}: RestrictedControlBarProps) {
     
     return <ButtonBar>
         <SuggestButton disabled={suggestButtonInfo.disabled} onClick={suggestButtonInfo.onClick}/>
     </ButtonBar>
 }
 
-interface CharacterControlBarProps {
+interface StandartControlBarProps {
     hitButtonInfo: ButtonProps,
     healButtonInfo: ButtonProps,
 }
 
-export default function CharacterControlBar({hitButtonInfo, healButtonInfo}: CharacterControlBarProps) {
+function StandartControlBar({hitButtonInfo, healButtonInfo}: StandartControlBarProps) {
     
     return <ButtonBar>
         <HitButton disabled={hitButtonInfo.disabled} onClick={hitButtonInfo.onClick}/>
@@ -59,15 +63,15 @@ export default function CharacterControlBar({hitButtonInfo, healButtonInfo}: Cha
     </ButtonBar>
 }
 
-interface GameMasterCharacterControlBarProps extends CharacterControlBarProps, RestrictedCharacterControlBarProps {
-    resurrectButtonInfo: ButtonProps
+interface GameMasterControlBarProps extends StandartControlBarProps, RestrictedControlBarProps {
+    resurrectButtonInfo: ButtonPropsWithChildren
 }
 
-export function GameMasterCharacterControlBar({
+function GameMasterControlBar({
     suggestButtonInfo, 
     hitButtonInfo, 
     healButtonInfo, 
-    resurrectButtonInfo}: GameMasterCharacterControlBarProps) {
+    resurrectButtonInfo}: GameMasterControlBarProps) {
     
     return <ButtonBar>
         <Button disabled={resurrectButtonInfo.disabled} onClick={resurrectButtonInfo.onClick}>
@@ -78,3 +82,98 @@ export function GameMasterCharacterControlBar({
         <HealButton disabled={healButtonInfo.disabled} onClick={healButtonInfo.onClick}/> 
     </ButtonBar>
 }
+
+interface ControlBarProps {
+    characterId: string,
+    showHealCharacterDialog: () => void,
+    showDamageCharacterDialog: () => void,
+    showSuggestItemDialog: () => void,
+}
+
+function ControlBar({characterId, showHealCharacterDialog, showDamageCharacterDialog, showSuggestItemDialog}: ControlBarProps) {
+    const [resurrectSent, setResurrectSent] = useState(false);
+
+    const { state, setFatalErrorOccured } = useGameReducer();
+
+    if (state == undefined) {
+        return <></>
+    }
+    const isGameMaster = state.isUserGameMaster;
+    const userCharacterDead: boolean | undefined = findCharacterById(state.gameInfo.userCharacterId)?.mainStats.isDead;
+
+    function findCharacterById(id: string) {
+        return state?.gameInfo.partyCharacters.find(x => x.id == id);
+    }
+
+    const resurrectToggleButton = async (characterId: string) => {
+        setResurrectSent(true);
+        const character = findCharacterById(characterId);
+        try {
+            await updateCharacter({
+                targetCharacterId: characterId,
+                isDead: !userCharacterDead,
+                isDying: userCharacterDead ? false : character?.mainStats.isDying,
+            });
+        } catch {
+            setFatalErrorOccured(true);
+        } finally {
+            setResurrectSent(false);
+        }
+    }
+
+    const suggestButtonInfo = {
+        onClick: showSuggestItemDialog,
+        disabled: userCharacterDead,
+    }
+
+    const healButtonInfo = {
+        onClick: showHealCharacterDialog,
+        disabled: userCharacterDead
+    }
+
+    const hitButtonInfo = {
+        onClick: showDamageCharacterDialog,
+        disabled: userCharacterDead,
+    }
+
+    if (isGameMaster) {
+        return <GameMasterControlBar 
+                resurrectButtonInfo={{
+                    onClick: () => resurrectToggleButton(characterId), 
+                    disabled: resurrectSent, 
+                    children: state.gameInfo.partyCharacters.find(x => x.id == characterId)?.mainStats.isDead
+                              ? "Воскрессить" : "Убить" }} 
+                hitButtonInfo={hitButtonInfo} 
+                healButtonInfo={healButtonInfo} 
+                suggestButtonInfo={suggestButtonInfo} />
+    } else if (state.gameInfo.userCharacterId == characterId) {
+        return <StandartControlBar hitButtonInfo={hitButtonInfo} healButtonInfo={healButtonInfo} />
+    }
+
+    return <RestrictedControlBar suggestButtonInfo={suggestButtonInfo} />
+}
+
+
+interface CharacterControlBarProps {
+    characterId: string,
+}
+
+export default function CharacterControlBarContainer({characterId}: CharacterControlBarProps) {
+    const [isHealDialogOpen, setIsHealDialogOpen] = useState(false);
+    const [isDamageOpen, setIsDamageOpen] = useState(false);
+    const [isSuggestDialogOpen, setIsSuggestDialogOpen] = useState(false);
+
+    return <>
+        <ControlBar 
+            characterId={characterId} 
+            showHealCharacterDialog={() => setIsHealDialogOpen(true)} 
+            showDamageCharacterDialog={() => setIsDamageOpen(true)}
+            showSuggestItemDialog={() => setIsSuggestDialogOpen(true)}
+        />
+        <HealFormDialog showForm={isHealDialogOpen} characterId={characterId} closeDialog={() => setIsHealDialogOpen(false)} />
+        <DamageFormDialog showForm={isDamageOpen} characterId={characterId} closeDialog={() => setIsDamageOpen(false)} />
+        <SuggestFormDialog showForm={isSuggestDialogOpen} characterId={characterId} closeDialog={() => setIsSuggestDialogOpen(false)} />
+    </>
+}
+
+

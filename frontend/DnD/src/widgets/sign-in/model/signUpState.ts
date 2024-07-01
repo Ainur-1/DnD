@@ -1,25 +1,14 @@
+import { FormField } from "@/shared/types/IFormField";
 import { useReducer } from "react";
 
 interface SignUpState {
-    email: {
-      value: string;
-      error: string | null;
-    };
-    username: {
-      value: string;
-      error: string | null;
-    };
+    email: FormField<string>,
+    username: FormField<string>
     name: {
       value: string;
     };
-    password: {
-      value: string;
-      error: string | null;
-    };
-    passwordRepeat: {
-      value: string;
-      error: string | null;
-    };
+    password: FormField<string>
+    passwordRepeat: FormField<string>
 }
 
 enum StateChangeType {

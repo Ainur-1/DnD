@@ -1,4 +1,4 @@
-import { DeathSaves, MainStats, Personality } from "@/entities/character/model/types";
+import { BaseCharacterStats, DeathSaves, DynamicStats, FullAbility, FullPersonality, SkillModifiers } from "@/entities/character/model/types";
 import { HubConnection } from "@microsoft/signalr"
 
 export type GameState = {
@@ -6,7 +6,8 @@ export type GameState = {
     roomCode: string,
     isUserGameMaster: boolean,
     gameInfo: GameInfo
-    connection: HubConnection
+    connection: HubConnection,
+    fatalErrorOccured: boolean,
 };
 
 export type GameInfo = {
@@ -18,8 +19,9 @@ export type GameInfo = {
 }
 
 export type GameCharacter = {
-    mainStats: MainStats,
-    personality: Personality,
+    mainStats: DynamicStats,
+    otherStats: FullAbility & SkillModifiers & BaseCharacterStats,
+    personality: FullPersonality,
     id: string
 }
 

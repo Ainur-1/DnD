@@ -41,7 +41,7 @@ interface DeadUserControlBar {
 function DeadUserControlBar({}: DeadUserControlBar) {
     const { state } = useGameReducer();
 
-    const deathSaves = state.gameInfo.deathSaves ?? {
+    const deathSaves = state!.gameInfo.deathSaves ?? {
         failureCount: 0,
         successCount: 0,
     };
@@ -91,6 +91,11 @@ interface ControlBarProps {
 
 export default function BottomControlBar({handleFightButtonClick, findMyCharacter, openInventory}: ControlBarProps) {
     const { state } = useGameReducer();
+
+    if (!state) {
+        return <></>
+    }
+
     const isGameMaster = state.isUserGameMaster;
     const game = state.gameInfo;
 
