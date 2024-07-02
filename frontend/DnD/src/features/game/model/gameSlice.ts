@@ -55,7 +55,7 @@ export const updateFight = createAsyncThunk<void, UpdateFightVariables, {state: 
         
         await connection.invoke("UpdateFight", {
             isFight: isFight,
-            scoreValues: basicInitiativeScoreValues.map(x => {
+            scoreValues: basicInitiativeScoreValues?.map(x => {
                 return {
                     characterId: x.characterId,
                     score: x.score,

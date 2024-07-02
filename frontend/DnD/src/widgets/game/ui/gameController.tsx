@@ -5,15 +5,14 @@ import { GameCharacter } from "@/features/game/model/types";
 import { CharacterCard } from "@/entities/character";
 import { InGameLiveOverlay } from "@/entities/character/ui/characterCardTopOverlays";
 import CharacterControlBar from "./characterControl";
-import { useState } from "react";
-import { HealFormDialog } from "./formDialogs";
-
 
 export default function GameController() {
 
-
     const { state } = useGameReducer();
 
+    if (!state) {
+        return <></>
+    }
 
     const items = state.gameInfo.partyCharacters;
 
@@ -25,14 +24,6 @@ export default function GameController() {
     const navigateCarouselToMyCharacter = () => {
 
     };
-
-    const handleFightClick = () => {
-
-    };
-
-    const showCharacterInfo = (characterId: string) => {
-        
-    }
 
     function constructCharacterCard(character: GameCharacter, _: number) {
 
@@ -67,7 +58,6 @@ export default function GameController() {
         <Carousel items={items} constructNode={constructCharacterCard}>
         </Carousel>
         <BottomControlBar 
-            handleFightButtonClick={handleFightClick} 
             findMyCharacter={navigateCarouselToMyCharacter} 
             openInventory={openMyCharacterInvetory}
         />

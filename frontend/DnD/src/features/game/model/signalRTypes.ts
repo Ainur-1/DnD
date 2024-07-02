@@ -37,8 +37,8 @@ export interface UpdateFightVariables {
     basicInitiativeScoreValues: {
         characterId: string,
         score: number
-    }[]
-}
+    }[] | null
+};
 
 export interface EndGameVariables {
     xp: number,

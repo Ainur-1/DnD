@@ -4,6 +4,9 @@ import SavingThrowsDisplay from "./savingThrowsDisplay";
 import EquippedItemsList from "./equippedItemsList";
 import useGameReducer from "@/features/game";
 import { DeathSaves } from "@/entities/character/model/types";
+import { StartFightFormDialog } from "./formDialogs";
+import { useState } from "react";
+import { updateFight } from "@/features/game/model/gameSlice";
 
 interface UserControlBarProps {
     findMeButtonInfo: ButtonProps
@@ -71,25 +74,45 @@ function DeadUserControlBar({}: DeadUserControlBar) {
 }
 
 interface GameMasterControlBarProps {
-    fightButtonInfo: ButtonPropsWithChildren
 }
 
-function GameMasterControlBar({fightButtonInfo}: GameMasterControlBarProps) {
+function GameMasterControlBar({}: GameMasterControlBarProps) {
+    const { state, setFatalErrorOccured } = useGameReducer();
+    const [endFightRequestSent, setEndFightRequestSent] = useState(false);
+
+    if (!state) {
+        return <></>
+    }
+
+    const [startFightFormDialogOpen, setStartFightFormDialogOpen] = useState(false); 
+
+    const startFightClick = () => setStartFightFormDialogOpen(true);
+
+    const endFightClick = async () => {
+        setEndFightRequestSent(true);
+        try {
+            await updateFight({ isFight: false, basicInitiativeScoreValues: null });
+        } catch {
+            setFatalErrorOccured(false);
+        } finally {
+            setEndFightRequestSent(false);
+        }
+    }
+
     return <Stack height={controlMinHeight}>
-        <Button variant="contained" disabled={fightButtonInfo.disabled} onClick={fightButtonInfo.onClick}>
-            {fightButtonInfo.children}
+        <Button disabled={endFightRequestSent} variant="contained" onClick={state.gameInfo.isFighting ? startFightClick : endFightClick}>
+            {`${state.gameInfo.isFighting ? "Завершить": "Начать" } битву`}
         </Button>
+        {!state.gameInfo.isFighting && <StartFightFormDialog showForm={startFightFormDialogOpen} closeDialog={() => setStartFightFormDialogOpen(false)} />}
     </Stack>
 }
 
 interface ControlBarProps {
-    handleFightButtonClick: () => void, 
     findMyCharacter: () => void,
     openInventory: () => void,
-
 }
 
-export default function BottomControlBar({handleFightButtonClick, findMyCharacter, openInventory}: ControlBarProps) {
+export default function BottomControlBar({findMyCharacter, openInventory}: ControlBarProps) {
     const { state } = useGameReducer();
 
     if (!state) {
@@ -100,10 +123,7 @@ export default function BottomControlBar({handleFightButtonClick, findMyCharacte
     const game = state.gameInfo;
 
     return <>
-        {isGameMaster && <GameMasterControlBar fightButtonInfo={{
-            children: `${game.isFighting ? "Завершить": "Начать" } битву`,
-            onClick: handleFightButtonClick,
-        }} />}
+        {isGameMaster && <GameMasterControlBar />}
         {!isGameMaster && <>
             {game.deathSaves && <DeadUserControlBar />}
             {!game.deathSaves && <UserControlBar findMeButtonInfo={{

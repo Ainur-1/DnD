@@ -1,16 +1,20 @@
 import useGameReducer from "@/features/game";
-import { damageCharacter, updateCharacter } from "@/features/game/model/gameSlice";
-import AppTabs from "@/shared/ui/Tabs";
+import { damageCharacter, updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
-import { Box, Button, Dialog, DialogContent, DialogContentText, DialogTitle, Tab, Tabs, TextField } from "@mui/material";
+import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import SuggesItemForm from "./SuggesItemForm";
+import { FormField } from "@/shared/types/IFormField";
+import { isDecimal } from "@/shared/utils/isDecimal";
 
-interface FormDialogProps {
+interface DialogProps {
     showForm: boolean,
-    characterId: string,
     closeDialog: () => void,
+}
+
+interface FormDialogProps extends DialogProps {
+    characterId: string,
 }
 
 interface HealFormDialogProps extends FormDialogProps {
@@ -262,6 +266,136 @@ export function SuggestFormDialog({showForm, characterId, closeDialog}: HealForm
             </DialogTitle>
             <DialogContent>
                 <SuggesItemForm characterId={characterId} closeForm={closeDialog} loadInventory={!state.isUserGameMaster}/>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
+    const { state, setFatalErrorOccured } = useGameReducer();
+    if (state == undefined || !state?.gameInfo) {
+        return <></>
+    }
+
+    const [values, setValues] = useState<{[key: string]: FormField<number>}>(state?.gameInfo.partyCharacters.
+        filter(x => !x.mainStats.isDead)
+        .reduce((acc, value, _) => {
+        const key = value.id;
+        acc[key] = {
+            value: 1,
+            error: null
+        };
+        return acc;
+    }, {} as {[key: string]: FormField<number>}));
+    const [fromError, setFormError] = useState("");
+    const [requestSent, setRequestSent] = useState(false);
+
+    function validDexValue(field: FormField<number>): boolean {
+        const { value } = field;
+
+        return typeof value === 'number' && 1 <= value && value <= 20 && !isDecimal(value);
+    }
+
+    function onChange(characterId: string, strValue: string | undefined) {
+        if (!(characterId in values)) {
+            return;
+        }
+
+        let error: string | null = null;
+        if (strValue === undefined || strValue.trim().length == 0) {
+            error = "Поле обязательно.";
+        } 
+
+        const { success, value } = tryParseNumber(strValue!.trim());
+        let actualValue = 1;
+        if (!success) {
+            error = "Не число.";
+        } else if (value! < 1 || value! > 20 || isDecimal(value!)) {
+            actualValue = 1;
+            error = "Кубик d20."
+        } else {
+            actualValue = value!;
+        }
+
+        setValues(prev => {
+            return {
+                ...prev,
+                [characterId]: {
+                    value: actualValue,
+                    error,
+                }
+            }
+        });
+    }
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (!Object.values(values).every(x => validDexValue(x))) {
+            setFormError("Некоторые поля заполнены неверно.")
+            return;
+        }
+
+        setRequestSent(true);
+        setFormError("");
+        try {
+            await updateFight({
+                isFight: true,
+                basicInitiativeScoreValues: Object.keys(values).map(key => {
+                    return {
+                        characterId: key,
+                        score: values[key].value!
+                    };
+                })
+            });
+        } catch {
+            setFatalErrorOccured(true);
+        } finally {
+            setRequestSent(false);
+            closeDialog();
+        }
+    };
+
+    return (
+        <Dialog 
+            open={showForm}
+            maxWidth="xs"
+            fullWidth={true}
+        >
+            <DialogTitle>
+                Начать режим боя
+            </DialogTitle>
+            <DialogContent>
+                <FormBox handleSubmit={handleSubmit} formTitle="Значения бросков инициативы" formError={fromError}>
+                    {state.gameInfo.partyCharacters
+                        .filter(x => !x.mainStats.isDead)
+                        .map((character, index) => <Grid key={`grid-fight-${index}`} container spacing={2}>
+                            <Grid item xs={7.2}>
+                                <Typography variant="h6">
+                                    {character.personality.characterName}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={2.4}>
+                                <TextField 
+                                    disabled={requestSent}
+                                    value={values[character.id].value} 
+                                    onChange={(e) => onChange(character.id, e.target.value)} 
+                                    fullWidth  
+                                    label="Лов." 
+                                    type="number" 
+                                    error={values[character.id].error != null}
+                                />
+                            </Grid>
+                            <Grid item xs={2.4}>
+                                <Typography variant="body2">
+                                    + {character.otherStats.dexterityModifier}
+                                </Typography>
+                            </Grid>
+                    </Grid>)}
+                    <Button disabled={!Object.values(values).every(x => validDexValue(x)) || requestSent} type="submit" fullWidth variant="outlined" sx={{ mt: 3, mb: 2 }}>
+                        Лечить
+                    </Button>
+                </FormBox>
             </DialogContent>
         </Dialog>
     )

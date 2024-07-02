@@ -24,8 +24,6 @@ export default function LiveGameSessionPage() {
       setIsLoaded(true);
    }
 
-   //todo: get partyid, check if exists, get info, set connection, get character id and then start
-
    return <>
       <ChangePageTitle title="Отряд"/>
       <Container>
