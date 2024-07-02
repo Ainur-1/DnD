@@ -49,14 +49,15 @@ enum ItemFormBaseActionType {
     setFormProperty,
     selectForm,
     resetForm,
+    validateForm,
 }
 
 type ItemFormBaseAction =
   | { type: ItemFormBaseActionType.selectForm; form: SelectedItemForm }
   | { type: ItemFormBaseActionType.setFormProperty; field: ItemFromBaseKeys; value: any; error?: string }
   | { type: ItemFormBaseActionType.setFormError; error: string | null }
-  | { type: ItemFormBaseActionType.resetForm; newFormType?: SelectedItemForm};
-
+  | { type: ItemFormBaseActionType.resetForm; newFormType?: SelectedItemForm}
+  | { type: ItemFormBaseActionType.validateForm; };
 
 const initialState: ItemFormBaseStateWithFormSelector = {
     selectedForm: SelectedItemForm.stuff,
@@ -170,6 +171,10 @@ function initWeaponProperties(state: ItemFormBaseStateWithFormSelector) {
     };
 }
 
+function getStateWithErrors(original: ItemFormBaseStateWithFormSelector): ItemFormBaseStateWithFormSelector {
+
+}
+
 function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseAction):ItemFormBaseStateWithFormSelector  {
     switch (action.type) {
         case ItemFormBaseActionType.resetForm:
@@ -213,6 +218,8 @@ function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseA
                 },
               };
 
+        case ItemFormBaseActionType.validateForm:
+              return getStateWithErrors(state);
         default:
             return state;
     }
@@ -220,16 +227,16 @@ function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseA
 }
 
 function stateToItem(state: ItemFormBaseStateWithFormSelector): Item | null {
-    const base = {
-        name: state.name.value!,
-        iconUrl: null ?? undefined,
-        weightInPounds: state.weightInPounds.value!,
-        description: state.description.value ?? undefined,
-        costInGold: state.costInGold.value!,
-        tags: state.tags.value,
-    }
-
     try {
+        const base = {
+            name: state.name.value!,
+            iconUrl: null ?? undefined,
+            weightInPounds: state.weightInPounds.value!,
+            description: state.description.value ?? undefined,
+            costInGold: state.costInGold.value!,
+            tags: state.tags.value && state.tags.value?.length > 0 ? state.tags.value : undefined,
+        };
+
         if (state.selectedForm == SelectedItemForm.armor) {
             return {
                 ...base,
@@ -248,9 +255,9 @@ function stateToItem(state: ItemFormBaseStateWithFormSelector): Item | null {
                 damageType: state.damageType!.value!,
                 normalDistanceInFoots: state.normalDistanceInFoots?.value ?? undefined,
                 criticalDistanceInFoots: state.criticalDistanceInFoots?.value ?? undefined,
-                properties: state.properties?.value ?? undefined,
-                hitDice: state.hitDice!.value!.toString(),
-                alternateHitDice: state.alternateHitDice?.value?.toString() ?? undefined,
+                properties: state.properties?.value && state.properties?.value.length > 0 ? state.properties!.value : undefined,
+                hitDice: state.hitDice!.value!,
+                alternateHitDice: state.alternateHitDice?.value ?? undefined,
             }
         }
 
@@ -260,8 +267,54 @@ function stateToItem(state: ItemFormBaseStateWithFormSelector): Item | null {
     }
 }
 
+function anyError(state: ItemFormBaseState): boolean {
+  const hasError = (field?: FormField<any>): boolean => field?.error !== null && field?.error !== undefined;
+
+  // Check common props
+  if (
+    hasError(state.name) ||
+    hasError(state.iconBase64) ||
+    hasError(state.weightInPounds) ||
+    hasError(state.description) ||
+    hasError(state.costInGold) ||
+    hasError(state.tags)
+  ) {
+    return true;
+  }
+
+  // Check weapon specific props
+  if (
+    hasError(state.damageType) ||
+    hasError(state.attackType) ||
+    hasError(state.proficiencyType) ||
+    hasError(state.normalDistanceInFoots) ||
+    hasError(state.criticalDistanceInFoots) ||
+    hasError(state.properties) ||
+    hasError(state.hitDice) ||
+    hasError(state.alternateHitDice)
+  ) {
+    return true;
+  }
+
+  // Check armor specific props
+  if (
+    hasError(state.armorType) ||
+    hasError(state.material) ||
+    hasError(state.requiredStrength) ||
+    hasError(state.hasStealthDisadvantage) ||
+    hasError(state.maxPossibleDexterityModifier) ||
+    hasError(state.armorClass)
+  ) {
+    return true;
+  }
+
+  // No errors found
+  return false;
+}
+
+
 export default reducer;
 export type { ItemFormBaseAction, ItemFormBaseStateWithFormSelector};
-export {initialState, ItemFormBaseActionType, SelectedItemForm, stateToItem};
+export {initialState, ItemFormBaseActionType, SelectedItemForm, stateToItem, anyError};
 
 

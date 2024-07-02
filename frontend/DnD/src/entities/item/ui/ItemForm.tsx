@@ -1,5 +1,5 @@
 import { ArmorType, Item, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "../model/types";
-import { ReactNode, useContext, useState,  createContext, useReducer, Dispatch } from "react";
+import { ReactNode, useContext, useState,  createContext, useReducer, Dispatch, useEffect } from "react";
 import { Box, Divider, FormControl, FormControlLabel, FormGroup, Grid, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import TagInput from "@/shared/ui/TagInput";
@@ -475,6 +475,13 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
             error
         });
     }
+
+    useEffect(() => {
+        dispatch({
+            type: ItemFormBaseActionType.resetForm,
+            newFormType: SelectedItemForm.stuff,
+        })
+    }, []);
 
     return <>
             <Grid item xs={12}>
