@@ -1,5 +1,5 @@
 
-type ItemBase = {
+export type ItemBase = {
     name: string;
     iconUrl?: string;
     weightInPounds: number;

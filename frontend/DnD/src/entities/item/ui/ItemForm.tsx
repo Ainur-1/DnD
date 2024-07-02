@@ -1,6 +1,6 @@
 import { ArmorType, Item, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "../model/types";
 import { ReactNode, useContext, useState,  createContext, useReducer, Dispatch, useEffect } from "react";
-import { Box, Divider, FormControl, FormControlLabel, FormGroup, Grid, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
+import { Divider, FormControl, FormControlLabel, FormGroup, Grid, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import TagInput from "@/shared/ui/TagInput";
 import { ArmorTypeSelector, WeaponAttackTypeSelector, WeaponDamageTypeSelector, WeaponProficiencyTypeSelector } from "./EnumSelectors";
@@ -52,13 +52,34 @@ function WeaponSpecificBody() {
         value: proficiencyType,
     });
 
-    const setWeaponDamageType = (damageType: WeaponDamageType) => dispatch({
-        type: ItemFormBaseActionType.setFormProperty,
-        field: "damageType",
-        value: damageType,
-    });
+    const setWeaponDamageType = (damageType: WeaponDamageType) => {
+        dispatch({
+            type: ItemFormBaseActionType.setFormProperty,
+            field: "damageType",
+            value: damageType,
+        });
+
+        if (damageType == WeaponDamageType.ranged) {
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "criticalDistanceInFoots",
+                value: null,
+            });
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "normalDistanceInFoots",
+                value: null,
+            });
+        }
+    };
 
     const setSelectedProperties = (properties: WeaponProperty[]) => {
+        dispatch({
+            type: ItemFormBaseActionType.setFormProperty,
+            field: "properties",
+            value: properties
+        });
+
         if (!properties.includes(WeaponProperty.versatile)) {
             dispatch({
                 type: ItemFormBaseActionType.setFormProperty,
@@ -66,13 +87,78 @@ function WeaponSpecificBody() {
                 value: null,
                 error: undefined
             });
+        } else if (!state.alternateHitDice!.value) {
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "alternateHitDice",
+                value: Dice.oneD1,
+                error: undefined
+            });
+        }
+    };
+
+    const setDistance = (strValue: string) => {
+        let error: string | undefined;
+        strValue = strValue?.trim();
+        if (strValue.length == 0) {
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "normalDistanceInFoots",
+                value: undefined,
+                error: "Поле обязательно."
+            });
+            return;
         }
 
-        dispatch({
-            type: ItemFormBaseActionType.setFormProperty,
-            field: "properties",
-            value: properties
-        });
+        const { success, value } = tryParseNumber(strValue);
+        if (!success) {
+            error = "Не число.";
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "normalDistanceInFoots",
+                value: undefined,
+                error
+            });
+        } else {
+            const distance = Math.floor(value!);
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "normalDistanceInFoots",
+                value: distance
+            });
+        }  
+    };
+
+    const setCriticalDistance = (strValue: string) => {
+        let error: string | undefined;
+        strValue = strValue?.trim();
+        if (strValue.length == 0) {
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "criticalDistanceInFoots",
+                value: undefined,
+                error: "Поле обязательно."
+            });
+            return;
+        }
+
+        const { success, value } = tryParseNumber(strValue);
+        if (!success) {
+            error = "Не число.";
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "criticalDistanceInFoots",
+                value: undefined,
+                error
+            });
+        } else {
+            const distance = Math.floor(value!);
+            dispatch({
+                type: ItemFormBaseActionType.setFormProperty,
+                field: "criticalDistanceInFoots",
+                value: distance
+            });
+        }  
     };
 
     const setDice = (dice: Dice) => {
@@ -92,7 +178,6 @@ function WeaponSpecificBody() {
     }
 
     return <>
-        <Divider/>
         <Grid item sm={6} xs={6}>
             <WeaponAttackTypeSelector required onValueChange={setWeaponAttackType} />
         </Grid>
@@ -103,11 +188,12 @@ function WeaponSpecificBody() {
             <WeaponDamageTypeSelector required onValueChange={setWeaponDamageType} />
         </Grid>
         {
-            state.damageType!.value == WeaponDamageType.melee && 
+            state.damageType?.value === WeaponDamageType.ranged && 
             <>
                 <Grid item sm={6} xs={6}>
                     <TextField
                       value={state.normalDistanceInFoots!.value}
+                      onChange={(e) => setDistance(e.target.value)}
                       error={state.normalDistanceInFoots!.error != null}
                       helperText={state.normalDistanceInFoots!.error}
                       fullWidth
@@ -119,12 +205,13 @@ function WeaponSpecificBody() {
                 <Grid item sm={6} xs={6}>
                     <TextField
                       value={state.criticalDistanceInFoots!.value}
-                      error={state.normalDistanceInFoots!.error != null}
-                      helperText={state.normalDistanceInFoots!.error}
+                      error={state.criticalDistanceInFoots!.error != null}
+                      helperText={state.criticalDistanceInFoots!.error}
                       fullWidth
                       label="Критическая дистанция"
                       required
                       type="number"
+                      onChange={(e) => setCriticalDistance(e.target.value)}
                     />
                 </Grid>
             </>
@@ -133,12 +220,12 @@ function WeaponSpecificBody() {
             <WeaponPropertiesAutocomplete selectedProperties={state.properties!.value ?? []} setSelectedProperties={setSelectedProperties}/>
         </Grid>
         <Grid item xs={6} sm={6}>
-            <DiceSelector id="Hit" selectorLabel="Урон" required onValueChange={setDice}  />
+            <DiceSelector id="Hit" selectorLabel="Урон" required value={state.hitDice?.value} onValueChange={setDice}  />
         </Grid>
         <Grid item xs={6} sm={6}>
             { 
                 state.properties?.value?.includes(WeaponProperty.versatile) &&
-                 <DiceSelector id="AlternateHit" selectorLabel="Алтернативный урон" required onValueChange={setAlternateDice}  />
+                 <DiceSelector id="AlternateHit" selectorLabel="Алтернативный урон" value={state.alternateHitDice?.value ?? undefined} required onValueChange={setAlternateDice}  />
             }
         </Grid>
     </>
@@ -282,7 +369,6 @@ function ArmorSpesificBody() {
     };
 
     return <>
-        <Divider />
         <Grid item sm={6} xs={6}>
             <ArmorTypeSelector required onValueChange={setArmorType} />
         </Grid>

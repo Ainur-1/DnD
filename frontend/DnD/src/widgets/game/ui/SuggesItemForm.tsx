@@ -1,5 +1,5 @@
 import { List } from "@mui/icons-material";
-import { Box, Button, Checkbox, Container, Divider, FormControlLabel, Grid, ListItem, Paper, Skeleton, TextField } from "@mui/material";
+import { Box, Button, Checkbox, Container, Divider, FormControlLabel, Grid, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
 import { useInventoryItemsQuery } from "@/features/inventory";
 import { ItemFromInventory } from "@/features/game/model/signalRTypes";
 import { useContext, useState } from "react";
@@ -9,8 +9,8 @@ import { tryParseNumber } from "@/shared/utils/parsers";
 import useGameReducer from "@/features/game";
 import { suggestItem } from "@/features/game/model/gameSlice";
 import { InventoryItemCard, Item, ItemFormBaseStateProvider } from "@/entities/item";
-import { ItemFormBaseBody, ItemFormBaseStateContext } from "@/entities/item/ui/ItemForm";
-import { stateToItem } from "@/entities/item/model/ItemFormBaseReducer";
+import { ItemFormBaseBody, ItemFormBaseDispatchContext, ItemFormBaseStateContext } from "@/entities/item/ui/ItemForm";
+import { anyError, ItemFormBaseActionType, stateToItem } from "@/entities/item/model/ItemFormBaseReducer";
 
 interface InventoryItemSelectorProps {
     characterId: string,
@@ -54,13 +54,53 @@ function InventoryItemSelector({characterId, selectItem}: InventoryItemSelectorP
     </>
 }
 
-interface NextButtonProps {
+interface CreatePrototypeFromItemFormProps {
     setPrototype: (item: Item | null) => void,
 }
-const NextButton = ({setPrototype} : NextButtonProps) => {
-    const state = useContext(ItemFormBaseStateContext);
 
-    return <Button disabled={stateToItem(state) == null} onClick={() => setPrototype(stateToItem(state))} variant="contained">Далее</Button>
+const CreatePrototypeFromItemForm = ({setPrototype}: CreatePrototypeFromItemFormProps) => {
+    const state = useContext(ItemFormBaseStateContext);
+    const dispatch = useContext(ItemFormBaseDispatchContext);
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const item = stateToItem(state);
+
+        if (anyError(state) || !item) {
+            dispatch?.({
+                type: ItemFormBaseActionType.setFormError,
+                error: "Некоторые данные не валидны."
+            });
+            return;
+        } 
+        
+        dispatch?.({
+            type: ItemFormBaseActionType.setFormError,
+            error: null
+        });
+        setPrototype(item);
+    };
+
+    return <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+            <Container>
+                <Typography variant="body2" color="error" textAlign="center">
+                    {state.formError}
+                </Typography>
+            </Container>
+            <ItemFormBaseBody/>
+            <Grid item xs={12}>
+                <Box sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignContent: "center"
+                }}>
+                    <Button type="submit" variant="contained">Далее</Button>
+                </Box>
+             </Grid>
+        </Grid>
+    </form>
 }
 
 interface SuggesItemFormProps {
@@ -152,12 +192,7 @@ export default function SuggesItemForm({characterId, loadInventory = false, clos
         });
         tabs.push({
             label: "Новый предмет",
-            tabPanelChildren: <Grid container spacing={2}>
-                <ItemFormBaseBody/>
-                <Grid item xs={12}>
-                    <NextButton setPrototype={setItemPrototype} />
-                </Grid>
-            </Grid>
+            tabPanelChildren: <CreatePrototypeFromItemForm setPrototype={setItemPrototype} />
         });
     }
 
@@ -197,7 +232,9 @@ export default function SuggesItemForm({characterId, loadInventory = false, clos
             {!loadInventory && <FormBox formTitle="Создать и передать предмет" handleSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         <ItemFormBaseBody />
-                        <Divider/>
+                        <Grid item xs={12}>
+                            <Divider/>
+                        </Grid>
                         <Grid item xs={12}>
                             <TextField 
                                 disabled={requestSent}

@@ -32,7 +32,7 @@ export function DiceSelector({id, required, selectorLabel, value, onValueChange}
             onChange={(e) => handleChange(e.target.value)}
         >
             {
-                values.map(dice => <MenuItem value={dice}>{dice}</MenuItem>)
+                values.map(dice => <MenuItem key={dice} value={dice}>{dice}</MenuItem>)
             }
         </Select>
     </FormControl>

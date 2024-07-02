@@ -1,6 +1,7 @@
 import { FormField } from "@/shared/types/IFormField";
-import { ArmorType, Item, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "./types";
+import { ArmorType, Item, ItemBase, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "./types";
 import { Dice } from "@/shared/types/domainTypes";
+import { isDecimal } from "@/shared/utils/isDecimal";
 
 interface ItemFormBaseState {    
   /* common props */
@@ -49,26 +50,24 @@ enum ItemFormBaseActionType {
     setFormProperty,
     selectForm,
     resetForm,
-    validateForm,
 }
 
 type ItemFormBaseAction =
   | { type: ItemFormBaseActionType.selectForm; form: SelectedItemForm }
   | { type: ItemFormBaseActionType.setFormProperty; field: ItemFromBaseKeys; value: any; error?: string }
   | { type: ItemFormBaseActionType.setFormError; error: string | null }
-  | { type: ItemFormBaseActionType.resetForm; newFormType?: SelectedItemForm}
-  | { type: ItemFormBaseActionType.validateForm; };
+  | { type: ItemFormBaseActionType.resetForm; newFormType?: SelectedItemForm};
 
 const initialState: ItemFormBaseStateWithFormSelector = {
     selectedForm: SelectedItemForm.stuff,
     formError: null,
 
     name: {
-        value: "",
+        value: undefined,
         error: null
     },
     iconBase64: {
-        value: "",
+        value: undefined,
         error: null
     },
     weightInPounds: {
@@ -111,7 +110,7 @@ function resetArmorProperties(state: ItemFormBaseStateWithFormSelector) {
 
 function initArmorProperties(state: ItemFormBaseStateWithFormSelector) {
     state.armorType = {
-        value: undefined,
+        value: ArmorType.light,
         error: null
     };
     state.material = {
@@ -138,15 +137,15 @@ function initArmorProperties(state: ItemFormBaseStateWithFormSelector) {
 
 function initWeaponProperties(state: ItemFormBaseStateWithFormSelector) {
     state.damageType = {
-        value: undefined,
+        value: WeaponDamageType.ranged,
         error: null
     };
     state.attackType = {
-        value: undefined,
+        value: WeaponAttackType.bludgeoning,
         error: null
     };
     state.proficiencyType = {
-        value: undefined,
+        value: WeaponProficiencyType.simple,
         error: null
     };
     state.normalDistanceInFoots = {
@@ -162,7 +161,7 @@ function initWeaponProperties(state: ItemFormBaseStateWithFormSelector) {
         error: null
     };   
     state.hitDice = {
-        value: undefined,
+        value: Dice.oneD1,
         error: null
     };
     state.alternateHitDice = {
@@ -171,9 +170,248 @@ function initWeaponProperties(state: ItemFormBaseStateWithFormSelector) {
     };
 }
 
-function getStateWithErrors(original: ItemFormBaseStateWithFormSelector): ItemFormBaseStateWithFormSelector {
+type ValidationFunction<T> = (oldState: ItemFormBaseStateWithFormSelector, value: T) => string | null;
 
-}
+type Validators = {
+    [K in keyof ItemFormBaseState]?: ValidationFunction<ItemFormBaseState[K]>;
+  }
+
+const requiredError = "Поле обязательно.";
+const mustBePositiveOrZeroError = "Поле должно быть больше или равно 0.";
+const mustBePositiveError = "Поле должно быть больше 0.";
+const onlyIntNumberError = "Только целые числа.";
+
+const validators: Validators = {
+    "name": function(_, field) {
+        const name = field.value;
+        if (!name || name.trim().length == 0) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "weightInPounds": function(_, field) {
+        const weight = field.value;
+
+        if (!weight) {
+            return requiredError;
+        } else if (weight < 0) {
+            return mustBePositiveOrZeroError;
+        }
+
+        return null;
+    },
+    "costInGold": function(_, field) {
+        const cost = field.value;
+
+        if (!cost) {
+            return requiredError;
+        } else if (cost < 0) {
+            return mustBePositiveOrZeroError;
+        }
+
+        return null;
+    },
+
+    /* weapons */
+    "damageType": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.weapon) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "attackType": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.weapon) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "proficiencyType": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.weapon) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "normalDistanceInFoots": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.weapon 
+            || state.damageType?.value !== WeaponDamageType.ranged) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        } else if (value <= 0) {
+            return mustBePositiveError;
+        } else if (isDecimal(value)) {
+            return onlyIntNumberError;
+        }
+
+        const mayBeCriticalDistance = state.criticalDistanceInFoots?.value;
+        if (mayBeCriticalDistance 
+            && mayBeCriticalDistance !== null 
+            && mayBeCriticalDistance <= value) {
+            return "Число должно быть меньше, чем критическая дистанция.";
+        }
+
+        return null;
+    },
+    "criticalDistanceInFoots": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.weapon 
+            || state.damageType?.value !== WeaponDamageType.ranged) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        } else if (value <= 0) {
+            return mustBePositiveError;
+        } else if (isDecimal(value)) {
+            return onlyIntNumberError;
+        }
+
+        const mayBeNormalDistance = state.normalDistanceInFoots?.value;
+        if (mayBeNormalDistance 
+            && mayBeNormalDistance !== null 
+            && mayBeNormalDistance >= value) {
+            return "Число должно быть больше, чем минимальная дистанция.";
+        }
+
+        return null;
+    },
+    "hitDice": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.weapon) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "alternateHitDice": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.weapon) {
+            return null;
+        }
+
+        const value = field?.value;
+        const mayBeProperties = state.properties?.value;
+        if (!value && mayBeProperties 
+            && mayBeProperties.includes(WeaponProperty.versatile)
+        ) {
+            return requiredError;
+        }
+
+        return null;
+    },
+
+    /* armor */
+    "armorType": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.armor) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "material": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.armor) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "requiredStrength": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.armor) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value && value !== null) {
+            return requiredError;
+        } else if (value !== null && value <= 0) {
+            return mustBePositiveError;
+        } else if (value !== null && isDecimal(value)) {
+            return onlyIntNumberError;
+        }
+
+        return null;
+    },
+    "hasStealthDisadvantage": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.armor) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        }
+
+        return null;
+    },
+    "maxPossibleDexterityModifier": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.armor) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value && value !== null) {
+            return requiredError;
+        } else if (value !== null && value <= 0) {
+            return mustBePositiveError;
+        } else if (value !== null && isDecimal(value)) {
+            return onlyIntNumberError;
+        }
+
+        return null;
+    },
+    "armorClass": function(state, field) {
+        if(state.selectedForm != SelectedItemForm.armor) {
+            return null;
+        }
+
+        const value = field?.value;
+        if (!value) {
+            return requiredError;
+        } else if (value <= 0) {
+            return mustBePositiveError;
+        } else if (isDecimal(value)) {
+            return onlyIntNumberError;
+        }
+
+        return null;
+    },
+};
 
 function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseAction):ItemFormBaseStateWithFormSelector  {
     switch (action.type) {
@@ -210,55 +448,66 @@ function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseA
             return newSelectFormState;
 
         case ItemFormBaseActionType.setFormProperty:
+
             return {
                 ...state,
                 [action.field]: {
-                  value: action.value,
-                  error: action.error || null,
+                    value: action.value,
+                    error: action.error 
+                        ?? validators[action.field]?.(state, {
+                            value: action.value,
+                            error: state[action.field]?.error ?? null
+                        }) 
+                        ?? null,
                 },
-              };
+            }
 
-        case ItemFormBaseActionType.validateForm:
-              return getStateWithErrors(state);
         default:
             return state;
     }
 
 }
 
+function assertDefined<T>(value: T | undefined, name: string): T {
+    if (value === undefined) {
+        throw new Error(`Missing value for ${name}`);
+    }
+    return value;
+}
+
 function stateToItem(state: ItemFormBaseStateWithFormSelector): Item | null {
     try {
-        const base = {
-            name: state.name.value!,
-            iconUrl: null ?? undefined,
-            weightInPounds: state.weightInPounds.value!,
+        const base: ItemBase = {
+            name: assertDefined(state.name.value, 'name'),
+            iconUrl: state.iconBase64.value ?? undefined,
+            weightInPounds: assertDefined(state.weightInPounds.value, 'weightInPounds'),
             description: state.description.value ?? undefined,
-            costInGold: state.costInGold.value!,
-            tags: state.tags.value && state.tags.value?.length > 0 ? state.tags.value : undefined,
+            costInGold: assertDefined(state.costInGold.value, 'costInGold'),
+            tags: state.tags.value && state.tags.value.length > 0 ? state.tags.value : undefined,
         };
 
         if (state.selectedForm == SelectedItemForm.armor) {
             return {
                 ...base,
-                armorType: state.armorType!.value!,
-                material: state.material!.value!,
+                armorType: assertDefined(state.armorType?.value, 'armorType'),
+                material: assertDefined(state.material?.value, 'material'),
                 requiredStrength: state.requiredStrength?.value ?? undefined,
-                hasStealthDisadvantage: state.hasStealthDisadvantage!.value!,
+                hasStealthDisadvantage: assertDefined(state.hasStealthDisadvantage?.value, 'hasStealthDisadvantage'),
                 maxPossibleDexterityModifier: state.maxPossibleDexterityModifier?.value ?? undefined,
-                armorClass: state.armorClass!.value!,
+                armorClass: assertDefined(state.armorClass?.value, 'armorClass'),
             };
         } else if (state.selectedForm == SelectedItemForm.weapon) {
             return {
                 ...base,
-                attackType: state.attackType!.value!,
-                proficiencyType: state.proficiencyType!.value!,
-                damageType: state.damageType!.value!,
+                attackType: assertDefined(state.attackType?.value, 'attackType'),
+                proficiencyType: assertDefined(state.proficiencyType?.value, 'proficiencyType'),
+                damageType: assertDefined(state.damageType?.value, 'damageType'),
                 normalDistanceInFoots: state.normalDistanceInFoots?.value ?? undefined,
                 criticalDistanceInFoots: state.criticalDistanceInFoots?.value ?? undefined,
-                properties: state.properties?.value && state.properties?.value.length > 0 ? state.properties!.value : undefined,
-                hitDice: state.hitDice!.value!,
+                properties: state.properties?.value && state.properties.value.length > 0 ? state.properties.value : undefined,
+                hitDice: assertDefined(state.hitDice?.value, 'hitDice'),
                 alternateHitDice: state.alternateHitDice?.value ?? undefined,
-            }
+            };
         }
 
         return base;
@@ -316,5 +565,3 @@ function anyError(state: ItemFormBaseState): boolean {
 export default reducer;
 export type { ItemFormBaseAction, ItemFormBaseStateWithFormSelector};
 export {initialState, ItemFormBaseActionType, SelectedItemForm, stateToItem, anyError};
-
-
