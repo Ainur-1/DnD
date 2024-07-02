@@ -1,4 +1,4 @@
 export interface FormField<T> {
-    value: T;
+    value: T | undefined;
     error: string | null;
 }

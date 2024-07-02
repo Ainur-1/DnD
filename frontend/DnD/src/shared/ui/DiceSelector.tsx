@@ -1,6 +1,7 @@
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Dice } from "../types/domainTypes";
 import { GenericSelectorProps } from "../types/IGenericSelectorProps";
+import { enumFromStringValue } from "../utils/enumFromStringParser";
 
 interface DiceSelectorProps extends GenericSelectorProps<Dice> {
     selectorLabel: string,
@@ -12,11 +13,12 @@ export function DiceSelector({id, required, selectorLabel, value, onValueChange}
 
     const handleChange = (value: Dice | string) => {
         if (typeof value === 'string') {
-            console.log(`Got value in select ${value}.`);
-            throw new Error("Unexpected value in enum selector.");
+            const diceEnumValue = enumFromStringValue(Dice, value);
+            if (diceEnumValue)
+                onValueChange(diceEnumValue);
+        } else {
+            onValueChange(value);
         }
-
-        onValueChange(value);
     };
 
     return <FormControl fullWidth required={required}> 

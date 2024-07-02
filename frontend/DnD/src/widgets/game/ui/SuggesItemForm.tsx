@@ -10,7 +10,7 @@ import useGameReducer from "@/features/game";
 import { suggestItem } from "@/features/game/model/gameSlice";
 import { InventoryItemCard, Item, ItemFormBaseStateProvider } from "@/entities/item";
 import { ItemFormBaseBody, ItemFormBaseStateContext } from "@/entities/item/ui/ItemForm";
-import { stateToItem } from "@/entities/item/model/itemFormBaseReducer";
+import { stateToItem } from "@/entities/item/model/ItemFormBaseReducer";
 
 interface InventoryItemSelectorProps {
     characterId: string,
@@ -73,7 +73,7 @@ type ExtendedItemFromInventory = ItemFromInventory & {item: Item};
 export default function SuggesItemForm({characterId, loadInventory = false, closeForm}: SuggesItemFormProps) {
 
     const [itemPrototype, setItemPrototype] = useState<Item | ExtendedItemFromInventory | null>(null);
-    const [count, setCount] = useState(1);
+    const [count, setCount] = useState<number|undefined>(1);
     const [countError, setCountError] = useState("");
     const [requestSent, setRequestSent] = useState(false);
     const { setFatalErrorOccured } = useGameReducer();
@@ -95,7 +95,7 @@ export default function SuggesItemForm({characterId, loadInventory = false, clos
                 setCountError("");
             }
         } else {
-            setCount(1);
+            setCount(undefined);
             setCountError("Введите число.");
         }
     };

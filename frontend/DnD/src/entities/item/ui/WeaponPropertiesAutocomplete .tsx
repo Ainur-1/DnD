@@ -29,7 +29,8 @@ export default function WeaponPropertiesAutocomplete({selectedProperties, setSel
     const theme = useTheme();
 
     const handlePropertyChange = (_: React.ChangeEvent<{}>, values: WeaponProperty[]) => {
-        const uniqueValues = values.filter((value, index, self) => (
+        const uniqueValues = values
+        .filter((value, index, self) => (
             self.indexOf(value) === index
         ));
         setSelectedProperties(uniqueValues);
@@ -39,12 +40,13 @@ export default function WeaponPropertiesAutocomplete({selectedProperties, setSel
         !selectedProperties.includes(property)
     );
 
+
     return (
         <Autocomplete
             multiple
             id="weapon-properties"
             options={filteredOptions}
-            getOptionLabel={(option) => option}
+            getOptionLabel={(option) => WeaponPropertiesLabelMap[option]}
             value={selectedProperties}
             onChange={handlePropertyChange}
             renderInput={(params) => (
@@ -55,7 +57,7 @@ export default function WeaponPropertiesAutocomplete({selectedProperties, setSel
                 />
             )}
             renderTags={(value, getTagProps) => value.map((option, index) => (
-                <Chip variant="filled" label={option} {...getTagProps({ index })} sx={{
+                <Chip variant="filled" label={WeaponPropertiesLabelMap[option]} {...getTagProps({ index })} sx={{
                   background: theme.palette.secondary.main
                 }}
                     title={WeaponPropertiesLabelMap[option]}

@@ -6,19 +6,20 @@ import { GenericSelectorProps } from "@/shared/types/IGenericSelectorProps";
 interface ArmorTypeSelectorProps extends GenericSelectorProps<ArmorType> {
 }
 
-export function ArmorTypeSelector({value, onValueChange}: ArmorTypeSelectorProps) {
+export function ArmorTypeSelector({value, onValueChange, required}: ArmorTypeSelectorProps) {
     const handleChange = (value: ArmorType | string) => {
         if (typeof value === 'string') {
-            console.log(`Got value in select ${value}.`);
-            throw new Error("Unexpected value in enum selector.");
+            const enumValue = value.toLowerCase();
+            onValueChange(ArmorType[enumValue as keyof typeof ArmorType]);
+        } else {
+            onValueChange(value);
         }
-
-        onValueChange(value);
     };
 
-    return <FormControl fullWidth>
+    return <FormControl fullWidth required={required}>
         <InputLabel id="armorType-select-label">Тип брони</InputLabel>
         <Select 
+            required={required}
             labelId="armorType-select-label" 
             id="armorType-select"
             value={value}
@@ -33,22 +34,18 @@ export function ArmorTypeSelector({value, onValueChange}: ArmorTypeSelectorProps
   </FormControl>
 }
 
-export function WeaponProficiencyTypeSelector({value, onValueChange}: GenericSelectorProps<WeaponProficiencyType>) {
+export function WeaponProficiencyTypeSelector({required, value, onValueChange}: GenericSelectorProps<WeaponProficiencyType>) {
     const handleChange = (value: WeaponProficiencyType | string) => {
-        if (typeof value === 'string') {
-            console.log(`Got value in select ${value}.`);
-            throw new Error("Unexpected value in enum selector.");
-        }
-
-        onValueChange(value);
+        onValueChange(typeof value === 'string' ? WeaponProficiencyType[(value.toLowerCase() as keyof typeof WeaponProficiencyType)] : value);
     };
 
-    return <FormControl fullWidth>
-        <InputLabel id="weaponProficiencyType-select-label">Оружейное мастерство</InputLabel>
+    return <FormControl required={required} fullWidth>
+        <InputLabel required={required} id="weaponProficiencyType-select-label">Оружейное мастерство</InputLabel>
         <Select 
             labelId="weaponProficiencyType-select-label" 
             id="weaponProficiencyType-select"
             value={value}
+            required={required}
             label="Оружейное мастерство"
             onChange={(e) => handleChange(e.target.value)}
         >
@@ -58,19 +55,15 @@ export function WeaponProficiencyTypeSelector({value, onValueChange}: GenericSel
   </FormControl>
 }
 
-export function WeaponAttackTypeSelector({value, onValueChange}: GenericSelectorProps<WeaponAttackType>) {
+export function WeaponAttackTypeSelector({required, value, onValueChange}: GenericSelectorProps<WeaponAttackType>) {
     const handleChange = (value: WeaponAttackType | string) => {
-        if (typeof value === 'string') {
-            console.log(`Got value in select ${value}.`);
-            throw new Error("Unexpected value in enum selector.");
-        }
-
-        onValueChange(value);
+        onValueChange(typeof value === 'string' ? WeaponAttackType[(value.toLowerCase() as keyof typeof WeaponAttackType)] : value);
     };
 
-    return <FormControl fullWidth>
+    return <FormControl required={required} fullWidth>
         <InputLabel id="weaponAttackType-select-label">Тип атаки</InputLabel>
         <Select 
+            required={required}
             labelId="weaponAttackType-select-label" 
             id="weaponAttackType-select"
             value={value}
@@ -84,19 +77,15 @@ export function WeaponAttackTypeSelector({value, onValueChange}: GenericSelector
   </FormControl>
 }
 
-export function WeaponDamageTypeSelector({value, onValueChange}: GenericSelectorProps<WeaponDamageType>) {
+export function WeaponDamageTypeSelector({required, value, onValueChange}: GenericSelectorProps<WeaponDamageType>) {
     const handleChange = (value: WeaponDamageType | string) => {
-        if (typeof value === 'string') {
-            console.log(`Got value in select ${value}.`);
-            throw new Error("Unexpected value in enum selector.");
-        }
-
-        onValueChange(value);
+        onValueChange(typeof value === 'string' ? WeaponDamageType[(value.toLowerCase() as keyof typeof WeaponDamageType)] : value);
     };
 
-    return <FormControl fullWidth>
+    return <FormControl required={required} fullWidth>
         <InputLabel id="weaponDamageType-select-label">Радиус действия</InputLabel>
         <Select 
+            required={required}
             labelId="weaponDamageType-select-label" 
             id="weaponDamageType-select"
             value={value}

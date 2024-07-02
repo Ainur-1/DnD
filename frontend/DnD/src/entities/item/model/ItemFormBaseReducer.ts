@@ -5,7 +5,7 @@ import { Dice } from "@/shared/types/domainTypes";
 interface ItemFormBaseState {    
   /* common props */
   name: FormField<string>;
-  iconBase64: FormField<string | undefined>;
+  iconBase64: FormField<string | null>;
   weightInPounds: FormField<number>;
   description: FormField<string | null>;
   costInGold: FormField<number>;
@@ -108,6 +108,68 @@ function resetArmorProperties(state: ItemFormBaseStateWithFormSelector) {
     state.armorClass = undefined;
 }
 
+function initArmorProperties(state: ItemFormBaseStateWithFormSelector) {
+    state.armorType = {
+        value: undefined,
+        error: null
+    };
+    state.material = {
+        value: "",
+        error: null
+    };
+    state.requiredStrength = {
+        value: null,
+        error: null
+    };
+    state.hasStealthDisadvantage = {
+        value: false,
+        error: null
+    };
+    state.maxPossibleDexterityModifier = {
+        value: null,
+        error: null
+    };
+    state.armorClass = {
+        value: 10,
+        error: null
+    };
+}
+
+function initWeaponProperties(state: ItemFormBaseStateWithFormSelector) {
+    state.damageType = {
+        value: undefined,
+        error: null
+    };
+    state.attackType = {
+        value: undefined,
+        error: null
+    };
+    state.proficiencyType = {
+        value: undefined,
+        error: null
+    };
+    state.normalDistanceInFoots = {
+        value: undefined,
+        error: null
+    };
+    state.criticalDistanceInFoots = {
+        value: undefined,
+        error: null
+    };
+    state.properties = {
+        value: undefined,
+        error: null
+    };   
+    state.hitDice = {
+        value: undefined,
+        error: null
+    };
+    state.alternateHitDice = {
+        value: undefined,
+        error: null
+    };
+}
+
 function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseAction):ItemFormBaseStateWithFormSelector  {
     switch (action.type) {
         case ItemFormBaseActionType.resetForm:
@@ -125,13 +187,16 @@ function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseA
         
         case ItemFormBaseActionType.selectForm:
             const newSelectFormState = {
-                ...state
+                ...state,
+                selectedForm: action.form,
             };
 
             if (action.form == SelectedItemForm.armor) {
                 resetWeaponProperties(newSelectFormState);
+                initArmorProperties(newSelectFormState);
             } else if (action.form == SelectedItemForm.weapon) {
                 resetArmorProperties(newSelectFormState);
+                initWeaponProperties(newSelectFormState);
             } else {
                 resetWeaponProperties(newSelectFormState);
                 resetArmorProperties(newSelectFormState);
@@ -156,11 +221,11 @@ function reducer(state: ItemFormBaseStateWithFormSelector, action: ItemFormBaseA
 
 function stateToItem(state: ItemFormBaseStateWithFormSelector): Item | null {
     const base = {
-        name: state.name.value,
+        name: state.name.value!,
         iconUrl: null ?? undefined,
-        weightInPounds: state.weightInPounds.value,
+        weightInPounds: state.weightInPounds.value!,
         description: state.description.value ?? undefined,
-        costInGold: state.costInGold.value,
+        costInGold: state.costInGold.value!,
         tags: state.tags.value,
     }
 
@@ -168,23 +233,23 @@ function stateToItem(state: ItemFormBaseStateWithFormSelector): Item | null {
         if (state.selectedForm == SelectedItemForm.armor) {
             return {
                 ...base,
-                armorType: state.armorType!.value,
-                material: state.material!.value,
+                armorType: state.armorType!.value!,
+                material: state.material!.value!,
                 requiredStrength: state.requiredStrength?.value ?? undefined,
-                hasStealthDisadvantage: state.hasStealthDisadvantage!.value,
+                hasStealthDisadvantage: state.hasStealthDisadvantage!.value!,
                 maxPossibleDexterityModifier: state.maxPossibleDexterityModifier?.value ?? undefined,
-                armorClass: state.armorClass!.value,
+                armorClass: state.armorClass!.value!,
             };
         } else if (state.selectedForm == SelectedItemForm.weapon) {
             return {
                 ...base,
-                attackType: state.attackType!.value,
-                proficiencyType: state.proficiencyType!.value,
-                damageType: state.damageType!.value,
+                attackType: state.attackType!.value!,
+                proficiencyType: state.proficiencyType!.value!,
+                damageType: state.damageType!.value!,
                 normalDistanceInFoots: state.normalDistanceInFoots?.value ?? undefined,
                 criticalDistanceInFoots: state.criticalDistanceInFoots?.value ?? undefined,
                 properties: state.properties?.value ?? undefined,
-                hitDice: state.hitDice!.value.toString(),
+                hitDice: state.hitDice!.value!.toString(),
                 alternateHitDice: state.alternateHitDice?.value?.toString() ?? undefined,
             }
         }
