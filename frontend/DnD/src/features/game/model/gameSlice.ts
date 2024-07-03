@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GameState } from "./types";
 import { DamageCharacterVariables, EndGameVariables, ItemFromInventory, JoinRoomResult, JoinRoomVariables, RoomState, SuggestItemVariables, UpdateCharacterVariables, CharacterInitiativeScore, UpdateFightVariables } from "./signalRTypes";
 import { Item } from "@/entities/item/model/types";
+import { inventoryApi } from "@/features/inventory/api/api";
 
 
 export const damageCharacter = createAsyncThunk<void, DamageCharacterVariables, {state: GameState}>(
@@ -39,11 +40,17 @@ export const suggestItem = createAsyncThunk<void, SuggestItemVariables, {state: 
 
 export const acceptInventoryItem = createAsyncThunk<boolean, {suggestionId: string}, {state: GameState}>(
     'game/acceptInventoryItem',
-    async function(args, { getState }){
+    async function(args, { getState, dispatch }){
         const { connection } = getState();
         const { suggestionId } = args;
         
-        return await connection.invoke<boolean>("AcceptInventory", suggestionId);
+        const result = await connection.invoke<boolean>("AcceptInventory", suggestionId);
+
+        if (result) {
+            dispatch(inventoryApi.util.invalidateTags(["InventoryItems"]));
+        }
+
+        return result;
     }
 );
 

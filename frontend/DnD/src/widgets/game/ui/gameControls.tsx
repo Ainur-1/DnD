@@ -1,12 +1,12 @@
 import { Box, Button, Grid, Stack } from "@mui/material";
-import { ButtonProps, ButtonPropsWithChildren } from "../model/widgetTypes";
+import { ButtonProps } from "../model/widgetTypes";
 import SavingThrowsDisplay from "./savingThrowsDisplay";
 import EquippedItemsList from "./equippedItemsList";
 import useGameReducer from "@/features/game";
 import { DeathSaves } from "@/entities/character/model/types";
 import { StartFightFormDialog } from "./formDialogs";
 import { useState } from "react";
-import { updateFight } from "@/features/game/model/gameSlice";
+import { updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 
 interface UserControlBarProps {
     findMeButtonInfo: ButtonProps
@@ -17,7 +17,7 @@ const controlMinHeight = 300;
 
 function UserControlBar({findMeButtonInfo, ineventoryButtonInfo}: UserControlBarProps) {
     const { state } = useGameReducer();
-    const characterId = state.gameInfo.userCharacterId;
+    const characterId = state!.gameInfo.userCharacterId;
 
     return <Grid container height={controlMinHeight} spacing={2}>
             <Grid item xs={4}>
@@ -38,34 +38,69 @@ function UserControlBar({findMeButtonInfo, ineventoryButtonInfo}: UserControlBar
         </Grid>
 }
 
-interface DeadUserControlBar {
+interface DyingUserControlBar {
 }
 
-function DeadUserControlBar({}: DeadUserControlBar) {
-    const { state } = useGameReducer();
+function DyingUserControlBar({}: DyingUserControlBar) {
+    const { state, setFatalErrorOccured } = useGameReducer();
+    const [ requestSent, setRequestSent ] = useState(false);
+
+    if(state === undefined) {
+        return <></>
+    }
 
     const deathSaves = state!.gameInfo.deathSaves ?? {
         failureCount: 0,
         successCount: 0,
     };
 
-    //todo: useUpdateDeathSaves mutation
     async function updateDeathSaves(deathSaves: DeathSaves) {
+        if (requestSent) {
+            return;
+        }
 
+        setRequestSent(true);
+        try {
+            const character = state?.gameInfo.partyCharacters.find(x => x.id === state.gameInfo.userCharacterId);
+            if (character === undefined) {
+                return;
+            }
+
+            await updateCharacter({
+                targetCharacterId: character.id,
+                deathSavesUpdate: {
+                    deathSaves: deathSaves
+                },
+            });
+
+        } catch {
+            setFatalErrorOccured(true);
+        } finally {
+            setRequestSent(false);
+        }
     }
 
-    async function changeSuccessCount(number: number | null) {
+    function changeSuccessCount(number: number | null) {
         const value = number ?? 0;
-        
+
+        return updateDeathSaves({
+            ...deathSaves,
+            successCount: value,
+        });
     } 
 
-    async function changeFailuresCount(number: number | null) {
+    function changeFailuresCount(number: number | null) {
         const value = number ?? 0;
-        
+
+        return updateDeathSaves({
+            ...deathSaves,
+            failureCount: value,
+        });
     } 
 
     return <Stack height={controlMinHeight}>
         <SavingThrowsDisplay 
+            readonly = {requestSent}
             successCount={deathSaves.successCount} 
             failuresCount={deathSaves.failureCount} 
             changeSuccessCount={changeSuccessCount} 
@@ -115,18 +150,16 @@ interface ControlBarProps {
 export default function BottomControlBar({findMyCharacter, openInventory}: ControlBarProps) {
     const { state } = useGameReducer();
 
-    if (!state) {
-        return <></>
-    }
-
-    const isGameMaster = state.isUserGameMaster;
-    const game = state.gameInfo;
+    const isGameMaster = state!.isUserGameMaster;
+    const game = state!.gameInfo;
+    const userCharacter = game.partyCharacters.find(x => x.id === game.userCharacterId);
 
     return <>
         {isGameMaster && <GameMasterControlBar />}
         {!isGameMaster && <>
-            {game.deathSaves && <DeadUserControlBar />}
-            {!game.deathSaves && <UserControlBar findMeButtonInfo={{
+            {game.deathSaves && <DyingUserControlBar />}
+            {userCharacter && !userCharacter.mainStats.isDead && !game.deathSaves && 
+            <UserControlBar findMeButtonInfo={{
                 onClick: findMyCharacter,
             }} ineventoryButtonInfo={{
                 onClick: openInventory
