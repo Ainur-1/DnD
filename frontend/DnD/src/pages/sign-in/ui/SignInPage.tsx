@@ -29,7 +29,7 @@ export default function SignInPage() {
         <ChangePageTitle title="Логин"/>
         <Container component="main" maxWidth="xs">
             <TeamTitle/>
-            <SignInForm afterSuccessSignIn={redirectAfterSignIn}/>
+            <SignInForm afterSuccessfulSignIn={redirectAfterSignIn}/>
         </Container>
     </>
 }

@@ -2,7 +2,7 @@ import { TextField, FormControlLabel, Checkbox, Button, Grid } from "@mui/materi
 import FormBox from "./FormBox";
 import { useState } from "react";
 import { containsWhitespace } from "../model/utils";
-import { useSignInMutation } from "@/features/auth/api/api";
+import { useSignInMutation } from "@/features/auth";
 import { useAuthReducer } from "@/features/auth";
 import Link from "@/shared/ui/styledLink";
 
@@ -17,8 +17,8 @@ export function SignInForm({ afterSuccessfulSignIn }: SignInFormProps) {
   const [passwordError, setPasswordError] = useState(false);
   const [remeberMe, setRememberMe] = useState(false);
   const [requestError, setRequestError] = useState('');
-  const [ signIn, { isLoading, isError, /*error*/ }] = useSignInMutation();
-  const { setIsAuthenticated } = useAuthReducer();
+  const [ signIn, { data, isLoading, isError, /*error*/ }] = useSignInMutation();
+  const { setUser } = useAuthReducer();
 
   const toggleRememberMe = () => setRememberMe(old => !old);
 
@@ -57,8 +57,10 @@ export function SignInForm({ afterSuccessfulSignIn }: SignInFormProps) {
       // todo error handle if network error or 
       setRequestError("Неверный логин или пароль.")
     } else {
-      setIsAuthenticated(true);
-      afterSuccessfulSignIn();
+      if (data) {
+        setUser({userId: data.userId});
+        afterSuccessfulSignIn();
+      }
     }
   }
 

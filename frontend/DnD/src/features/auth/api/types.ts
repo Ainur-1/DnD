@@ -1,5 +1,5 @@
 export interface SignInMutationResult  {
-
+    userId: string,
 }
 
 export interface SignInMutationVariables {

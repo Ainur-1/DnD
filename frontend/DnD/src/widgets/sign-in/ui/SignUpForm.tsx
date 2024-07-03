@@ -3,7 +3,7 @@ import FormBox from "./FormBox";
 import { FieldName, useStateReducer } from "../model/signUpState";
 import { Button, TextField } from "@mui/material";
 import { getErrosForSignUpState } from "../model/utils";
-import { useSignUpMutation } from "@/features/auth/api/api";
+import { useSignUpMutation } from "@/features/auth";
 
 interface SignUpFormProps {
   afterSuccessfulSignUp: () => void,
