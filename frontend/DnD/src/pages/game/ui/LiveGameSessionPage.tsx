@@ -1,6 +1,6 @@
 import ChangePageTitle from "@/shared/ui/changePageTitle";
 import { GameController, GameLoader } from "@/widgets/game";
-import { Container } from "@mui/material";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -27,12 +27,29 @@ export default function LiveGameSessionPage() {
    return <>
       <ChangePageTitle title="Отряд"/>
       <Container>
-         {!isLoaded && <GameLoader onFailure={onFailure} onLoaded={onSuccess} partyId={partyId} />}
-         {isLoaded && <>
-            {failure && <GameController/>}
-            {!failure && <div>Ошибка{/*todo: обработка ошибки перенаправление на страницу с ошибкой*/}</div>}
-         </>
-         }
+         <Box
+           sx={{
+             display: 'flex',
+             flexDirection: 'column',
+             alignItems: 'center',
+             justifyContent: 'center',
+             minHeight: '100vh',
+           }}
+         >
+            {!isLoaded && <GameLoader onFailure={onFailure} onLoaded={onSuccess} partyId={partyId} />}
+            {isLoaded && <>
+               {!failure && <GameController/>}
+               {failure && <Stack sx={{alignItems:"center", justifyContent:"center"}}>
+                     <Typography margin="dense">
+                        Ошибка
+                     </Typography>
+                     <Button onClick={reset}>
+                        Попробовать еще раз
+                     </Button>
+                  </Stack>
+               }
+            </>} 
+         </Box>
       </Container>
    </>
 }

@@ -163,6 +163,7 @@ export default function BottomControlBar({findMyCharacter}: ControlBarProps) {
             {userCharacter && !userCharacter.mainStats.isDead && !game.deathSaves && 
             <UserControlBar findMeButtonInfo={{
                 onClick: findMyCharacter,
+                disabled: true,
             }}
             />}
         </>}

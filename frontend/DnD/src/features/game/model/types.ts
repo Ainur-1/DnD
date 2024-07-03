@@ -5,13 +5,13 @@ export type GameState = {
     partyId: string,
     roomCode: string,
     isUserGameMaster: boolean,
-    gameInfo: GameInfo
+    gameInfo: GameInfo,
     connection: HubConnection,
     fatalErrorOccured: boolean,
 };
 
 export type GameInfo = {
-    userCharacterId: string,
+    userCharacterId: string | null,
     deathSaves?: DeathSaves
     partyCharacters: GameCharacter[],
     isFighting: boolean,

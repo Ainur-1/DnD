@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GameState } from "./types";
-import { DamageCharacterVariables, EndGameVariables, ItemFromInventory, JoinRoomResult, JoinRoomVariables, RoomState, SuggestItemVariables, UpdateCharacterVariables, CharacterInitiativeScore, UpdateFightVariables } from "./signalRTypes";
+import { DamageCharacterVariables, EndGameVariables,
+         ItemFromInventory, JoinRoomResult, RoomState, 
+         SuggestItemVariables, UpdateCharacterVariables, 
+         UpdateFightVariables } from "./signalRTypes";
 import { Item } from "@/entities/item/model/types";
 import { inventoryApi } from "@/features/inventory/api/api";
 
@@ -109,13 +112,12 @@ export const endGame = createAsyncThunk<boolean, EndGameVariables, {state: GameS
     }
 )
 
-export const joinRoom = createAsyncThunk<JoinRoomResult, JoinRoomVariables, { state: GameState }>(
+export const joinRoom = createAsyncThunk<JoinRoomResult, {}, { state: GameState }>(
     "game/joinRoom",
-    async function (args, { getState }) {
-        const { connection, partyId } = getState();
-        const { accessCode } = args;
+    async function (_, { getState }) {
+        const { connection, partyId, roomCode } = getState();
 
-        const state = await connection.invoke<RoomState | null>("JoinRoom", partyId, accessCode);
+        const state = await connection.invoke<RoomState | null>("JoinRoom", partyId, roomCode);
 
         if (state == null) {
             return { 
@@ -126,7 +128,7 @@ export const joinRoom = createAsyncThunk<JoinRoomResult, JoinRoomVariables, { st
         return {
             success: true,
             payload: state as RoomState,
-        }
+        };
     }
 )
 
@@ -141,9 +143,7 @@ const gameSlice = createSlice({
     initialState: initialState,
     reducers: {
         init(state, action: PayloadAction<GameState>) {
-            if (state)
             state.state = action.payload;
-
         },
         reset(state) {
             state = initialState;
@@ -153,7 +153,7 @@ const gameSlice = createSlice({
             if (state) {
                 state.fatalErrorOccured = action.payload;
             }
-        }
+        },
     },
 });
 

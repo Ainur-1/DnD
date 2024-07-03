@@ -12,7 +12,7 @@ const useGameReducer = () => {
         state,
         init: (state: GameState) => dispatch(init(state)),
         reset: () => dispatch(reset()),
-        setFatalErrorOccured: (value: boolean) => dispatch(setFatalErrorOccured(value))
+        setFatalErrorOccured: (value: boolean) => dispatch(setFatalErrorOccured(value)),
     };
 }
 

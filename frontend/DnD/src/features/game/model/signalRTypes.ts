@@ -3,7 +3,6 @@ import { GameCharacter } from "./types";
 import { DeathSaves } from "@/entities/character/model/types";
 
 export interface JoinRoomVariables {
-    accessCode: string,
 }
 
 export type RoomState = {
