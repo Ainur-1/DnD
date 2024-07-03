@@ -1,10 +1,13 @@
 import IconWithCenteredValue, { iconWithCenteredValueFont } from "@/shared/ui/IconWithCenteredValue ";
-import { Box, CardActionArea, styled } from "@mui/material";
+import { Box, CardActionArea, Container, Grid, styled, Typography } from "@mui/material";
 import ShieldIcon from '@mui/icons-material/Shield';
 import SquareIcon from '@mui/icons-material/Square';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CircleIcon from '@mui/icons-material/Circle';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import CloseIcon from '@mui/icons-material/Close';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+import KeyboardDoubleArrowUpTwoToneIcon from '@mui/icons-material/KeyboardDoubleArrowUpTwoTone';
 
 interface InGameLiveOverlay {
     hp: number,
@@ -82,4 +85,58 @@ export function InGameLiveOverlay({hp,  tempHp, initiativeBonus, armor, proficie
             </Box>
         </Box>
     </CardActionArea>
+}
+
+interface CarouselCardOverlayProps {
+    showDeadIcon: boolean,
+    showInPartyLabel: boolean,
+    showCanUpdateIcon: boolean,
+}
+
+export function CarouselCardOverlay({showDeadIcon, showInPartyLabel, showCanUpdateIcon}: CarouselCardOverlayProps) {
+
+    return <>
+        <Box sx={{
+                flex: '0 0 80%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+        }}>
+            {showDeadIcon &&
+                <Box sx={{
+                    position: 'absolute',
+                    height: '100%',
+                    width: '100%',
+                    '& .MuiSvgIcon-root': {
+                      height: '100%',
+                      width: '100%',
+                    },
+                }}
+                >
+                    <CloseIcon sx={{color: "#f523005c"}}/>
+                </Box>
+            }
+        </Box>
+        <Box flex='0 0 20%'>
+            <Grid container alignItems="center" justifyContent="space-evenly" spacing={1}>
+                <Grid justifyContent="flex-start" item xs={10}>
+                    <Typography sx={{
+                        background: "#6cb76c",
+                        borderRadius: "5px",
+                        textAlign: "center",
+                    }}>
+                        {showInPartyLabel && "В отряде"}
+                    </Typography>
+                </Grid>
+                <Grid item xs={2}>
+                    {showCanUpdateIcon && <KeyboardDoubleArrowUpTwoToneIcon sx={{
+                        color:"#3197f1",
+                        background: "#8d6f45",
+                        borderRadius: "50%",
+                    }}
+                    />}
+                </Grid>
+            </Grid>
+        </Box>
+    </>
 }

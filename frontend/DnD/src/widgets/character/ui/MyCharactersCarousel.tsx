@@ -1,10 +1,9 @@
-import { CharacterCard } from "@/entities/character"
+import { CarouselCardOverlay, CharacterCard, CharacterCardSkeletone } from "@/entities/character"
 import { CarouselCharacter, useMyCharactersQuery } from "@/features/character";
 import Carousel from "@/shared/ui/Carousel"
 import ErrorWithRetryButton from "@/shared/ui/ErrorWithRetryButton";
 import { Box, Button, Stack } from "@mui/material";
 import DeleteCharacterButton from "./DeleteCharacterButton";
-import { CharacterCardSkeletone } from "@/entities/character/ui/characterCard";
 import { AbsoluteCenterContent } from "@/shared/ui/AbsoluteSenterContent";
 
 interface CharacterCardActionsProps {
@@ -24,7 +23,10 @@ function getCarouselCard(item: CarouselCharacter) {
         characterClass, 
         characterLevel, 
         characterImageBase64,
-        id
+        id,
+        canBeUpdated,
+        isDead,
+        isInParty
     } = item;
 
     const characterInfo = {
@@ -39,7 +41,16 @@ function getCarouselCard(item: CarouselCharacter) {
         <CharacterCard 
             key={id}
             characterInfo={characterInfo} 
-            cardActions={<CharacterCardActions chracterId={id} characterDisplay={`'${characterName}' (${characterRace})`}/>}
+            imageOverlayChildren={<CarouselCardOverlay 
+                showDeadIcon={isDead} 
+                showInPartyLabel={isInParty} 
+                showCanUpdateIcon={canBeUpdated}/>
+            }
+            cardActions={<CharacterCardActions 
+                chracterId={id} 
+                characterDisplay={`'${characterName}' (${characterRace})`
+                }
+            />}
         />
     </Box>
 } 
