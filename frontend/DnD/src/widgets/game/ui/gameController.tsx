@@ -16,11 +16,6 @@ export default function GameController() {
 
     const items = state.gameInfo.partyCharacters;
 
-
-    const openMyCharacterInvetory = () => {
-
-    };
-
     const navigateCarouselToMyCharacter = () => {
 
     };
@@ -59,7 +54,6 @@ export default function GameController() {
         </Carousel>
         <BottomControlBar 
             findMyCharacter={navigateCarouselToMyCharacter} 
-            openInventory={openMyCharacterInvetory}
         />
     </>
 }

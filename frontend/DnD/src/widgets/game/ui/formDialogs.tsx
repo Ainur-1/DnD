@@ -2,11 +2,13 @@ import useGameReducer from "@/features/game";
 import { damageCharacter, updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
-import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, TextField, Typography } from "@mui/material";
+import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, List, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import SuggesItemForm from "./SuggesItemForm";
 import { FormField } from "@/shared/types/IFormField";
 import { isDecimal } from "@/shared/utils/isDecimal";
+import { useInventoryItemsQuery } from "@/features/inventory";
+import { InventoryItemCard } from "@/entities/item";
 
 interface DialogProps {
     showForm: boolean,
@@ -396,6 +398,48 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
                         Лечить
                     </Button>
                 </FormBox>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+interface ShowInventoryDialogProps extends DialogProps {
+    characterId: string
+}
+
+export function ShowInventoryDialog({characterId, showForm}: ShowInventoryDialogProps) {
+    const { data, isLoading, isSuccess } = useInventoryItemsQuery({
+        characterId
+    });
+
+    return (
+        <Dialog 
+            open={showForm}
+            maxWidth="xs"
+            fullWidth={true}
+        >
+            <DialogTitle>
+                Инвентарь
+            </DialogTitle>
+            <DialogContent>
+                <Paper style={{overflow: 'auto'}}>
+                    { isLoading && <Skeleton animation="wave" variant="rounded" width="auto" height="100%"/>}
+                    {
+                        isSuccess &&
+                        <List>
+                            {data.items
+                                .map(item => <ListItem key={item.id}>
+                                <InventoryItemCard 
+                                    title={item.item.name} 
+                                    iconUrl={item.item.iconUrl} 
+                                    count={item.count} 
+                                    cardHeight={64} />
+                                Здесь кнопки действия
+                            </ListItem>
+                            )}
+                        </List>
+                    }
+                </Paper>
             </DialogContent>
         </Dialog>
     )

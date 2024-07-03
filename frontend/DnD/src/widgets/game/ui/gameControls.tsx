@@ -4,28 +4,29 @@ import SavingThrowsDisplay from "./savingThrowsDisplay";
 import EquippedItemsList from "./equippedItemsList";
 import useGameReducer from "@/features/game";
 import { DeathSaves } from "@/entities/character/model/types";
-import { StartFightFormDialog } from "./formDialogs";
+import { ShowInventoryDialog, StartFightFormDialog } from "./formDialogs";
 import { useState } from "react";
 import { updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 
 interface UserControlBarProps {
     findMeButtonInfo: ButtonProps
-    ineventoryButtonInfo: ButtonProps
 }
 
 const controlMinHeight = 300;
 
-function UserControlBar({findMeButtonInfo, ineventoryButtonInfo}: UserControlBarProps) {
+function UserControlBar({findMeButtonInfo}: UserControlBarProps) {
     const { state } = useGameReducer();
     const characterId = state!.gameInfo.userCharacterId;
+    const [isInventoryOpen, setIsInventoryOpen] = useState(false);
 
-    return <Grid container height={controlMinHeight} spacing={2}>
-            <Grid item xs={4}>
+    return <>
+        <Grid container height={controlMinHeight} spacing={2}>
+                <Grid item xs={4}>
                 <Stack spacing={1} paddingTop={2}>
                     <Button variant="contained" onClick={findMeButtonInfo.onClick} size="small" fullWidth>
                         Найти меня
                     </Button> 
-                    <Button variant="contained" onClick={ineventoryButtonInfo.onClick} size="large" fullWidth>
+                    <Button variant="contained" onClick={() => setIsInventoryOpen(true)} size="large" fullWidth>
                         Инвентарь
                     </Button> 
                 </Stack>
@@ -36,6 +37,8 @@ function UserControlBar({findMeButtonInfo, ineventoryButtonInfo}: UserControlBar
                 </Box>
             </Grid>
         </Grid>
+        <ShowInventoryDialog showForm={isInventoryOpen} characterId={characterId} closeDialog={() => setIsInventoryOpen(false)} />
+    </>
 }
 
 interface DyingUserControlBar {
@@ -144,10 +147,9 @@ function GameMasterControlBar({}: GameMasterControlBarProps) {
 
 interface ControlBarProps {
     findMyCharacter: () => void,
-    openInventory: () => void,
 }
 
-export default function BottomControlBar({findMyCharacter, openInventory}: ControlBarProps) {
+export default function BottomControlBar({findMyCharacter}: ControlBarProps) {
     const { state } = useGameReducer();
 
     const isGameMaster = state!.isUserGameMaster;
@@ -161,9 +163,8 @@ export default function BottomControlBar({findMyCharacter, openInventory}: Contr
             {userCharacter && !userCharacter.mainStats.isDead && !game.deathSaves && 
             <UserControlBar findMeButtonInfo={{
                 onClick: findMyCharacter,
-            }} ineventoryButtonInfo={{
-                onClick: openInventory
-            }} />}
+            }}
+            />}
         </>}
     </>
 }
