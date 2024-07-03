@@ -1,4 +1,6 @@
+import CenterContent from "@/shared/ui/CenterContent";
 import ChangePageTitle from "@/shared/ui/changePageTitle";
+import ErrorWithRetryButton from "@/shared/ui/ErrorWithRetryButton";
 import { GameController, GameLoader } from "@/widgets/game";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import { useState } from "react";
@@ -26,30 +28,12 @@ export default function LiveGameSessionPage() {
 
    return <>
       <ChangePageTitle title="Отряд"/>
-      <Container>
-         <Box
-           sx={{
-             display: 'flex',
-             flexDirection: 'column',
-             alignItems: 'center',
-             justifyContent: 'center',
-             minHeight: '100vh',
-           }}
-         >
-            {!isLoaded && <GameLoader onFailure={onFailure} onLoaded={onSuccess} partyId={partyId} />}
-            {isLoaded && <>
-               {!failure && <GameController/>}
-               {failure && <Stack sx={{alignItems:"center", justifyContent:"center"}}>
-                     <Typography margin="dense">
-                        Ошибка
-                     </Typography>
-                     <Button onClick={reset}>
-                        Попробовать еще раз
-                     </Button>
-                  </Stack>
-               }
-            </>} 
-         </Box>
-      </Container>
+      <CenterContent>
+         {!isLoaded && <GameLoader onFailure={onFailure} onLoaded={onSuccess} partyId={partyId} />}
+         {isLoaded && <>
+            {!failure && <GameController/>}
+            {failure && <ErrorWithRetryButton errorText="Ошибка" retryButtonText="Загрузить еще раз" onRetryClicked={reset}/>}
+         </>} 
+      </CenterContent>
    </>
 }

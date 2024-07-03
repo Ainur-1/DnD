@@ -1,4 +1,4 @@
-import { Box, IconButton, Paper, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import React, { ReactNode } from "react";
 import CommunityCarousel from 'react-material-ui-carousel'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
@@ -11,6 +11,7 @@ interface CarouselProps<T> {
 
 export default function Carousel<T>({items, constructNode}: CarouselProps<T>) {
     const [activeStep, setActiveStep] = React.useState<number>(0);
+    const theme = useTheme();
 
     return <Box>
         <Typography variant="h6" gutterBottom sx={{textAlign: 'center'}}>  
@@ -22,32 +23,35 @@ export default function Carousel<T>({items, constructNode}: CarouselProps<T>) {
                 paddingBottom:1
             }}
             index={activeStep}
+            navButtonsProps={{
+                style: {
+                    backgroundColor: 'transparent',
+                    borderRadius: 0,
+                    color: theme.palette.secondary.main
+                }
+                
+            }}
+            navButtonsWrapperProps={{
+                style: {
+                    marginLeft: -20,
+                    marginRight: -20,
+                }
+            }}
             navButtonsAlwaysVisible
+            autoPlay={false}
             cycleNavigation={false}
             swipe={true}
             indicators={false}
             fullHeightHover={true}
+            NextIcon={<ArrowRightIcon />}
+            PrevIcon={<ArrowLeftIcon />}
             indicatorContainerProps={{
                 style: {
                 marginTop: '10px',
                 },
             }}
             onChange={(now, _) => setActiveStep(now ?? 0)}
-            NavButton={({ onClick, className, style, next, prev }) => (
-                <IconButton
-                  onClick={onClick}
-                  className={className}
-                  style={{
-                    ...style,
-                    backgroundColor: 'transparent',
-                    margin: '0 20px',
-                    color: 'black',
-                  }}
-                >
-                  {next && <ArrowRightIcon color="primary"/>}
-                  {prev && <ArrowLeftIcon color="primary"/>}
-                </IconButton>
-              )}
+
         >
             {items.map((item, index) => constructNode(item, index))}
         </CommunityCarousel>

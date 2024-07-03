@@ -1,4 +1,5 @@
 import { BaseCharacterStats, DeathSaves, DynamicStats, FullAbility, FullPersonality, SkillModifiers } from "@/entities/character/model/types";
+import { WithId } from "@/shared/types/domainTypes";
 import { HubConnection } from "@microsoft/signalr"
 
 export type GameState = {
@@ -22,7 +23,6 @@ export type GameCharacter = {
     mainStats: DynamicStats,
     otherStats: FullAbility & SkillModifiers & BaseCharacterStats,
     personality: FullPersonality,
-    id: string
-}
+} & WithId<string>
 
 export type GameStateOrNull = GameState | null;
