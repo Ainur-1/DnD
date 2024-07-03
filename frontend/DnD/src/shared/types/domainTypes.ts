@@ -19,3 +19,7 @@ export enum Dice {
     twoD6 = "2d6",
     twoD10 = "2d10"
 }
+
+export type WithId<T> = {
+    id: T
+}
