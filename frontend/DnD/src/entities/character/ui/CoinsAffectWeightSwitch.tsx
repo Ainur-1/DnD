@@ -8,6 +8,6 @@ interface CoinsAffectWeightSwitchProps {
 const CoinsAffectWeightSwitch = ({ value, onChange }: CoinsAffectWeightSwitchProps) => <SwitchWithLabelAtStart 
     value={value}
     onChange={onChange}
-    label="Учитывать вес монет"  />
+    label="Учитывать вес монет" />
 
 export default CoinsAffectWeightSwitch;

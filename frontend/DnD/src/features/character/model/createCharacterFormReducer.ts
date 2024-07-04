@@ -1,26 +1,15 @@
 import { FormField } from "@/shared/types/IFormField";
 import { useReducer } from "react";
 
-type CreateCharacterState = {
+export type Steps = 1 | 2;
+
+type Step1State = {
     name: FormField<string>;
     isPublic: FormField<boolean>;
     coinsAffectWeight: FormField<boolean>;
-};
+}
 
-export type CreateCharacterFormState = {
-    step: number;
-} & CreateCharacterState;
-
-export type Steps = 1;
-
-export type StateKeys = keyof CreateCharacterState;
-
-export type Action =
-  | { type: 'SetStep', step: Steps }
-  | { type: 'SetField', fieldName: StateKeys, value: any, error?: string };
-
-export const initialState: CreateCharacterFormState = {
-    step: 1,
+const setp1Init = {
     name: {
         value: undefined,
         error: null
@@ -30,10 +19,28 @@ export const initialState: CreateCharacterFormState = {
         error: null
     },
     coinsAffectWeight: {
-        value: true,
+        value: false,
         error: null
     }
 };
+
+type CreateCharacterState = Step1State;
+
+export type CreateCharacterFormState = {
+    step: Steps;
+} & CreateCharacterState;
+
+export const initialState: CreateCharacterFormState = {
+    step: 1,
+    ...setp1Init,
+};
+
+export type StateKeys = keyof CreateCharacterState;
+
+export type Action =
+  | { type: 'SetStep', step: Steps }
+  | { type: 'SetField', fieldName: StateKeys, value: any, error?: string };
+
 
 export function reducer(state: CreateCharacterFormState, action: Action): CreateCharacterFormState {
   switch (action.type) {
@@ -52,6 +59,12 @@ export function reducer(state: CreateCharacterFormState, action: Action): Create
   }
 }
 
+function isValidStep1(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
+
+    return true;
+}
+
+
 export function useCreateCharacterReducer() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -69,5 +82,8 @@ export function useCreateCharacterReducer() {
                 type: "SetStep",
                 step
             }),
+        isValidStep1: () => isValidStep1(state, dispatch),
     }
 }
+
+

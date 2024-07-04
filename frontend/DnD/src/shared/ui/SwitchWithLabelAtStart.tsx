@@ -8,9 +8,8 @@ interface SwitchWithLabelAtStartProps {
 
 const SwitchWithLabelAtStart = ({ value, label, onChange }: SwitchWithLabelAtStartProps) => 
 <FormControlLabel
-    required
     control={<Switch 
-        value={value}
+        checked={value}
         onChange={(e) => onChange(e.target.checked)}
     />}
     label={label}
