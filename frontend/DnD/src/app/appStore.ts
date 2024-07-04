@@ -4,6 +4,7 @@ import { authApi } from "@/features/auth/api/api";
 import { inventoryApi } from "@/features/inventory/api/api";
 import { partyApi } from "@/features/party/api/api";
 import { characterApi } from "@/features/character/api/api";
+import { raceApi } from "@/features/races/api/api";
 
 const store = configureStore({
     reducer: rootReducer,
@@ -12,7 +13,8 @@ const store = configureStore({
         .concat(authApi.middleware)
         .concat(inventoryApi.middleware)
         .concat(partyApi.middleware)
-        .concat(characterApi.middleware),
+        .concat(characterApi.middleware)
+        .concat(raceApi.middleware),
 });
 
 export default store;
