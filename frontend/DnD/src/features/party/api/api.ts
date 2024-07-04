@@ -1,10 +1,11 @@
 import { BASE_URL } from "@/shared/configuration/enviromentConstants";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { MyPartiesQueryResult, PartyQueryResult, StrictPartyQueryResult } from "./apiVariables";
+import { CreatePartyResult, CreatePartyVariables, JoinPartyResult, JoinPartyVariables, MyPartiesQueryResult, PartyQueryResult, StrictPartyQueryResult } from "./apiVariables";
 
 export const partyApi = createApi({
     reducerPath: 'party/api',
     baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    tagTypes: ["MyParties"],
     endpoints: (build) => ({
         strictParty: build.query<StrictPartyQueryResult, string>({
             query: (body) => ({
@@ -19,14 +20,38 @@ export const partyApi = createApi({
                 method: "POST",
             }),
         }),
-        myParties: build.query<MyPartiesQueryResult, void>({
+        myParties: build.query<PartyQueryResult[], void>({
             query: (body) => ({
                 url: "my party query",
                 method: "POST",
                 body
             }),
+            providesTags: ["MyParties"]
+        }),
+
+        joinParty: build.mutation<JoinPartyResult, JoinPartyVariables>({
+            query: (body) => ({
+                url: "join party",
+                method: "POST",
+                body
+            }),
+            invalidatesTags: ["MyParties"]
+        }),
+        createParty: build.mutation<CreatePartyResult, CreatePartyVariables>({
+            query: (body) => ({
+                url: "join party",
+                method: "POST",
+                body
+            }),
+            invalidatesTags: ["MyParties"]
         }),
     })
 });
 
-export const { useStrictPartyQuery, useMyPartiesQuery, usePartyQuery, useLazyPartyQuery } = partyApi;
+export const { useStrictPartyQuery, 
+    useMyPartiesQuery, 
+    usePartyQuery, 
+    useLazyPartyQuery, 
+    useJoinPartyMutation,
+    useCreatePartyMutation,
+} = partyApi;
