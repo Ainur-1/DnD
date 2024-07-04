@@ -1,6 +1,6 @@
-import { useDeleteMyCharacterMutation } from "@/features/character";
 import { Button, ButtonProps, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material"
 import { useState } from "react"
+import { useDeleteMyCharacterMutation } from "../api/api";
 
 interface DeleteCharacterButtonProps extends ButtonProps {
     characterDisplayName: string;
