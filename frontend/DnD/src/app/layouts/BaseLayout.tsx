@@ -5,7 +5,7 @@ import "./baseCss.module.css";
 import { AppBar } from "@/widgets/navbar";
 import LiveGameSessionPage from "@/pages/game";
 import { MyCharactersPage } from "@/pages/characters";
-import UncompletedSessionsPage from "@/pages/uncompletedSessions/ui/UncompletedSessionsPage";
+import { PartiesPage } from "@/pages/parties";
 
 function BaseLayout() {
     return (
@@ -15,7 +15,7 @@ function BaseLayout() {
             <Route path="/sign-in" element={<SignInPage/>}/>
             <Route path="/sign-up" element={<SignUpPage/>}/>
             <Route path="/my-characters" element={<MyCharactersPage/>} />
-            <Route path="/parties/active" element={<UncompletedSessionsPage/>} />
+            <Route path="/my-parties" element={<PartiesPage/>} />
             <Route /*element={<PrivateRoute/>}*/>
               <Route path="/game/:partyId" element={<LiveGameSessionPage/>} />
             </Route>

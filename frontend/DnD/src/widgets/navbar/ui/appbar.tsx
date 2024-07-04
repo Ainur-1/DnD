@@ -44,6 +44,6 @@ export default function AppBar() {
   const { state } = useAuthReducer(); 
 
   return <Box sx={{ flexGrow: 1 }}>
-      {state.isAuthenticated && <AppBarWithDrawer/>}
+      {!state.isAuthenticated && <AppBarWithDrawer/>}
     </Box>
 }
