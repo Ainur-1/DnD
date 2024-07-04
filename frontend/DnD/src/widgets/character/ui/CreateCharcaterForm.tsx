@@ -1,8 +1,8 @@
 import { Box, FormControl, FormGroup, Stack, TextField } from "@mui/material";
-import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
 import { CharacterIsPublicSwitch, CoinsAffectWeightSwitch } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 import { useState } from "react";
+import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
 
 interface StepProps {
     state: CreateCharacterFormState,

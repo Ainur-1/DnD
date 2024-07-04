@@ -114,5 +114,3 @@ export type HitDices = {
     hitDice: string,
     hitDiceLeft: number,
 }
-
-

@@ -7,7 +7,7 @@ type Step1State = {
     name: FormField<string>;
     isPublic: FormField<boolean>;
     coinsAffectWeight: FormField<boolean>;
-}
+};
 
 const setp1Init = {
     name: {
@@ -24,7 +24,11 @@ const setp1Init = {
     }
 };
 
-type CreateCharacterState = Step1State;
+
+type Step2State = {
+};
+
+type CreateCharacterState = Step1State & Step2State;
 
 export type CreateCharacterFormState = {
     step: Steps;

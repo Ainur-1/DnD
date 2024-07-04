@@ -1,5 +1,5 @@
-import { CreateCharcaterForm } from "@/features/character";
 import ChangePageTitle from "@/shared/ui/changePageTitle";
+import { CreateCharcaterForm } from "@/widgets/character";
 
 export default function CreateCharacterPage() {
     return <>
