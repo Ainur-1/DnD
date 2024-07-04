@@ -1,6 +1,7 @@
 export interface StrictPartyQueryResult {
     partyCharactersIds: string[],
     code: string,
+    id: string
 }
 
 export interface PartyQueryResult extends StrictPartyQueryResult {
@@ -9,5 +10,5 @@ export interface PartyQueryResult extends StrictPartyQueryResult {
 }
 
 export interface MyPartiesQueryResult {
-    
+    parties: PartyQueryResult[]
 }

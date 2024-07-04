@@ -19,7 +19,7 @@ export const partyApi = createApi({
                 method: "POST",
             }),
         }),
-        myParties: build.query<MyPartiesQueryResult, void>({
+        myParties: build.query<PartyQueryResult[], void>({
             query: (body) => ({
                 url: "my party query",
                 method: "POST",

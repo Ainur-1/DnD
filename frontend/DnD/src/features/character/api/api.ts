@@ -8,6 +8,7 @@ export const characterApi = createApi({
     baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
     tagTypes: ["MyCharactersList"],
     endpoints: (build) => ({
+        /* recieve character info */
         deathSaves: build.query<DeathSavesResult, string>({
             query: (body) => ({
                 url: "character deathsaves",
@@ -16,6 +17,16 @@ export const characterApi = createApi({
             }),
             //todo: провайд тегов
         }),
+        onlyCharacterName:  build.query<string, string>({
+            query: (body) => ({
+                url: "character name",
+                method: "POST",
+                body
+            }),
+            //todo: провайд тегов
+        }),
+
+        /* mutations */
         myCharacters: build.query<CarouselCharacter[], void>({
             query: () => ({
                 url: "my characters list",
@@ -33,4 +44,10 @@ export const characterApi = createApi({
     })
 });
 
-export const { useDeathSavesQuery, useLazyDeathSavesQuery, useMyCharactersQuery, useDeleteMyCharacterMutation } = characterApi;
+export const { useDeathSavesQuery, 
+    useLazyDeathSavesQuery, 
+    useMyCharactersQuery, 
+    useDeleteMyCharacterMutation,
+    useOnlyCharacterNameQuery,
+    useLazyOnlyCharacterNameQuery
+} = characterApi;

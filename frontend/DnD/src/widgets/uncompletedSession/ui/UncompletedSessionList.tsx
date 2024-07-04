@@ -1,30 +1,48 @@
-import { List, ListItem } from "@mui/material";
+import { List, ListItem, Typography } from "@mui/material";
 import UncompletedSessionCard, { UncompletedSessionCardSkeletone } from "./UncompletedSessionCard";
+import { useMyPartiesQuery } from "@/features/party";
+import { AbsoluteCenterContent } from "@/shared/ui/AbsoluteSenterContent";
+import ErrorWithRetryButton from "@/shared/ui/ErrorWithRetryButton";
+
+function getArrayForSkeletone() {
+    const array = [];
+    const empty = {};
+    for (let i = 0; i < 10; i++){
+        array.push(empty);
+    }
+
+    return array;
+}
 
 interface UncompletedSessionCardListProps {
 }
 
 export default function UncompletedSessionList({}: UncompletedSessionCardListProps) {
+    const { data, isFetching, isError, isSuccess } = useMyPartiesQuery();
 
-    //todo: get parties
-    const length = 12;
-    const data = [{ code: "Q123Uty", partyId: "dsgdfgddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dsgdfgddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dsgdgddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dsfgddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dfgddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dsgdf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dfgd33df", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "d4343ddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "ds56655gddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "ds565gddf", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dsgd56565", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-        { code: "Q123Uty", partyId: "dsgd565656df", isUserPartyCreator: true, maybeChracaterName: "Персонвж" },
-    ];
-
-    return <List>
-        {data.map(x => <ListItem key={x.partyId}>
-            <UncompletedSessionCardSkeletone />
-        </ListItem>)}
-    </List>
+    return <>
+        { isError && <AbsoluteCenterContent>
+                <ErrorWithRetryButton />
+            </AbsoluteCenterContent>
+        }
+        { !isError && 
+            <List>
+                {isFetching && getArrayForSkeletone()
+                    .map((_, index) => <ListItem key={index}><UncompletedSessionCardSkeletone/></ListItem>)
+                }
+                {
+                    isSuccess && <>
+                        {
+                            (!data || data.length == 0) && <Typography>У Вас нет начатых игр.</Typography>
+                        }
+                        {
+                            data && data.length > 0 && data.map(x => <ListItem>
+                                <UncompletedSessionCard code={x.code} partyId={x.id} isUserPartyCreator={x.isUserGameMaster} mayBeInGameCharacterId={x.userCharacterId} />
+                            </ListItem>)
+                        }
+                    </>
+                }
+            </List>
+        }
+    </>
 }
