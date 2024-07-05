@@ -1,4 +1,4 @@
-import { WithId } from "@/shared/types/domainTypes";
+import { NamePlusDescription, WithId } from "@/shared/types/domainTypes";
 
 export type RaceIdType = string;
 
@@ -20,3 +20,7 @@ export type RaceInfo = {
 export type Race = {
     subrace?: string;
 } & SimpleRace
+
+export type RaceTrait = {
+    options?: string[]
+} & NamePlusDescription;
