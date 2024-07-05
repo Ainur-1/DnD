@@ -37,10 +37,10 @@ export function SignUpForm({ afterSuccessfulSignUp }: SignUpFormProps) {
       
       const nameValue = state.name.value.trim();
       await signUp({
-          email: state.email.value.trim(),
+          email: state.email.value!.trim(),
           name: nameValue === '' ? null : nameValue,
-          password: state.password.value.trim(),
-          username: state.username.value.trim()
+          password: state.password.value!.trim(),
+          username: state.username.value!.trim()
       });
 
       if (isError) {

@@ -2,7 +2,7 @@ import useGameReducer from "@/features/game";
 import { damageCharacter, updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
-import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, List, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
+import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import SuggesItemForm from "./SuggesItemForm";
 import { FormField } from "@/shared/types/IFormField";

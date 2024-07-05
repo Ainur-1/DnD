@@ -38,6 +38,7 @@ export const characterApi = createApi({
             query: (characterId) => ({
                 url: "deleteCharacter",
                 method: "POST",
+                characterId
             }),
             invalidatesTags: ["MyCharactersList"]
         }),

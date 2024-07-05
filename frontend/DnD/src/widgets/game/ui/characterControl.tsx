@@ -99,7 +99,7 @@ function ControlBar({characterId, showHealCharacterDialog, showDamageCharacterDi
         return <></>
     }
     const isGameMaster = state.isUserGameMaster;
-    const userCharacterDead: boolean | undefined = findCharacterById(state.gameInfo.userCharacterId)?.mainStats.isDead;
+    const userCharacterDead: boolean | undefined = findCharacterById(state.gameInfo.userCharacterId!)?.mainStats.isDead;
 
     function findCharacterById(id: string) {
         return state?.gameInfo.partyCharacters.find(x => x.id == id);

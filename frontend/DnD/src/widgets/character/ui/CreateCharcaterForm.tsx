@@ -6,7 +6,6 @@ import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer }
 import { StringSelector } from "@/shared/ui/GenericSelector";
 import { useLazyRaceInfoQuery, useStrictRacesQuery } from "@/features/races";
 import { RaceInfo, SimpleRace } from "@/entities/races/model/type";
-import { error } from "console";
 import { useStrictClassesQuery } from "@/features/classes/api/api";
 import { SimpleClass } from "@/entities/classes";
 

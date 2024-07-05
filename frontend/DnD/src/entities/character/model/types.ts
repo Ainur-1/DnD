@@ -86,12 +86,6 @@ export type BaseCharacterStats = {
     proficiencyBonus: number,
 }
 
-type DynamicHp = {
-    hp: number,
-    tempHp: number,
-
-}
-
 export type ProficiencyAndInitiative = {
     initiativeModifier: number,
     proficiencyBonus: number,

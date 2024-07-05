@@ -2,7 +2,6 @@ import CenterContent from "@/shared/ui/CenterContent";
 import ChangePageTitle from "@/shared/ui/changePageTitle";
 import ErrorWithRetryButton from "@/shared/ui/ErrorWithRetryButton";
 import { GameController, GameLoader } from "@/widgets/game";
-import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 

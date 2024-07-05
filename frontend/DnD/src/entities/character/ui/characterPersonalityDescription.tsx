@@ -1,9 +1,9 @@
 import { Divider, Grid, Stack, Typography } from "@mui/material";
-import { CharacterPersonalityAdditions } from "../model/types";
 import TraitDescription, { TraitMultilineDescription } from "@/shared/ui/TraitDescription";
 import { ReactChildrenProps } from "@/shared/types/reactChildrenProps";
 import { ClassFeature, RaceTrait } from "@/shared/types/domainTypes";
 import AccordionList from "@/shared/ui/AccordionList";
+import { PersonalityAdditions } from "../model/types";
 
 const GridContainer = ({children}: ReactChildrenProps) => <Grid container spacing={2}>{children}</Grid>
 
@@ -77,8 +77,7 @@ function LoreGrid({alignment, bonds, flaws, background}: LoreGridProps) {
 }
 
 interface CharacterPersonalityDescriptionProps {
-    personality: CharacterPersonalityAdditions
-
+    personality: PersonalityAdditions
 }
 
 export default function CharacterPersonalityDescription({

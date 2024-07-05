@@ -20,10 +20,14 @@ export default function GameController() {
 
     };
 
+    const showCharacterInfo = (charcterId: string) => {
+        
+    } 
+
     function constructCharacterCard(character: GameCharacter, _: number) {
 
         const {
-            currentHp, 
+            hp,
             tempHp, 
             armorClass, 
             initiativeModifier, 
@@ -32,7 +36,7 @@ export default function GameController() {
         } = character.mainStats;
 
         const Overlay = () => <InGameLiveOverlay 
-            hp={currentHp} 
+            hp={hp} 
             tempHp={tempHp} 
             armor={armorClass} 
             initiativeBonus={initiativeModifier} 

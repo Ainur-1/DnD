@@ -1,4 +1,4 @@
-import { Box, Rating, Stack, styled, Typography, useTheme } from "@mui/material";
+import { Rating, Stack, styled, Typography, useTheme } from "@mui/material";
 import DoneIcon from '@mui/icons-material/Done';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 

@@ -1,4 +1,4 @@
-import { ArmorType, Item, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "../model/types";
+import { ArmorType, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "../model/types";
 import { ReactNode, useContext, useState,  createContext, useReducer, Dispatch, useEffect } from "react";
 import { Divider, FormControl, FormControlLabel, FormGroup, Grid, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
 import { tryParseNumber } from "@/shared/utils/parsers";
@@ -662,7 +662,6 @@ interface ItemFormProps {
     chracterId: string,
 }
 export default function ItemForm({}: ItemFormProps) {
-    const [item, setItem] = useState<Item | null>();
     const [count, setCount] = useState(1);
     const [countError, setCountError] = useState("");
     const [itemInUse, setItemInUse] = useState(false);
@@ -705,6 +704,5 @@ export default function ItemForm({}: ItemFormProps) {
             <FormControlLabel control={<Switch value={itemInUse} onChange={() => setItemInUse(x => !x)} />} label="Сразу экипировать" labelPlacement="start" />
             <FormControlLabel control={<Switch value={itemProficiency} onChange={() => setItemProficiencyOn(x => !x)} />} label="Владение предметом" labelPlacement="start" />
         </FormGroup>
-
     </FormBox>
 }

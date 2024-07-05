@@ -85,3 +85,12 @@ export type InventoryItem = {
 export type ExpandedInventoryItem = InventoryItem & {
     item: Item,
 }
+
+export type InventoryWallet = {
+    goldCoins: number;
+    copperCoins: number;
+    platinumCoins: number;
+    silverCoins: number;
+    electrumCoins: number;
+    totalInGoldCoins: number;
+}

@@ -8,7 +8,7 @@ const fullyUndefined = {
     error: null
 };
 
-export type Steps = 1 | 2;
+export type Steps = 1 | 2 | 3;
 
 type Step1State = {
     name: FormField<string>;

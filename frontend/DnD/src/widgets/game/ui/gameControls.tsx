@@ -33,11 +33,11 @@ function UserControlBar({findMeButtonInfo}: UserControlBarProps) {
             </Grid>
             <Grid item xs={8}>
                 <Box height="100%">
-                    <EquippedItemsList characterId={characterId}/>
+                    <EquippedItemsList characterId={characterId!}/>
                 </Box>
             </Grid>
         </Grid>
-        <ShowInventoryDialog showForm={isInventoryOpen} characterId={characterId} closeDialog={() => setIsInventoryOpen(false)} />
+        <ShowInventoryDialog showForm={isInventoryOpen} characterId={characterId!} closeDialog={() => setIsInventoryOpen(false)} />
     </>
 }
 
