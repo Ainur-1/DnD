@@ -1,18 +1,26 @@
 import CharacterAbilities from "./ui/CharacterAbilities";
 import CharacterCard, { CharacterCardSkeletone } from "./ui/characterCard";
-import { CarouselCardOverlay, InGameLiveOverlay } from "./ui/characterCardTopOverlays";
+import { CarouselCardOverlay, InGameLiveOverlay, LoadImageOverlay } from "./ui/characterCardTopOverlays";
+import { CharacterImage, CharacterImageSkeleton } from "./ui/CharacterImage";
 import CharacterIsPublicSwitch from "./ui/CharacterIsPublicSwitch";
 import CharacterXpField from "./ui/CharacterXpField";
 import CharacterNameField from "./ui/ChracterName";
 import CoinsAffectWeightSwitch from "./ui/CoinsAffectWeightSwitch";
 
-export { CharacterCard, 
+
+export {
     CarouselCardOverlay, 
     InGameLiveOverlay, 
+    LoadImageOverlay,
+};
+
+export { CharacterCard, 
     CharacterCardSkeletone,
     CharacterIsPublicSwitch,
     CoinsAffectWeightSwitch,
     CharacterNameField,
     CharacterAbilities,
-    CharacterXpField
+    CharacterXpField,
+    CharacterImageSkeleton,
+    CharacterImage
  };

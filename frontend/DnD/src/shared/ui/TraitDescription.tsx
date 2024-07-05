@@ -1,4 +1,5 @@
-import { Stack, TextField, Typography } from "@mui/material"
+import CharacterBackgroundField from "@/entities/character/ui/CharacterBackgroundField";
+import { Stack, Typography } from "@mui/material"
 import Grid from "@mui/material/Grid";
 
 interface TraitDescriptionPropsBase {
@@ -36,11 +37,6 @@ export function TraitMultilineDescription({title, descriptions}: TraitDescriptio
     const result = typeof descriptions === 'string' ? descriptions : descriptions.join("; ");
     return <Stack>
         <GridTitle title={title}/>
-        <TextField
-            disabled={true}
-            value={result}
-            variant="filled"
-            multiline
-        />
+        <CharacterBackgroundField disabled={true} value={result} />
     </Stack>
 }

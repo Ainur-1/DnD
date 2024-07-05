@@ -139,3 +139,23 @@ export function CarouselCardOverlay({showDeadIcon, showInPartyLabel, showCanUpda
         </Box>
     </>
 }
+
+interface LoadImageOverlayProps {
+
+}
+
+export function LoadImageOverlay({}: LoadImageOverlayProps) {
+    return <CardActionArea 
+    sx={{
+        display: "flex",
+        height: "100%",
+        alignItems: "center",
+        flexDirection: "column",
+        justifyContent: "center"
+    }}>
+        <Box sx={{
+            display: "flex",
+        }}>
+        </Box>
+    </CardActionArea>
+}

@@ -1,6 +1,7 @@
-import { SimpleClass, ClassIdType } from "./model/types";
+import { SimpleClass, ClassIdType, ClassInfo } from "./model/types";
 
 export type { 
     SimpleClass,
-    ClassIdType
+    ClassIdType,
+    ClassInfo,
  };

@@ -1,8 +1,9 @@
-import { CardActions, useTheme } from "@mui/material";
-import { Box, Card, CardContent } from "@mui/material";
-import ShortCharacterInfo, { CharacterImage, CharacterImageSkeleton, ImageOverlay, ShortCharacterInfoSkeleton } from "./characterCardTop";
+import { CardActions } from "@mui/material";
+import { Card, CardContent } from "@mui/material";
+import ShortCharacterInfo, { ShortCharacterInfoSkeleton } from "./characterCardTop";
 import { ReactNode } from "react";
 import { Personality } from "../model/types";
+import { CharacterImage, CharacterImageSkeleton } from "./CharacterImage";
 
 interface CardWrapperProps {
     cardImage: ReactNode,
@@ -11,19 +12,9 @@ interface CardWrapperProps {
 };
 
 function CardWrapper({cardImage, cardContent, cardActions}: CardWrapperProps) {
-    const theme = useTheme();
 
     return <Card sx={{ width: 345 }}>
-        <Box sx={{
-            height: 150,
-            backgroundColor: theme.palette.grey.A200,
-            display: 'flex',
-            position: "relative",
-            justifyContent: 'center',
-            alignItems: 'center',
-        }}>
-            {cardImage}
-        </Box>
+        {cardImage}
         <CardContent>
             {cardContent}
         </CardContent>
@@ -53,10 +44,7 @@ export default function CharacterCard({cardActions, characterInfo, imageOverlayC
     } = characterInfo;
 
     return <CardWrapper 
-        cardImage={<>
-                <CharacterImage base64Image={characterImageBase64} />
-                {imageOverlayChildren && <ImageOverlay>{imageOverlayChildren}</ImageOverlay>}
-            </>}
+        cardImage={<CharacterImage base64Image={characterImageBase64} imageOverlayChildren={imageOverlayChildren}/>}
         cardContent={<ShortCharacterInfo 
             className={characterClass} 
             level={characterLevel.toString()} 

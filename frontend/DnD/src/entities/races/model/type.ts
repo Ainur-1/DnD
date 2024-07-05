@@ -7,14 +7,13 @@ export type SimpleRace = {
 } & WithId<RaceIdType>;
 
 export type RaceInfo = {
-    subrace: string;
     adultAge: number;
     recommendedAlignmentDescription: string;
     size: string;
     speed: number;
     languages: string[];
     subraces: string[];
-
+    raceTraits: RaceTrait[]
 } & SimpleRace;
 
 export type Race = {

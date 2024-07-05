@@ -1,5 +1,6 @@
 import { ClassIdType } from "@/entities/classes";
 import { Race } from "@/entities/races";
+import { InventoryItem } from "@/features/inventory";
 import { FormField } from "@/shared/types/IFormField";
 import { useReducer } from "react";
 
@@ -8,7 +9,7 @@ const fullyUndefined = {
     error: null
 };
 
-export type Steps = 1 | 2 | 3;
+export type Steps = 1 | 2 | 3 | 4 ;
 
 type Step1State = {
     name: FormField<string>;
@@ -30,17 +31,58 @@ const setp1Init: Step1State = {
 
 type Step2State = {
     race: FormField<Race>;
+    raceTraitsAdjustments: FormField<{
+        [name: string]: number
+    }>;
     classId: FormField<ClassIdType>;
+    skillTraitsMastery: FormField<string[]>;
     classXp: FormField<number>;
 };
 
-const setp2Init: Step2State = {
+const step2Init: Step2State = {
     race: fullyUndefined,
+    raceTraitsAdjustments: fullyUndefined,
     classId: fullyUndefined,
-    classXp: fullyUndefined
+    skillTraitsMastery: fullyUndefined,
+    classXp: fullyUndefined,
 };
 
-type CreateCharacterState = Step1State & Step2State;
+type Step3State = {
+    base64Image: FormField<string>,
+    age: FormField<number>,
+    speed: FormField<number>,
+    alignment: FormField<string>,
+    background: FormField<string>,
+    languages: FormField<string[]>,
+    flaws: FormField<string[]>,
+    bonds: FormField<string[]>,
+    otherTraits: FormField<string[]> 
+}
+
+const step3Init: Step3State = {
+    base64Image: fullyUndefined,
+    age: fullyUndefined,
+    speed: fullyUndefined,
+    alignment: fullyUndefined,
+    background: fullyUndefined,
+    languages: fullyUndefined,
+    flaws: fullyUndefined,
+    bonds: fullyUndefined,
+    otherTraits: fullyUndefined,
+};
+
+type Step4State = {
+    inventroy: FormField<InventoryItem[]>
+};
+
+const step4Init: Step4State = {
+    inventroy: {
+        value: [],
+        error: null,
+    },
+};
+
+type CreateCharacterState = Step1State & Step2State & Step3State & Step4State;
 
 export type CreateCharacterFormState = {
     step: Steps;
@@ -49,7 +91,9 @@ export type CreateCharacterFormState = {
 export const initialState: CreateCharacterFormState = {
     step: 1,
     ...setp1Init,
-    ...setp2Init
+    ...step2Init,
+    ...step3Init,
+    ...step4Init,
 };
 
 export type StateKeys = keyof CreateCharacterState;
@@ -86,6 +130,11 @@ function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<
     return true;
 }
 
+function isValidStep4(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
+
+    return true;
+}
+
 
 export function useCreateCharacterReducer() {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -106,6 +155,7 @@ export function useCreateCharacterReducer() {
             }),
         isValidStep1: () => isValidStep1(state, dispatch),
         isValidStep2: () => isValidStep2(state, dispatch),
+        isValidStep4: () => isValidStep4(state, dispatch),
     }
 }
 

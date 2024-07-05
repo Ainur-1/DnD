@@ -1,41 +1,5 @@
-import { Box, Typography, Grid, useTheme, CardMedia, Skeleton, Stack } from '@mui/material';
-import { ReactChildrenProps } from "@/shared/types/reactChildrenProps";
-import { QuestionMark } from "@mui/icons-material";
+import { Box, Typography, Grid, Skeleton, Stack } from '@mui/material';
 
-const imageHeight = 150;
-
-export const CharacterImageSkeleton = () => <Skeleton variant="rectangular" animation="wave" height={imageHeight} />
-
-interface CharacterImageProps {
-    base64Image?: string | null,
-}
-
-export function CharacterImage({base64Image}: CharacterImageProps) {
-    const theme = useTheme();
-
-    if (base64Image == null) {
-        return <QuestionMark style={{color: theme.palette.grey.A100}} />
-    }
-    
-    return <CardMedia component="img" sx={{height: imageHeight}} src={`data:image;base64,${base64Image}`}/>
-}
-
-export function ImageOverlay({children}: ReactChildrenProps) {
-    return <Box
-        sx={{
-            position: "absolute",
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: "column",
-            justifyContent: 'end',
-            alignItems: "center",
-            zIndex: 10,
-        }}
-    >
-        {children}
-    </Box>
-}
 
 interface CharacterCardTopProps {
     name: string,
