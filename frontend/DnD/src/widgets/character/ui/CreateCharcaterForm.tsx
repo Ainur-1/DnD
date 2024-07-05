@@ -1,5 +1,5 @@
-import { Box, FormControl, FormGroup, Stack, TextField } from "@mui/material";
-import { CharacterIsPublicSwitch, CoinsAffectWeightSwitch } from "@/entities/character";
+import { Box, FormControl, FormGroup, Stack } from "@mui/material";
+import { CharacterIsPublicSwitch, CharacterNameField, CoinsAffectWeightSwitch } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 import { useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
@@ -27,17 +27,10 @@ function Step1({ state, setStep, setField, isValid }: StepProps) {
 
     return <Stack paddingTop={10}>
         <Stack alignItems="center">
-            <TextField 
-                value={state.name.value} 
-                onChange={(e) => setField("name", e.target.value.trimStart())} 
-                margin="normal" 
-                required 
-                fullWidth  
-                label="Имя персонажа" 
-                type="text" 
-                autoFocus
-                error={state.name.error !== null}
-                helperText={state.name.error}
+            <CharacterNameField 
+                value={state.name.value}
+                onChange={(value) => setField("name", value)}
+                errorText={state.name.error}
             />
             <FormGroup>
                 <CoinsAffectWeightSwitch 
