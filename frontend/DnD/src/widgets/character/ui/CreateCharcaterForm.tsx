@@ -4,17 +4,12 @@ import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 import { useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
 import { StringSelector } from "@/shared/ui/GenericSelector";
-import { useLazyRaceInfoQuery, useStrictRacesQuery } from "@/features/races";
-import { RaceInfo, SimpleRace } from "@/entities/races/model/type";
 import { useStrictClassesQuery } from "@/features/classes/api/api";
 import { SimpleClass } from "@/entities/classes";
+import { RaceSelector } from "@/features/races";
+import { Race } from "@/entities/races";
+import { ClassSelector } from "@/features/classes";
 
-const mapRaceToSelect = (data: SimpleRace[]) => data.map(x => {
-    return {
-        label: x.name,
-        value: x.id
-    };
-});
 
 const mapClassToSelect = (data: SimpleClass[]) => data.map(x => {
     return {
@@ -74,56 +69,7 @@ function Step1({ state, setStep, setField, isValid }: StepProps) {
 }
 
 function Step2({ state, setStep, setField, isValid }: StepProps) {
-    const [raceInfo] = useLazyRaceInfoQuery();
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
-    const { data: strictRaces } = useStrictRacesQuery();
-    const { data: strictClasses } = useStrictClassesQuery();
-
-    const [tempRace, setTempRace] = useState<RaceInfo | undefined>();
-    const [raceDisabled, setRaceDisabled] = useState(false);
-
-    const onRaceSelect = async (id: string) => {
-        setRaceDisabled(true);
-        setTempRace(undefined);
-        try {
-            const response = await raceInfo(id);
-            if (response.isSuccess && response.data.success) {
-                const info = response.data.data;
-                if (info?.subraces) {
-                    setTempRace(info);
-                } else {
-                    const race = {
-                        id,
-                        name: info?.name,
-                    };
-                    setField("race", race);
-                }
-            } else {
-                //todo: handle errors
-                console.log("Fatal error. No connection or whatever.");
-                setTempRace(undefined);
-                setField("race", undefined, "Ошибка при загурзке.");
-            }
-        } finally {
-            setRaceDisabled(false);
-        }
-    };
-
-    const onSubraceSelect = (subrace: string) => {
-        if (!tempRace) {
-            console.log("Temp race was not loaded, but subrace was selected. How?");
-            return;
-        }
-        setField("race", {
-            id: tempRace.id,
-            name: tempRace.name,
-            subrace
-        });
-    };
-
-    const onClassSelect = (classId: string) => {
-        setField("classId", classId);
-    }
 
     const characterAbilitiesProps = {
         strength: {
@@ -166,36 +112,13 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
     return <Stack>
         <Stack alignItems="center">
             <Grid container>
-                <Grid item mx={6}>
-                    <StringSelector
-                        disabled={raceDisabled} 
-                        selectorLabel="Раса" 
-                        id="race" 
-                        values={strictRaces?.data ? [] : mapRaceToSelect(strictRaces!.data!) } 
-                        onValueChange={onRaceSelect} />
+                <Grid item xs={12}>
+                    <RaceSelector onRaceSelected={(race) => setField("race", race)} />
                 </Grid>
-                <Grid item mx={6}>
-                    { tempRace && <StringSelector 
-                            selectorLabel="Подраса" 
-                            id="subrace" 
-                            values={tempRace.subraces.map(x => {
-                                return {
-                                    label: x,
-                                    value: x
-                                };
-                            })} 
-                            onValueChange={onSubraceSelect} />
-                    }
+                <Grid item xs={6}>
+                    <ClassSelector onClassSelected={(value) => setField("classId", value)} />
                 </Grid>
-                <Grid item mx={6}>
-                    <StringSelector 
-                        selectorLabel="Класс" 
-                        id="class" 
-                        values={strictClasses?.data ? [] : mapClassToSelect(strictRaces!.data!)}  
-                        onValueChange={onClassSelect}
-                    />
-                </Grid>
-                <Grid item mx={6}>
+                <Grid item xs={6}>
                     <CharacterXpField 
                         errorText={state.classXp.error}
                         value={state.classXp.value}

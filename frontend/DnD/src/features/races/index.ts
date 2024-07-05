@@ -1,3 +1,3 @@
-import { useLazyRaceInfoQuery, useStrictRacesQuery } from "./api/api";
+import RaceSelector from "./ui/RaceSelector";
 
-export { useStrictRacesQuery, useLazyRaceInfoQuery };
+export { RaceSelector };
