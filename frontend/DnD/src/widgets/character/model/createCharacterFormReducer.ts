@@ -1,5 +1,12 @@
+import { ClassIdType } from "@/entities/classes";
+import { Race } from "@/entities/races";
 import { FormField } from "@/shared/types/IFormField";
 import { useReducer } from "react";
+
+const fullyUndefined = {
+    value: undefined,
+    error: null
+};
 
 export type Steps = 1 | 2;
 
@@ -9,11 +16,8 @@ type Step1State = {
     coinsAffectWeight: FormField<boolean>;
 };
 
-const setp1Init = {
-    name: {
-        value: undefined,
-        error: null
-    },
+const setp1Init: Step1State = {
+    name: fullyUndefined,
     isPublic: {
         value: true,
         error: null
@@ -24,8 +28,16 @@ const setp1Init = {
     }
 };
 
-
 type Step2State = {
+    race: FormField<Race>;
+    classId: FormField<ClassIdType>;
+    classXp: FormField<number>;
+};
+
+const setp2Init: Step2State = {
+    race: fullyUndefined,
+    classId: fullyUndefined,
+    classXp: fullyUndefined
 };
 
 type CreateCharacterState = Step1State & Step2State;
@@ -37,6 +49,7 @@ export type CreateCharacterFormState = {
 export const initialState: CreateCharacterFormState = {
     step: 1,
     ...setp1Init,
+    ...setp2Init
 };
 
 export type StateKeys = keyof CreateCharacterState;
@@ -68,6 +81,11 @@ function isValidStep1(state: CreateCharacterFormState, dispatch: React.Dispatch<
     return true;
 }
 
+function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
+
+    return true;
+}
+
 
 export function useCreateCharacterReducer() {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -87,6 +105,7 @@ export function useCreateCharacterReducer() {
                 step
             }),
         isValidStep1: () => isValidStep1(state, dispatch),
+        isValidStep2: () => isValidStep2(state, dispatch),
     }
 }
 

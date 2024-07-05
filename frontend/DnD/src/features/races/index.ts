@@ -1,3 +1,3 @@
-import { useRaceNamesQuery } from "./api/api";
+import { useLazyRaceInfoQuery, useStrictRacesQuery } from "./api/api";
 
-export { useRaceNamesQuery };
+export { useStrictRacesQuery, useLazyRaceInfoQuery };

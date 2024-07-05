@@ -1,9 +1,9 @@
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Dice } from "../types/domainTypes";
-import { GenericSelectorProps } from "../types/IGenericSelectorProps";
+import { SelectorProps } from "../types/IGenericSelectorProps";
 import { enumFromStringValue } from "../utils/enumFromStringParser";
 
-interface DiceSelectorProps extends GenericSelectorProps<Dice> {
+interface DiceSelectorProps extends SelectorProps<Dice> {
     selectorLabel: string,
     id: string,
 }

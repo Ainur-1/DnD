@@ -1,14 +1,21 @@
 import { BASE_URL } from "@/shared/configuration/enviromentConstants";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RaceNamesQueryResult } from "./variables";
+import { RaceNamesInfoQueryResult, RaceNamesQueryResult } from "./variables";
 
 export const raceApi = createApi({
     reducerPath: 'races/api',
     baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
     endpoints: (build) => ({
-        raceNames: build.query<RaceNamesQueryResult, void>({
+        strictRaces: build.query<RaceNamesQueryResult, void>({
             query: (body) => ({
                 url: "geta ll races",
+                method: "POST",
+                body
+            }),
+        }),
+        raceInfo: build.query<RaceNamesInfoQueryResult, string>({
+            query: (body) => ({
+                url: "get full race info",
                 method: "POST",
                 body
             }),
@@ -16,4 +23,8 @@ export const raceApi = createApi({
     })
 });
 
-export const { useRaceNamesQuery, } = raceApi;
+export const { 
+    useStrictRacesQuery, 
+    useRaceInfoQuery, 
+    useLazyRaceInfoQuery 
+} = raceApi;
