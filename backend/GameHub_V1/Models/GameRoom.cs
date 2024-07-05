@@ -1,33 +1,38 @@
 ﻿using GameHub.Dtos;
 using System.Collections.Concurrent;
 using System.Numerics;
+using Contracs.Online;
 
 namespace GameHub.Models
 {
     public class GameRoom
     {
 
-        //маппинг персонаж-конекшен айди
-        //public string RoomId => Game.Id;
-
-        //герой которому предлагают (цель) - АЙДИ ПРЕДОЛЖЕНИЯ - ПРЕДЛОЖЕНИЕ О ПРЕДМЕТЕ
-
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, InventoryItemSuggestion>> _connectionRoomMapping = new();
         
         public bool IsFight => SortedInitciativeScores != null;
+        //public bool IsGameMaster {  get; set; }
         public (Guid CharacterId, int Score)[]? SortedInitciativeScores { get; set; }    
-        public string RoomId { get; set; }
+        //public string RoomId { get; set; }
+        public Guid PartyId { get; set; }
         public string RoomName { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatorName { get; set; }
         public string AccessCode { get; set; }
         public List<Player> Players { get; set; } = new();
         public Guid GameMasterId { get; set; }
+        
+        
+        // 
+        public bool IsFighting { get; set; }
+        public string[]? Order { get; set; }
+        public GameCharacterDto? Character { get; set; }
+        //
 
 
-        public GameRoom(string roomId, string roomName, string creatorName, string accesscode, Guid gameMasterId)
+        public GameRoom(Guid partyId, string roomName, string creatorName, string accesscode, Guid gameMasterId)
         {
-            RoomId = roomId;
+            PartyId = partyId;
             RoomName = roomName;
             CreatorName = creatorName;
             CreatedDate = DateTime.UtcNow;
@@ -42,22 +47,11 @@ namespace GameHub.Models
                 return true;
             }
             return false;
-            /*
-            if (Players.Count < 2 && !Players.Any(p => p.ConnectionId == newPlayer.ConnectionId)){
-                Players.Add(newPlayer);
-                if (Players.Count == 1)
-                {
-                    Game.PlayerXId = newPlayer.ConnectionId;
-                }
-                else if (Players.Count == 2)
-                {
-                    Game.PlayerYId = newPlayer.ConnectionId;
+        }
 
-                }
-                return true;
-            }
-            return false;
-              */
+        public bool IsGameMaster(Guid userId)
+        {
+            return GameMasterId == userId;
         }
 
     }

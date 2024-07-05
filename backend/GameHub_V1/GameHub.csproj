@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="blazor\**" />
+    <Compile Remove="Pages\**" />
+    <EmbeddedResource Remove="blazor\**" />
+    <EmbeddedResource Remove="Pages\**" />
+    <None Remove="blazor\**" />
+    <None Remove="Pages\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AspNetCore.Identity.MongoDbCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.6" />
@@ -17,11 +26,6 @@
     <ProjectReference Include="..\Contracs\Contracs.csproj" />
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\Services.Abstractions\Services.Abstractions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="blazor\" />
-    <Folder Include="Pages\" />
   </ItemGroup>
 
 </Project>

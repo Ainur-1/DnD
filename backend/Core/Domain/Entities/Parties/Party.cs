@@ -6,6 +6,7 @@ public class Party
 
     public Guid GameMasterId { get; protected set; }
 
+    //public string AccessCode { get; protected set; }
     public List<Guid> InGameCharactersIds { get; set; }
 
     public void Add()

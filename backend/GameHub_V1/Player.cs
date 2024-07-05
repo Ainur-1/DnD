@@ -6,23 +6,17 @@ namespace GameHub
 {
     public class Player//// User
     {
-        public string Id { get; set; }
+        public Guid CharacterId { get; set; }
         public string ConnectionId { get; set; }
-        public List<InventoryItem> Inventory { get; set; }
-        public string Name { get; set; }
-
+        public Guid UserIdentidier { get; set; }
+        
         public bool IsGameMaster { get; set; }
 
-        public Player(string connectionId, string name, bool isGameMaster = false)
+        public Player(string connectionId, Guid userIdentifier)
         {
             ConnectionId = connectionId;
-            Name = name;
-            IsGameMaster = isGameMaster;
+            UserIdentidier = userIdentifier;
         }
 
-        public void AddItemToInventory(InventoryItem item)
-        {
-            Inventory.Add(item);
-        }
     }
 }

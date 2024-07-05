@@ -12,7 +12,10 @@ namespace Contracs.Online
         public CharacterPersonalityDto Personality { get; set; }
         public CharacterStatsDto CharacterStats { get; set; }
 
-
+        public static implicit operator Guid(GameCharacterDto v)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }
