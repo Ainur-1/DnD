@@ -4,6 +4,6 @@ import { CreateCharcaterForm } from "@/widgets/character";
 export default function CreateCharacterPage() {
     return <>
         <ChangePageTitle title="Создание персонажа" />
-        <CreateCharcaterForm />
+            <CreateCharcaterForm />
     </>   
 }

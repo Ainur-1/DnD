@@ -19,7 +19,7 @@ export default function RaceTraitAdjustmentForm({ raceTrait, selectedOption, onO
         onOptionChange(value);
     }
 
-    return <Grid container>
+    return <>
             <Grid item xs={8}>
                 <Typography variant="h6" component="div" fontWeight="bold">
                     {raceTrait.name}
@@ -41,5 +41,5 @@ export default function RaceTraitAdjustmentForm({ raceTrait, selectedOption, onO
                     </RadioGroup>
                 </FormControl>
             </Grid>
-        </Grid>
+        </>
 }

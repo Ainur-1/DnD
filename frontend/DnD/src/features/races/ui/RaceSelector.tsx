@@ -54,13 +54,13 @@ export default function RaceSelector({onRaceSelected}: RaceSelectorProps) {
         }
     };
 
-    return <Grid container>
+    return <>
         <Grid item xs={6}>
             <StringSelector
                 disabled={raceDisabled} 
                 selectorLabel="Раса" 
                 id="race" 
-                values={strictRaces?.data ? [] : strictRaces!.data!.map(x => {
+                values={!strictRaces?.data ? [] : strictRaces!.data!.map(x => {
                     return {
                         label: x.name,
                         value: x.id
@@ -81,5 +81,5 @@ export default function RaceSelector({onRaceSelected}: RaceSelectorProps) {
                     onValueChange={onSubraceSelect} />
             }
         </Grid>
-    </Grid>
+    </>
 }

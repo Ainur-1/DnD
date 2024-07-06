@@ -43,6 +43,7 @@ export default function TagInput({inputPlaceHolder, setTags, tags, disabled=fals
           renderInput={(params) => (
               <TextField
                   {...params}
+                  margin='dense'
                   variant="outlined"
                   placeholder={inputPlaceHolder}
                   onKeyDown={handleKeyDown} />

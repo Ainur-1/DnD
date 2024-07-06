@@ -5,11 +5,11 @@ interface InventoryWeightProps {
 }
 
 export default function InventoryWeight({ weightInPounds }: InventoryWeightProps) {
-    return <Box flex="flex" alignItems="center" justifyContent="space-between">
-        <Typography component="div" variant="h6" textAlign="start">
+    return <Box display="flex" alignItems="center" justifyContent="space-between" marginTop={1} marginBottom={1}>
+        <Typography component="div" variant="h6">
             Общий вес
         </Typography>
-        <Typography component="div" variant="body2" textAlign="end">
+        <Typography component="div" variant="body1">
             {weightInPounds} фунт.
         </Typography>
     </Box>

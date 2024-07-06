@@ -16,7 +16,7 @@ export default function ClassSelector({onClassSelected}: ClassSelectorProps) {
     return <StringSelector 
         selectorLabel="Класс" 
         id="class" 
-        values={strictClasses?.data ? [] : strictClasses!.data!.map(x => {
+        values={!strictClasses?.data ? [] : strictClasses!.data!.map(x => {
             return {
                 label: x.name,
                 value: x.id

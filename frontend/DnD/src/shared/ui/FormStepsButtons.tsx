@@ -22,11 +22,10 @@ export function FormStepsButtons({
     prevButtonText, 
     nextButtonText}: FormStepsButtonsProps) {
 
-    return <Box sx={{
-        display: "flex",
-        justifyContent: showPrevButton ? "space-between" : "flex-end",
-        alignContent: "center"
-    }}>
+    return <Box display="flex" justifyContent={showPrevButton ? "space-between" : "flex-end"}
+        alignContent="center"
+        marginTop={5}
+    >
         {
             showPrevButton && <Button disabled={prevButtonDisabled} size="small" variant="text" onClick={onPrevButtonClicked}>
                 {prevButtonText}

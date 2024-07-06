@@ -17,18 +17,16 @@ export default function AddItemInventoryDialog({show, close, onItemAdd}: AddItem
             fullWidth={true}
             scroll="body"
         >
-            <DialogTitle display="inline-flex" justifyContent="space-between">
-                <Typography variant="h4" component="div">
+            <DialogTitle display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="h6" component="div">
                     Добавить в инветарь
                 </Typography>
-                <Container>
-                    <IconButton onClick={close}>
-                        <CloseIcon />
-                    </IconButton>
-                </Container>
+                <IconButton onClick={close}>
+                    <CloseIcon />
+                </IconButton>
             </DialogTitle>
             <DialogContent>
-                <AddItemToInventoryForm onItemSubmit={onItemAdd} />
+                <AddItemToInventoryForm onItemSubmit={onItemAdd} submitButtonText="Добавить" />
             </DialogContent>
         </Dialog>
     )

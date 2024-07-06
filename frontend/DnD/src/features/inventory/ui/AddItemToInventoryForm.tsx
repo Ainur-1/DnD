@@ -120,7 +120,7 @@ function Form({onItemSubmit, formError, submitButtonText}: AddItemToInventoryFor
         }
     }
 
-    return <Box component="form" onSubmit={(e) => onSubmit}>
+    return <Box paddingTop={1} component="form" onSubmit={onSubmit}>
         <Grid container spacing={2}>
             <Container>
                 <Typography variant="body2" color="error" textAlign="center">

@@ -23,7 +23,7 @@ export default function CharacterXpField({ value, onChange, errorText }: Charact
         onChange(value);
     };
 
-    return <TextField 
+    return <TextField
         value={value} 
         onChange={onChangeInternal} 
         margin="normal" 

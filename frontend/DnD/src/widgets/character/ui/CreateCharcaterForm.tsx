@@ -9,7 +9,7 @@ import CharacterBackgroundField from "@/entities/character/ui/CharacterBackgroun
 import TagInput from "@/shared/ui/TagInput";
 import SkillTraitMasteryField from "./SkillTraitMasteryField";
 import RaceTraitAdjustment from "./RaceTraitsAdjustments";
-import { AddItemToInventoryForm, ExpandedInventoryItem } from "@/features/inventory";
+import { ExpandedInventoryItem } from "@/features/inventory";
 import AddItemInventoryDialog from "./AddItemInventoryDialog";
 import { InventoryWeight } from "@/entities/item";
 import InventoryList from "@/entities/item/ui/InventoryList";
@@ -125,20 +125,18 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
 
     return <Stack>
         <Stack alignItems="center">
-            <Grid container>
-                <Grid item xs={12}>
-                    <RaceSelector onRaceSelected={(race) => setField("race", race)} />
-                </Grid>
-                <Grid item xs={12}>
+            <Grid container alignItems="center" justifyContent="center" rowSpacing={1}>
+                <RaceSelector onRaceSelected={(race) => setField("race", race)} />
+                {state.race.value && <Grid item xs={12}>
                     <RaceTraitAdjustment 
                         race={state.race.value} 
                         setSelectedOption={setSelectedRaceTraitOption} 
                         getSelectedOption={getSelectedRaceTraitOption} />
-                </Grid>
-                <Grid item xs={6}>
+                </Grid>}
+                <Grid item xs={6} md={6}>
                     <ClassSelector onClassSelected={(value) => setField("classId", value)} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={6} md={6}>
                     <CharacterXpField 
                         errorText={state.classXp.error}
                         value={state.classXp.value}
@@ -271,11 +269,11 @@ function Step4({ state, setStep, setField }: StepProps) {
 
     return <Stack>
         <Stack>
-            <Typography variant="h3" component="div">
+            <Typography variant="h5" fontWeight="bold" component="div" textAlign="center">
                 Стартовый инветарь
             </Typography>
-            <Typography variant="body1" component="div">
-                {isFetching && <Box display="flex">
+            <Typography variant="body1" color="GrayText" component="div" marginTop={5}>
+                {isFetching && <Box display="flex" justifyContent="center">
                         <CircularProgress />
                     </Box>}
                 {isSuccess && <>{data}</>}
@@ -322,9 +320,8 @@ export default function CreateCharcaterForm() {
 
     const skipValidation = () => true;
 
-    //todo: submit here
     return <>
-        <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit}>
+        <Box component="form" noValidate onSubmit={handleSubmit} padding={2}>
             {state.step === 1 && <Step1 state={state} isValid={isValidStep1} setField={setField} setStep={setStep} />}
             {state.step === 2 && <Step2 state={state} isValid={isValidStep2} setField={setField} setStep={setStep} />}
             {state.step === 3 && <Step3 state={state} isValid={skipValidation} setField={setField} setStep={setStep} />}
