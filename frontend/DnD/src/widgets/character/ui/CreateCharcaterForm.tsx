@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Container, FormControl, FormGroup, Grid, Stack, Typography } from "@mui/material";
 import { CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterUploadImage, CharacterXpField, CoinsAffectWeightSwitch } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
 import { RaceSelector, useRaceInfoQuery } from "@/features/races";
 import { ClassSelector, useClassStartInventoryDescriptionQuery } from "@/features/classes";
@@ -15,6 +15,8 @@ import { InventoryWeight } from "@/entities/item";
 import InventoryList from "@/entities/item/ui/InventoryList";
 import { AlignmentSelector } from "@/entities/character/ui/AlignmentSelector";
 import { Aligments } from "@/shared/types/domainTypes";
+import { useCreateCharacterMutation } from "@/features/character";
+import { useNavigate } from "react-router-dom";
 
 interface StepProps {
     state: CreateCharacterFormState,
@@ -252,7 +254,7 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
     </Stack>
 }
 
-function Step4({ state, setStep, setField }: StepProps) {
+function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps & {disable: boolean, submit: () => void}) {
     const [show, setShow] = useState(false);
 
     const [disableButtons] = useState(false);
@@ -301,6 +303,12 @@ function Step4({ state, setStep, setField }: StepProps) {
         }, [] as ExpandedInventoryItem[]));
     };
 
+    const onNextButtonClicked = () => {
+        if (isValid()){
+            submit();
+        }
+    };
+
     return <Stack>
         <Stack>
             <Typography variant="h5" fontWeight="bold" component="div" textAlign="center">
@@ -331,10 +339,10 @@ function Step4({ state, setStep, setField }: StepProps) {
         <FormStepsButtons 
             onPrevButtonClicked={() => setStep(3)}
             prevButtonText="Назад"
-            nextButtonType="submit"
             nextButtonText="Создать"
-            nextButtonDisabled={disableButtons}
-            prevButtonDisabled={disableButtons}
+            onNextButtonClicked={onNextButtonClicked}
+            nextButtonDisabled={disableButtons || disable}
+            prevButtonDisabled={disableButtons || disable}
         />
     </Stack>
 }
@@ -343,22 +351,50 @@ export default function CreateCharcaterForm() {
     const { state, 
         setField, 
         setStep,
+        setFormError,
         isValidStep1,
         isValidStep2,
         isValidStep3,
         isValidStep4
      } = useCreateCharacterReducer();
 
+    const [createCharacter, {isLoading, isSuccess, isError, error}] = useCreateCharacterMutation();
+    const navigate = useNavigate();
+    const formRef = useRef<HTMLFormElement>(null);
+
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+
+        if (isLoading) {
+            setFormError("Запрос уже отправлен.");
+            return;
+        } else if (state.step != 4) {
+            setFormError("Заполните форму.");
+            return;
+        }
+
+        setFormError();
+        try{
+            //todo: get character from form state
+            await createCharacter({});
+        } catch {
+            setFormError(isError ? "Ошибка сети." : error);
+        }
+
+        if (isSuccess) {
+            navigate("/my-characters");
+        }
     }
 
+    const raiseSubmitEvent = () => formRef.current?.submit();
+
     return <>
-        <Box component="form" noValidate onSubmit={handleSubmit} padding={2}>
+        <Box component="form" noValidate onSubmit={handleSubmit} padding={2} ref={formRef}>
             {state.step === 1 && <Step1 state={state} isValid={isValidStep1} setField={setField} setStep={setStep} />}
             {state.step === 2 && <Step2 state={state} isValid={isValidStep2} setField={setField} setStep={setStep} />}
             {state.step === 3 && <Step3 state={state} isValid={isValidStep3} setField={setField} setStep={setStep} />}
-            {state.step === 4 && <Step4 state={state} isValid={isValidStep4} setField={setField} setStep={setStep} />}
+            {state.step === 4 && <Step4 state={state} isValid={isValidStep4} setField={setField} setStep={setStep} 
+                                        disable={isLoading} submit={raiseSubmitEvent}/>}
         </Box>
     </>
 }

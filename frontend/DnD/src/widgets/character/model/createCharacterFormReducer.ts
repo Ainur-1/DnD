@@ -125,10 +125,12 @@ type CreateCharacterState = Step1State & Step2State & Step3State & Step4State;
 
 export type CreateCharacterFormState = {
     step: Steps;
+    formError: string | undefined;
 } & CreateCharacterState;
 
 export const initialState: CreateCharacterFormState = {
     step: 1,
+    formError: undefined,
     ...setp1Init,
     ...step2Init,
     ...step3Init,
@@ -139,7 +141,8 @@ export type StateKeys = keyof CreateCharacterState;
 
 export type Action =
   | { type: 'SetStep', step: Steps }
-  | { type: 'SetField', fieldName: StateKeys, value: any, error?: string };
+  | { type: 'SetField', fieldName: StateKeys, value: any, error?: string }
+  | { type: 'SetFormError', error: string | undefined };
 
 
 export function reducer(state: CreateCharacterFormState, action: Action): CreateCharacterFormState {
@@ -177,6 +180,11 @@ export function reducer(state: CreateCharacterFormState, action: Action): Create
                 value: action.value,
                 error: action.error ?? null
             }
+        };
+    case 'SetFormError':
+        return {
+            ...state,
+            formError: action.error
         };
     default:
         return state;
@@ -305,9 +313,9 @@ function isValidStep3(state: CreateCharacterFormState, dispatch: React.Dispatch<
     return true;
 }
 
-function isValidStep4(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
+function isValidStep4(state: CreateCharacterFormState, _: React.Dispatch<Action>) {
 
-    return state.inventory?.value && state.inventory?.value.every(x => x.count >= 1);
+    return state.inventory?.value != undefined && state.inventory!.value.every(x => x.count >= 1);
 }
 
 
@@ -322,6 +330,10 @@ export function useCreateCharacterReducer() {
                 type: "SetStep",
                 step
             }),
+        setFormError: (error?: string) => dispatch({
+            type: 'SetFormError',
+            error
+        }),
         isValidStep1: () => isValidStep1(state, dispatch),
         isValidStep2: () => isValidStep2(state, dispatch),
         isValidStep3: () => isValidStep3(state, dispatch),
