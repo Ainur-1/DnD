@@ -24,13 +24,14 @@ public class GameHub: Hub
     private readonly UserManager<User> _userManager;
     private readonly ICharacterService _characterService;
     private readonly IPartyService _partyService;
+    private readonly IventoryService _iventoryService;
 
-
-    public GameHub (ICharacterService characterService, UserManager<User> userManager, IPartyService partyService)
+    public GameHub (ICharacterService characterService, UserManager<User> userManager, IPartyService partyService, IventoryService iventoryService)
     {
         _userManager = userManager;
         _characterService = characterService;
         _partyService = partyService;
+        _iventoryService = iventoryService;
     }
 
     public override async Task OnConnectedAsync()
@@ -285,18 +286,25 @@ public class GameHub: Hub
         }
 
 
-        // 3) Получить модификатор ловкости каждого живого персонажа
+        // 4) Получить модификатор ловкости каждого живого персонажа
         var initiativeModifiers = new ConcurrentDictionary<string, int>();
         foreach (var scoreValue in fightStatus.ScoreValues)
         {
-            //var characterId = Guid.Parse(scoreValue.CharacterId);
-            //var characterStats = await _characterService.GetCharacterStatsAsync(characterId);
-            //initiativeModifiers[scoreValue.CharacterId] = characterStats.DexterityModifier;
+            var characterId = Guid.Parse(scoreValue.CharacterId);
+            var characterStats = await _characterService.GetCharacterInGameStatsAsync(characterId);
+
+            if (characterStats == null || characterStats.IsDead) // Проверяем, что персонаж живой
+            {
+                throw new InvalidOperationException("Все персонажи в списке должны быть живыми.");
+            }
+
+            initiativeModifiers[scoreValue.CharacterId] = characterStats.Initiative;
         }
 
         // 4) Если пользователь Game Master, отсортировать значения инициативы по убыванию
         if (isGameMaster)
         {
+
             fightStatus.ScoreValues = fightStatus.ScoreValues.OrderByDescending(sv => sv.Score).ToArray();
         }
 
@@ -317,8 +325,62 @@ public class GameHub: Hub
     }
 
     //предложить предмет 
-    public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInvenotyAbout)
+    public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
     {
+
+        // Получаем connectionId
+        var connectionId = Context.ConnectionId;
+        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        {
+            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
+        }
+
+        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
+        if (room == null)
+        {
+            throw new InvalidOperationException("Комната не найдена.");
+        }
+
+        var characterId = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId)?.CharacterId;
+        if (characterId == null)
+        {
+            throw new InvalidOperationException("Персонаж не найден в комнате.");
+        }
+        var isGameMaster = await _partyService.IsGameMaster(Guid.Parse(userId), partyId);
+
+        if (isGameMaster)
+        {
+            // Если присылает гейммастер, то должно быть заполнено поле Item
+            if (suggestInventoryAbout.ItemDescription == null)
+            {
+                throw new InvalidOperationException("Поле Item должно быть заполнено для гейммастера.");
+            }
+        }
+        else
+        {
+            // Если присылает игрок, должны быть заполнены оба поля Item и ItemfromInventory
+            if (suggestInventoryAbout.ItemDescription == null || suggestInventoryAbout.ItemfromInventory == null)
+            {
+                throw new InvalidOperationException("Для игрока должны быть заполнены оба поля: Item и ItemfromInventory.");
+            }
+
+            // Проверяем наличие предмета в инвентаре
+            var itemExists = await _iventoryService.CheckInventoryItem(characterId, suggestInventoryAbout.ItemfromInventory);
+            if (!itemExists)
+            {
+                throw new InvalidOperationException("Предмет не найден в инвентаре персонажа.");
+            }
+        }
+
+        // Обрабатываем предложение предмета
+        var suggestion = new InventoryItemSuggestion
+        {
+            Item = suggestInventoryAbout.ItemDescription,
+            itemFromInventory = suggestInventoryAbout.ItemfromInventory
+        };
+
+        await _iventoryService.HandleItemSuggestion(room, characterId, suggestion);
+
         /*это может прислать обычнйыы игрок и гейммастер
          * если присылает гейммастер то это поле item
          * ecли присылает игрок оба поля item и inventory item 
@@ -382,25 +444,21 @@ public class GameHub: Hub
             throw new InvalidOperationException("Персонаж не найден в комнате.");
         }
 
+        // Получаем предложение инвентаря
 
-        //// Проверяем наличие предложения
-        //var suggestion = await SuggestionService.GetSuggestionById(suggestionId);
-        //if (suggestion == null)
-        //{
-        //    return false;
-        //}
+        // Обработка принятия предложения
+        try
+        {
 
-        //// Обрабатываем добавление предмета
-        //if (suggestion.Item != null)
-        //{
-        //    await InventoryService.CreateItem(characterId, suggestion.Item);
-        //}
-        //else if (suggestion.itemFromInventory != null)
-        //{
-        //    await InventoryService.TakeItemFromAnother(characterId, suggestion.itemFromInventory.InventoryItemId, suggestion.itemFromInventory.Count);
-        //}
+        }
+        catch (Exception ex)
+        {
+            // Обработка ошибок
+            Console.WriteLine($"Ошибка при принятии предложения инвентаря: {ex.Message}");
+            return false;
+        }
 
-        return true;
+        
 
         /*todo
          * 1) Получить по конекшну characterId 
