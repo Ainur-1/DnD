@@ -25,6 +25,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Contracs\Contracs.csproj" />
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Core\Service.Abstractions.csproj" />
+	  
   </ItemGroup>
 
 </Project>

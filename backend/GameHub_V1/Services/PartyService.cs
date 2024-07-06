@@ -1,8 +1,9 @@
 ﻿using GameHub.Models;
+using GameHub.Service;
 
 namespace GameHub
 {
-    public class PartyService
+    public class PartyService: IPartyService
     {
 
         private readonly List<GameRoom> _rooms;
@@ -28,12 +29,13 @@ namespace GameHub
             {
                 foreach (var player in room.Players)
                 {
-                    
-                    
+                    player.XP += xp;
                 }
                 
                 _rooms.Remove(room);
             }
         }
+
+
     }
 }

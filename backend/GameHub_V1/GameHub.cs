@@ -71,7 +71,6 @@ public class GameHub: Hub
             }
             else
             {
-
                 
                 var character = await _characterService.GetByIdAsync(user.Id);
 
@@ -150,6 +149,7 @@ public class GameHub: Hub
         // 2) Вызов метода EndGameAsync из PartyService
         await _partyService.EndGameAsync(partyId, xp);
         return true;
+
         /*todo
          * 1) возврат true false только гейммастер
          * 2) Вызвать метод PartyService EndGameAsync {partyid, xp}

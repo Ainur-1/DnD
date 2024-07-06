@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace GameHub.Service
 {
-    public class CharacterService
+    public interface IPartyService
     {
+        public Task<bool> IsGameMaster(Guid userId, Guid partyId);
+        public Task EndGameAsync(Guid partyId, int xp);
 
     }
 }

@@ -7,8 +7,9 @@ namespace GameHub
     public class Player//// User
     {
         public Guid CharacterId { get; set; }
-        public string ConnectionId { get; set; }
         public Guid UserIdentidier { get; set; }
+        public string ConnectionId { get; set; }
+        public int XP { get; set; }
         
         //public bool IsGameMaster { get; set; }
 

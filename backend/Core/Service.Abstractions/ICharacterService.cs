@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+
 using Contracs.Online;
 
-namespace GameHub;
+namespace Service.Abstractions;
 
 public interface ICharacterService
 {
