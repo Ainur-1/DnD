@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GameHub.Models;
+using Service.Abstractions.Interface;
+
 namespace GameHub.Service
 {
     public class IventoryService

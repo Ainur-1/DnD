@@ -73,7 +73,7 @@ public class GameHub: Hub
             else
             {
                 
-                var character = await _characterService.GetByIdAsync(user.Id);
+                var character = await _characterService.GetByIdAsync(user.Id, partyId);
 
                 if (character != null)
                 {
@@ -232,11 +232,7 @@ public class GameHub: Hub
         }
 
         // ) Применить урон к HP персонажа
-        characterStats.Hp -= damageAmount;
-        if (characterStats.Hp < 0) characterStats.Hp = 0;
-
-        // ) Обновить статистику персонажа в сервисе
-        await _characterService.UpdateCharacterInGameStatsAsync(Guid.Parse(targetCharacterId), characterStats);
+        await _characterService.TakeDamageAsync(Guid.Parse(targetCharacterId), damageAmount);
 
         // ) Уведомить всех участников комнаты об обновленном состоянии персонажа
         await Clients.Group(partyId.ToString()).SendAsync("CharacterUpdated", targetCharacterId, characterStats);
@@ -326,7 +322,7 @@ public class GameHub: Hub
     }
 
     //предложить предмет 
-    public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
+    public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)////пока не трогаем
     {
 
         // Получаем connectionId
@@ -347,7 +343,7 @@ public class GameHub: Hub
         {
             throw new InvalidOperationException("Персонаж не найден в комнате.");
         }
-        var isGameMaster = await _partyService.IsGameMaster(Guid.Parse(userId), partyId);
+        var isGameMaster = await _partyService.IsGameMaster(partyId, partyId);/////
 
         if (isGameMaster)
         {
@@ -423,7 +419,7 @@ public class GameHub: Hub
     }
 
     //принять предмет 
-    public async Task<bool> AcceptInventory(string suggestionId)
+    public async Task<bool> AcceptInventory(string suggestionId)//пока не трогаем
     {
 
         // Получаем connectionId
@@ -458,7 +454,7 @@ public class GameHub: Hub
             Console.WriteLine($"Ошибка при принятии предложения инвентаря: {ex.Message}");
             return false;
         }
-
+        return true;
         
 
         /*todo

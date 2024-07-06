@@ -1,5 +1,5 @@
 ﻿using GameHub.Models;
-using GameHub.Service;
+using Service.Abstractions.Interface;
 
 namespace GameHub
 {
