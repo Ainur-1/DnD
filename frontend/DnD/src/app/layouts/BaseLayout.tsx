@@ -8,6 +8,7 @@ import { MyCharactersPage } from "@/pages/characters";
 import { PartiesPage } from "@/pages/parties";
 import { CreateCharacterPage } from "@/pages/character-create";
 
+
 function BaseLayout() {
     return (
       <UseProviders>
