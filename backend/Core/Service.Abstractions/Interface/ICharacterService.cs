@@ -2,7 +2,7 @@
 
 using Contracs.Online;
 
-namespace Service.Abstractions;
+namespace Service.Abstractions.Interface;
 
 public interface ICharacterService
 {

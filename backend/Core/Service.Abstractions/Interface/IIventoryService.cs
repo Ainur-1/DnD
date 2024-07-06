@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameHub.Service
+namespace Service.Abstractions.Interface
 {
     public interface IIventoryService
     {
