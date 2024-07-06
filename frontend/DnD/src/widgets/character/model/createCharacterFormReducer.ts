@@ -106,7 +106,31 @@ export type Action =
 export function reducer(state: CreateCharacterFormState, action: Action): CreateCharacterFormState {
   switch (action.type) {
     case 'SetStep':
-        return { ...state, step: action.step };
+        let resetFields;
+        if (action.step < state.step) {
+            if (action.step < 4) {
+                resetFields = step4Init;
+            } 
+            if (action.step < 3) {
+                resetFields = {
+                    ...resetFields,
+                    ...step3Init,
+                };
+            }
+            if (action.step < 2) {
+                resetFields = {
+                    ...resetFields,
+                    ...step2Init
+                };
+            }
+        }
+
+        return { 
+            ...state, 
+            ...resetFields,
+            step: action.step 
+        };
+        
     case 'SetField':
         return { 
             ...state, 
@@ -158,5 +182,3 @@ export function useCreateCharacterReducer() {
         isValidStep4: () => isValidStep4(state, dispatch),
     }
 }
-
-
