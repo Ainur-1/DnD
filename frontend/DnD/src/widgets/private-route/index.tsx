@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { Navigate, Outlet, useLocation, } from "react-router-dom";
 
 interface PrivateRouteProps {
-    children: ReactNode,
+    children?: ReactNode,
     redirectPath?: string
 }
 

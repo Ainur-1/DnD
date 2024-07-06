@@ -4,6 +4,7 @@ using Domain.Entities.Game.Items;
 using Domain.Entities.Races;
 using Domain.Extensions.Serialization;
 using Newtonsoft.Json;
+using Path = System.IO.Path;
 
 namespace DnD.Data;
 
@@ -67,7 +68,7 @@ public static class WebApplicationExtensions
             const string pattern = "Error while database migrating on startup: {ex}.";
 
             if (logger == null)
-                Console.Error.WriteLine(pattern);
+                Console.Error.WriteLine(pattern.Replace("{ex}", ex.Message));
             else
                 logger?.LogCritical(pattern, ex);
 

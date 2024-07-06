@@ -1,4 +1,6 @@
+using DataAccess;
 using DataAccess.DependencyInjection;
+using DnD.Areas.Identity.Data;
 using DnD.Areas.Identity.Pages.Account;
 using DnD.Data;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +10,8 @@ using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using GameHub.blazor;
 using DataAccess;
-
+using DnD.GraphQL;
+using DnD.GraphQL.Services;
 
 namespace DnD;
 
@@ -25,7 +28,7 @@ public class Program
         services
                 .AddIdentity<User, UserRole>(options =>
                 {
-                    options.SignIn.RequireConfirmedEmail = false; 
+                    options.SignIn.RequireConfirmedEmail = false;
                     options.SignIn.RequireConfirmedAccount = false;
                 })
                 .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
@@ -41,6 +44,7 @@ public class Program
         services.AddScoped<HubConnectionService>();
 
         services.RegisterDatabaseServices(mongoDbSettings);
+        services.AddMongoCollections();
 
         builder.Services.AddRazorPages();
 
@@ -60,6 +64,12 @@ public class Program
             });
         }
 
+        builder.Services.AddGraphQLServer()
+            .AddGraphQLServer()
+            .AddQueryType<Query>()
+            .AddMutationType<Mutation>()
+            .AddFiltering()
+            .AddSorting();
 
         var app = builder.Build();
 
@@ -78,6 +88,8 @@ public class Program
 
         app.MapHub<GameHub.GameHub>("/gamehub");
 
+
+        app.MapGraphQL();
         app.MapRazorPages();
 
         if (configuration.IsDataSeedRequested())
