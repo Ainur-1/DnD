@@ -1,13 +1,18 @@
-﻿@    using GameHub
-@    using GameHub.blazor
-@    using Microsoft.AspNetCore.Authorization
-@    using Microsoft.AspNetCore.Components.Authorization
-@    using Microsoft.AspNetCore.Components.WebAssembly.Server
-@    using DnD.Pages.Shared
-@    using Microsoft.AspNetCore.SignalR.Client
-@    using Microsoft.AspNetCore.Components.Web
-@    using System.Net
+﻿@using GameHub
+@using GameHub.Models
+@using GameHub.blazor
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Server
+@using DnD.Pages.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.AspNetCore.Components.Web
+@using System.Net
 @page "/Lobby"
+@using GameHub.blazor
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 @inject HubConnectionService service
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -35,7 +40,7 @@
             <li>
                 Создатель: @room.CreatorName Название комнаты @room.RoomName
                 <input @bind="ac" placeholder="код" />
-                <button @onclick="() => JoinRoom(room.RoomId, ac)">Присоединиться</button>
+                <button @onclick="() => JoinRoom(room.PartyId.ToString(), ac)">Присоединиться</button>
             </li>
         }
 
@@ -118,7 +123,7 @@ else
             if (createdRoom is not null)
             {
                 currentRoom = createdRoom;
-                NavigationManager.NavigateTo($"/Room/{createdRoom.RoomId}");
+                NavigationManager.NavigateTo($"/Room/{createdRoom.PartyId}");
             }
             else
             {
@@ -144,7 +149,7 @@ else
             {
                 currentRoom = joinedRoom;
                 // Redirect to Room page
-                NavigationManager.NavigateTo($"/Room/{joinedRoom.RoomId}");
+                NavigationManager.NavigateTo($"/Room/{joinedRoom.PartyId}");
             }
             else
             {

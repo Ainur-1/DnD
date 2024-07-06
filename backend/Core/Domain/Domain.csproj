@@ -20,7 +20,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Contracs\Contracs.csproj" />
+    <Folder Include="Entities\Online\" />
   </ItemGroup>
 
 </Project>

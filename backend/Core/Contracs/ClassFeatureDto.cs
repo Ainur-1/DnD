@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Contracts;
 
-namespace Contracs
+public class ClassFeatureDto
 {
-    public class ClassFeatureDto
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
+    public string Name { get; set; }
 
-
-    }
+    public string Description { get; set; }
 }

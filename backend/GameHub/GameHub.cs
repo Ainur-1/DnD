@@ -1,16 +1,13 @@
-﻿using AspNetCore.Identity.MongoDbCore.Models;
-using Contracs.Online;
-using Domain.Entities;
-using Domain.Entities.Game.Items;
-using Domain.Entities.Parties;
+﻿using Contracts.Online;
 using Domain.Entities.User;
 using GameHub.Dtos;
 using GameHub.Models;
-using GameHub.Service;
+using GameHub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
-using Service.Abstractions.Interface;
+using Service.Abstractions;
+using Services.Implementation;
 using System.Collections.Concurrent;
 
 namespace GameHub;
@@ -23,11 +20,11 @@ public class GameHub: Hub
     private static readonly ConcurrentDictionary<string, Guid> _connectionRoomMapping = new();
     
     private readonly UserManager<User> _userManager;
-    private readonly ICharacterService _characterService;
+    private readonly OldCharacterService _characterService;
     private readonly IPartyService _partyService;
-    private readonly IventoryService _iventoryService;
+    private readonly OldInventoryService _iventoryService;
 
-    public GameHub (ICharacterService characterService, UserManager<User> userManager, IPartyService partyService, IventoryService iventoryService)
+    public GameHub (OldCharacterService characterService, UserManager<User> userManager, IPartyService partyService, OldInventoryService iventoryService)
     {
         _userManager = userManager;
         _characterService = characterService;
@@ -65,7 +62,7 @@ public class GameHub: Hub
 
             GameCharacterDto? characterDTO = null;
 
-            if (await _partyService.IsGameMaster(user.Id, partyId))
+            if (await _partyService.IsGameMasterAsync(user.Id, partyId))
             {
                 // Если игрок является игровым мастером, присваиваем только PartyId
                 _connectionRoomMapping[Context.ConnectionId] = partyId;
@@ -78,7 +75,7 @@ public class GameHub: Hub
                 if (character != null)
                 {
                     _connectionRoomMapping[Context.ConnectionId] = partyId;
-                    _connectionRoomMapping[Context.ConnectionId] = character;
+                    _connectionRoomMapping[Context.ConnectionId] = character.Id;
 
                     
                     characterDTO = new GameCharacterDto
@@ -101,7 +98,7 @@ public class GameHub: Hub
             //room.IsFighting = room.IsFight;
             if (room.IsFight)
             {
-                room.Order = room.SortedInitciativeScores?.OrderByDescending(x => x.Score)
+                room.Order = room.SortedInitiativeScores?.OrderByDescending(x => x.Score)
                                                          .Select(x => x.CharacterId.ToString())
                                                          .ToArray();
             }
@@ -141,14 +138,14 @@ public class GameHub: Hub
         var user = await _userManager.GetUserAsync(Context.User);
 
         // 1) Проверка, является ли пользователь игровым мастером
-        if (!await _partyService.IsGameMaster(user.Id, partyId))
+        if (!await _partyService.IsGameMasterAsync(user.Id, partyId))
         {
             await Clients.Caller.SendAsync("Error", "Вы не являетесь игровым мастером");
             return false;
         }
 
         // 2) Вызов метода EndGameAsync из PartyService
-        await _partyService.EndGameAsync(partyId, xp);
+        await _partyService.DisbandPartyAsync(partyId, xp);
         return true;
 
         /*todo
@@ -172,9 +169,9 @@ public class GameHub: Hub
         bool isFighting = room.IsFighting;
 
         string[] characterOrder = null;
-        if (isFighting && room.SortedInitciativeScores != null)
+        if (isFighting && room.SortedInitiativeScores != null)
         {
-            characterOrder = room.SortedInitciativeScores
+            characterOrder = room.SortedInitiativeScores
                 .OrderByDescending(x => x.Score)
                 .Select(s => s.CharacterId.ToString())
                 .ToArray();
@@ -275,7 +272,7 @@ public class GameHub: Hub
         }
         // 2) Проверить, является ли пользователь Game Master через сервис PartyService
         var userId = _userManager.GetUserId(Context.User);
-        var isGameMaster = await _partyService.IsGameMaster(Guid.Parse(userId), partyId); // 
+        var isGameMaster = await _partyService.IsGameMasterAsync(Guid.Parse(userId), partyId); // 
 
         if (!isGameMaster)
         {
@@ -343,7 +340,7 @@ public class GameHub: Hub
         {
             throw new InvalidOperationException("Персонаж не найден в комнате.");
         }
-        var isGameMaster = await _partyService.IsGameMaster(partyId, partyId);/////
+        var isGameMaster = await _partyService.IsGameMasterAsync(partyId, partyId);/////
 
         if (isGameMaster)
         {
@@ -362,7 +359,8 @@ public class GameHub: Hub
             }
 
             // Проверяем наличие предмета в инвентаре
-            var itemExists = await _iventoryService.CheckInventoryItem(characterId, suggestInventoryAbout.ItemfromInventory);
+            var suggestionItem = suggestInventoryAbout!.ItemfromInventory;
+            var itemExists = await _iventoryService.CheckInventoryItem(characterId.Value!, suggestionItem.InventoryItemId.ToString(), suggestionItem.Count);
             if (!itemExists)
             {
                 throw new InvalidOperationException("Предмет не найден в инвентаре персонажа.");
@@ -373,7 +371,7 @@ public class GameHub: Hub
         var suggestion = new InventoryItemSuggestion
         {
             Item = suggestInventoryAbout.ItemDescription,
-            itemFromInventory = suggestInventoryAbout.ItemfromInventory
+            ItemFromInventory = suggestInventoryAbout.ItemfromInventory
         };
 
         await _iventoryService.HandleItemSuggestion(room, characterId, suggestion);
@@ -493,7 +491,7 @@ public class GameHub: Hub
     }
 
     // Метод обновления стат персонажа
-    public async Task UpdateCharacterStat(DinymicStatsDto updatedStats)
+    public async Task UpdateCharacterStat(DynamicStatsDto updatedStats)
     {
         /*Todo
          * Получить айди персонажа свзянного по конекшону 

@@ -1,21 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Contracts.Online;
 
-namespace Contracs.Online
+public class GameCharacterDto
 {
-    public class GameCharacterDto
-    {
-        public Guid Id {  get; set; }  
-        public CharacterPersonalityDto Personality { get; set; }
-        public CharacterStatsDto CharacterStats { get; set; }
+    public Guid Id {  get; set; }  
 
-        public static implicit operator Guid(GameCharacterDto v)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
+    public CharacterPersonalityDto Personality { get; set; }
+    public CharacterStatsDto CharacterStats { get; set; }
 }

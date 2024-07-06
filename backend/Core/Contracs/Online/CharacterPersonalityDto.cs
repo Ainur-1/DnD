@@ -1,14 +1,8 @@
 ﻿using Domain.Entities.Character;
 using Domain.Entities.Classes;
-using Domain.Entities.Game.Races;
 using Domain.Entities.Races;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Contracs;
-namespace Contracs.Online;
+
+namespace Contracts.Online;
 
 public class CharacterPersonalityDto
 {

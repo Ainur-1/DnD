@@ -1,13 +1,13 @@
 using DataAccess.DependencyInjection;
+using DnD.Areas.Identity.Pages.Account;
 using DnD.Data;
 using Microsoft.AspNetCore.Identity;
-using DataAccess;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using DnD.Areas.Identity.Pages.Account;
 using Domain.Entities.User;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using GameHub.blazor;
+using DataAccess;
 
 
 namespace DnD;

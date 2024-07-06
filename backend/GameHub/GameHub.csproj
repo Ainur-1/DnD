@@ -23,9 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Contracs\Contracs.csproj" />
+    <ProjectReference Include="..\Core\Contracs\Contracts.csproj" />
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
-    <ProjectReference Include="..\Core\Service.Abstractions.csproj" />
+    <ProjectReference Include="..\Core\Service.Abstractions\Services.Abstractions.csproj" />
+    <ProjectReference Include="..\Infrastructure\DataAccess\DataAccess.csproj" />
+    <ProjectReference Include="..\Infrastructure\Services.Implementation\Services.Implementation.csproj" />
 	  
   </ItemGroup>
 
