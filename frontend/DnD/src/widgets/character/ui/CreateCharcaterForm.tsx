@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, FormControl, FormGroup, Grid, Stack, Typography } from "@mui/material";
-import { CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterXpField, CoinsAffectWeightSwitch } from "@/entities/character";
+import { CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterUploadImage, CharacterXpField, CoinsAffectWeightSwitch } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 import { useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
@@ -181,6 +181,9 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
 
     return <Stack>
         <Stack alignItems="center">
+            <Box width={200} height={200}>
+                <CharacterUploadImage base64Image={state.base64Image.value} setImage={(base64Iamge) => setField("base64Image", base64Iamge)}/>
+            </Box>
             <CharacterBackgroundField
                 label="Лор"
                 value={state.background.value}

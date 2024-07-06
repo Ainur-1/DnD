@@ -51,7 +51,7 @@ export function CharacterImage({base64Image, imageOverlayChildren}: CharacterIma
 
     return <CharacterImageWrapper>
         {base64Image == null && <QuestionMark style={{color: theme.palette.grey.A100}} />}
-        {base64Image != null && <CardMedia component="img" sx={{height: imageHeight}} src={`data:image;base64,${base64Image}`}/>}
+        {base64Image != null && <CardMedia component="img" sx={{height: imageHeight}} src={`data:image/jpeg;base64;${base64Image}`}/>}
         {imageOverlayChildren && <ImageOverlay>{imageOverlayChildren}</ImageOverlay>}
     </CharacterImageWrapper>
 }
