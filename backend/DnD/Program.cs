@@ -5,6 +5,11 @@ using DnD.Areas.Identity.Pages.Account;
 using DnD.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Domain.Entities.User;
+using Microsoft.AspNetCore.Components.Server.Circuits;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using GameHub.blazor;
+using DataAccess;
 using DnD.GraphQL;
 using DnD.GraphQL.Services;
 
@@ -30,8 +35,14 @@ public class Program
                 .AddDefaultTokenProviders()
                 .AddDefaultUI();
 
+        services.AddSignalR();
         services.AddRazorPages();
         services.AddTransient<IEmailSender, EmailSender>();
+        builder.Services.AddServerSideBlazor();
+        
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<CircuitHandler, InitializeCircuitHandler>());
+        services.AddScoped<HubConnectionService>();
+
         services.RegisterDatabaseServices(mongoDbSettings);
         services.AddMongoCollections();
 
@@ -70,6 +81,14 @@ public class Program
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseStaticFiles();
+
+        app.MapBlazorHub();
+        app.MapFallbackToPage("/_Host");
+
+        app.MapHub<GameHub.GameHub>("/gamehub");
+
+
         app.MapGraphQL();
         app.MapRazorPages();
 

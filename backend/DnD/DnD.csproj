@@ -11,10 +11,15 @@
 
   <ItemGroup>
     <Content Remove="Areas\Identity\Pages\Account\Index.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Lobby.razor" />
+    <Content Remove="Areas\Identity\Pages\Room.razor" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Identity.MongoDbCore" Version="3.1.2" />
+    <PackageReference Include="HotChocolate.Abstractions" Version="13.9.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.6" />
     <PackageReference Include="GraphQL.Server.Ui.GraphiQL" Version="7.7.1" />
     <PackageReference Include="HotChocolate" Version="13.9.6" />
     <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.6" />
@@ -22,6 +27,7 @@
     <PackageReference Include="HotChocolate.Data.MongoDb" Version="13.9.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">
       <PrivateAssets>all</PrivateAssets>
@@ -33,14 +39,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Core\Contracs\Contracts.csproj" />
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Core\Service.Abstractions\Services.Abstractions.csproj" />
+    <ProjectReference Include="..\GameHub\GameHub.csproj" />
     <ProjectReference Include="..\Infrastructure\DataAccess\DataAccess.csproj" />
+    <ProjectReference Include="..\Infrastructure\Services.Implementation\Services.Implementation.csproj" />
   </ItemGroup>
    
   <ItemGroup>
     <UpToDateCheckInput Remove="Areas\Identity\Pages\Account\Index.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\Index.cshtml" />
     <None Include="Areas\Identity\Pages\Account\Index.cshtml" />
+    <None Include="Pages\Lobby.razor" />
+    <None Include="Pages\Room.razor" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Components.Routing
+
+@code {
+    [Parameter]
+    public Dictionary<string, string> Cookies { get; set; }
+
+    [Parameter]
+    public string RemoteIpAddress { get; set; }
+}
+
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        @if (routeData.PageType == typeof(Lobby))
+        {
+            <Lobby Cookies="Cookies" RemoteIpAddress="RemoteIpAddress" />
+        }
+        else
+        {
+            <RouteView RouteData="routeData" />
+        }
+    </Found>
+    <NotFound>
+        <h1>Page not found</h1>
+        <p>Sorry, but there's nothing here!</p>
+    </NotFound>
+</Router>

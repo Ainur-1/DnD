@@ -1,9 +1,13 @@
+﻿using Microsoft.AspNetCore.Identity;
 ﻿using DnD.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using MongoDbGenericRepository;
+using Domain.Entities.User;
+using HotChocolate;
 using DnD.GraphQL.Types;
 using MongoDbGenericRepository;
 

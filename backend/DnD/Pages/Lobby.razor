@@ -1,0 +1,164 @@
+﻿@using GameHub
+@using GameHub.Models
+@using GameHub.blazor
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Server
+@using DnD.Pages.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.AspNetCore.Components.Web
+@using System.Net
+@page "/Lobby"
+@using GameHub.blazor
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@inject HubConnectionService service
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize]
+<h3>Lobby</h3>
+
+@if (currentRoom is null)
+{
+
+
+    //<input @bind="playerName" placeholder="your name" />
+    <input @bind="currentRoomName" placeholder="Room name" />
+    <button @onclick="CreateRoom">CreateRoom</button>
+
+    <h3>Rooms:</h3>
+    <ul>
+        
+        @foreach (var room in rooms)
+        {
+            /*<li>
+                @playerName <button @onclick="() => JoinRoom(room.RoomId)">
+                    JoinRoom
+                </button>
+            </li>*/
+            <li>
+                Создатель: @room.CreatorName Название комнаты @room.RoomName
+                <input @bind="ac" placeholder="код" />
+                <button @onclick="() => JoinRoom(room.PartyId.ToString(), ac)">Присоединиться</button>
+            </li>
+        }
+
+    </ul>
+}
+else
+{
+    <CascadingValue Value="hubConnection">
+        <Room CurrentRoom="currentRoom"/>
+    </CascadingValue>
+
+}
+@code {
+
+    private Dictionary<string, string> accessCodes = new Dictionary<string, string>();
+    private string ac = string.Empty;
+
+
+    [Parameter]
+    public Dictionary<string, string> Cookies { get; set; }
+
+    [Parameter]
+    public string RemoteIpAddress { get; set; }
+
+
+    private HubConnection? hubConnection;
+    private string playerName = string.Empty;
+    private string currentRoomName = string.Empty;
+    private GameRoom? currentRoom;
+
+    private List<GameRoom> rooms = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/Identity/Account/Login", forceLoad: true);
+            return;
+        }
+
+        hubConnection = service.HubConnection;
+
+        hubConnection.On<List<GameRoom>>("Rooms", (roomList) =>
+        {
+            Console.WriteLine($"Всего комнат = {roomList.Count}");
+            rooms = roomList;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private async Task CreateRoom()
+    {
+            /*
+        if (hubConnection is null)
+        return;
+
+        //await hubConnection.InvokeAsync<GameRoom>("CreateRoom", currentRoomName, playerName);
+
+        var createdRoom = await hubConnection.InvokeAsync<GameRoom>("CreateRoom", currentRoomName, playerName);
+        if (createdRoom is not null)
+            {
+            currentRoom = createdRoom;
+            // Redirect to Room page
+            NavigationManager.NavigateTo($"/Room/{createdRoom.RoomId}");
+        }
+        else
+            {
+            Console.WriteLine("Не удалось создать комнату");
+        }*/
+
+        if (hubConnection is null)
+            return;
+
+        try
+        {
+            var createdRoom = await hubConnection.InvokeAsync<GameRoom>("CreateRoom", currentRoomName);
+            if (createdRoom is not null)
+            {
+                currentRoom = createdRoom;
+                NavigationManager.NavigateTo($"/Room/{createdRoom.PartyId}");
+            }
+            else
+            {
+                Console.WriteLine("Не удалось создать комнату");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при создании комнаты: {ex.Message}");
+        }
+
+    }
+
+    private async Task JoinRoom(string roomId, string ac)
+    {
+        if (hubConnection is null)
+            return;
+
+        try
+        {
+            var joinedRoom = await hubConnection.InvokeAsync<GameRoom>("JoinRoom", roomId, playerName, ac);
+            if (joinedRoom is not null)
+            {
+                currentRoom = joinedRoom;
+                // Redirect to Room page
+                NavigationManager.NavigateTo($"/Room/{joinedRoom.PartyId}");
+            }
+            else
+            {
+                Console.WriteLine("Команты не существует");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при присоединении в комнату: {ex.Message}");
+        }
+    }
+}
