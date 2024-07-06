@@ -1,0 +1,42 @@
+/* CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: Arial, sans-serif; /* Or any other font you prefer */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  background-color: #fff; /* Or any other background color you prefer */
+}a {
+  text-decoration: none; /* Remove underline */
+  color: inherit; /* Inherit the color from parent element */
+}
+
+@font-face {
+    font-family: 'WenKai TC';
+    src: url('/fonts/LXGWWenKaiTC-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'WenKai TC';
+    src: url('/fonts/LXGWWenKaiTC-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'WenKai TC';
+    src: url('/fonts/LXGWWenKaiTC-Light.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+}
