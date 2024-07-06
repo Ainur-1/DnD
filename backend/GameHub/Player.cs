@@ -1,5 +1,7 @@
 ﻿//using DnD.Areas.Identity.Data;
 
+using Contracs.Online;
+using Contracs;
 using Domain.Entities.Game.Items;
 
 namespace GameHub
@@ -9,6 +11,9 @@ namespace GameHub
         public Guid CharacterId { get; set; }
         public Guid UserIdentidier { get; set; }
         public string ConnectionId { get; set; }
+        public DinymicStatsDto DinymicStatsDto { get; set; }
+        public CharacterPersonalityDto Personality { get; set; }
+
         public int XP { get; set; }
         
         //public bool IsGameMaster { get; set; }
