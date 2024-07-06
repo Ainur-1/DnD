@@ -33,8 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Core\Contracs\Contracs.csproj" />
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
-    <ProjectReference Include="..\GameHub_V1\GameHub.csproj" />
+    <ProjectReference Include="..\Core\Service.Abstractions\Service.Abstractions.csproj" />
     <ProjectReference Include="..\Infrastructure\DataAccess\DataAccess.csproj" />
   </ItemGroup>
    

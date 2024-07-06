@@ -10,6 +10,7 @@ using GameHub.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+using Service.Abstractions.Interface;
 using System.Collections.Concurrent;
 
 namespace GameHub;
