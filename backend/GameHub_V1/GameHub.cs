@@ -6,24 +6,22 @@ using Domain.Entities.Parties;
 using Domain.Entities.User;
 using GameHub.Dtos;
 using GameHub.Models;
+using GameHub.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
-using Services.Abstractions;
-using System;
 using System.Collections.Concurrent;
-using System.Security.Claims;
 
 namespace GameHub;
 
 [Authorize]
 public class GameHub: Hub
 {
-    public static List<Party> _party { get; set; }
+    //public static List<Party> _party { get; set; }
     private static readonly List<GameRoom> _rooms = new ();
     private static readonly ConcurrentDictionary<string, Guid> _connectionRoomMapping = new();
+    
     private readonly UserManager<User> _userManager;
-
     private readonly ICharacterService _characterService;
     private readonly IPartyService _partyService;
 
@@ -38,12 +36,10 @@ public class GameHub: Hub
     public override async Task OnConnectedAsync()
     {
         Console.WriteLine($"Игрок {_userManager.GetUserNameAsync} с ID '{Context.ConnectionId}' подключен");
-
-
     }
 
     //вход в комнату
-    public async Task<GameRoom?> JoinRoom(string accessCode, Guid partyId)
+    public async Task<GameRoom?> JoinRoomAsync(string accessCode, Guid partyId)
     {
         var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
 
@@ -67,7 +63,7 @@ public class GameHub: Hub
 
             GameCharacterDto? characterDTO = null;
 
-            if (room.IsGameMaster(user.Id))
+            if (await _partyService.IsGameMaster(user.Id, partyId))
             {
                 // Если игрок является игровым мастером, присваиваем только PartyId
                 _connectionRoomMapping[Context.ConnectionId] = partyId;
@@ -101,7 +97,7 @@ public class GameHub: Hub
             await Clients.Group(partyId.ToString()).SendAsync($"Игрок {_userManager.GetUserNameAsync} Присоединился", newPlayer);
             Console.WriteLine($"Игрок {_userManager.GetUserNameAsync} c id {Context.ConnectionId} присоединился к комнате");
 
-            room.IsFighting = room.IsFight;
+            //room.IsFighting = room.IsFight;
             if (room.IsFight)
             {
                 room.Order = room.SortedInitciativeScores?.OrderByDescending(x => x.Score)
@@ -138,84 +134,60 @@ public class GameHub: Hub
 
     }
 
-
-    //UPDATE FIGHT STATUS ЗАВЕршиться или начаться только гейммастер()
-    public async Task UpdateFight(FightStatusDto fightStatus)
+    //endgame только гейммастер()
+    public async Task<bool> EndGame(int xp, Guid partyId)
     {
-        /*
-         * todo ()
-         * 1)Проверяем конекшен Что пользователь гейммастер через сервис 
-         * 2)Получить модификатор ловкостити каждого живого персонажа 
-         * (кол-во живых персонажей должна быть равно = длине массиву значений из аргументов метода)
+        var user = await _userManager.GetUserAsync(Context.User);
 
-         * 3)Если пользователь гейммастер - отсортирвоать значения инициатива (по убыванию (desc))
-         * 4)Обновить статус боя и разослать ивент FIGHT STATUS UPDATE {isfight, guid characterorder[]}
-         
-         
-         */
-    }
+        // 1) Проверка, является ли пользователь игровым мастером
+        if (!await _partyService.IsGameMaster(user.Id, partyId))
+        {
+            await Clients.Caller.SendAsync("Error", "Вы не являетесь игровым мастером");
+            return false;
+        }
 
-    //endgame только гейммастер(+)
-    public async Task<bool> EndGame(int xp)
-    {
+        // 2) Вызов метода EndGameAsync из PartyService
+        await _partyService.EndGameAsync(partyId, xp);
+        return true;
         /*todo
          * 1) возврат true false только гейммастер
          * 2) Вызвать метод PartyService EndGameAsync {partyid, xp}
          * 
          */
 
-        var connectionId = Context.ConnectionId;
-        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-
-        if (room != null)
-        {
-            var gameMaster = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId && p.IsGameMaster);
-            if (gameMaster != null)
-            {
-                // Логика завершения игры (например, очистка комнаты, отправка уведомлений)
-
-
-                await _partyService.EndGameAsync(partyId, xp);
-
-                _rooms.Remove(room);
-                await Clients.Group().SendAsync("GameEnded", roomId);
-                return;
-            }
-        }
-
-        await Clients.Caller.SendAsync("Error");
     }
-
     //обновление состояние игры
     private async Task GameRoomState(GameRoom room)
     {
-        //character update
+        
         //идет ли бой сейчаc isfighting bool
         //order массив стрингов // characterid персонажей по порядку desc //иначе null
         //
         //return 
         //
 
-        // Проверка, идет ли бой сейчас
-        bool isFighting = room.IsFight; // Предположим, что у вас есть свойство, определяющее статус боя
+        // Проверяем, идет ли бой
+        bool isFighting = room.IsFighting;
 
-        // Получение порядка хода персонажей
-        var order = isFighting ? room.SortedInitciativeScores : null;
-
-        // Сборка состояния игры
-        var gameState = new
+        string[] characterOrder = null;
+        if (isFighting && room.SortedInitciativeScores != null)
         {
-            RoomId = room.PartyId,
+            characterOrder = room.SortedInitciativeScores
+                .OrderByDescending(x => x.Score)
+                .Select(s => s.CharacterId.ToString())
+                .ToArray();
+        }
+
+        // Обновляем состояние комнаты
+        var roomState = new
+        {
             IsFighting = isFighting,
-            Order = order,
-            Players = room.Players.Select(p => new
-            {
-                p.ConnectionId,
-                Character = _characterService.GetByIdAsync(p.CharacterId).Result // Получение персонажа игрока
-            })
+            CharacterOrder = characterOrder,
         };
 
-        await Clients.Group(room.PartyId.ToString()).SendAsync("GameStateUpdated", gameState);
+        // Отправляем состояние комнаты клиентам
+        await Clients.Group(room.PartyId.ToString()).SendAsync("RoomStateUpdate", roomState);
+
     }
 
     //нанесения уровна
@@ -230,58 +202,121 @@ public class GameHub: Hub
          *
          */
 
-        var connectionId = Context.ConnectionId;
-        var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
-
-        if (room != null)
+        // ) Проверить, привязан ли идентификатор подключения к комнате
+        if (!_connectionRoomMapping.TryGetValue(Context.ConnectionId, out var partyId))
         {
-            var gameMaster = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId && p.IsGameMaster);
-            if (gameMaster != null)
-            {
-                var targetPlayer = room.Players.FirstOrDefault(p => p.Id == targetPlayerId);
-                if (targetPlayer != null)
-                {
-                    targetPlayer.Health -= damageAmount; //??
-
-                    await GameRoomState(room);
-                    await Clients.Group(roomId).SendAsync("PlayerDamaged", targetPlayer, damageAmount);
-                    return;
-                }
-            }
+            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
         }
 
-        await Clients.Caller.SendAsync("Error", "Cannot apply damage. Either room not found, player not found, or you don't have the permission.");
+        // ) Получить комнату по идентификатору комнаты
+        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
+        if (room == null)
+        {
+            throw new InvalidOperationException("Комната не найдена.");
+        }
+
+        // ) Проверить, находится ли целевой персонаж в партии
+        var targetCharacter = room.Players.FirstOrDefault(p => p.CharacterId.ToString() == targetCharacterId);
+        if (targetCharacter == null)
+        {
+            throw new InvalidOperationException("Целевой персонаж не найден в партии.");
+        }
+
+        // ) Использовать CharacterService для обновления HP целевого персонажа
+        var characterStats = await _characterService.GetCharacterInGameStatsAsync(Guid.Parse(targetCharacterId));
+        if (characterStats == null)
+        {
+            throw new InvalidOperationException("Статистика персонажа не найдена.");
+        }
+
+        // ) Применить урон к HP персонажа
+        characterStats.Hp -= damageAmount;
+        if (characterStats.Hp < 0) characterStats.Hp = 0;
+
+        // ) Обновить статистику персонажа в сервисе
+        await _characterService.UpdateCharacterInGameStatsAsync(Guid.Parse(targetCharacterId), characterStats);
+
+        // ) Уведомить всех участников комнаты об обновленном состоянии персонажа
+        await Clients.Group(partyId.ToString()).SendAsync("CharacterUpdated", targetCharacterId, characterStats);
+
+
+        //var connectionId = Context.ConnectionId;
+        //var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
+
+        //if (room != null)
+        //{
+        //    var gameMaster = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId && p.IsGameMaster);
+        //    if (gameMaster != null)
+        //    {
+        //        var targetPlayer = room.Players.FirstOrDefault(p => p.Id == targetPlayerId);
+        //        if (targetPlayer != null)
+        //        {
+        //            targetPlayer.Health -= damageAmount; //??
+
+        //            await GameRoomState(room);
+        //            await Clients.Group(roomId).SendAsync("PlayerDamaged", targetPlayer, damageAmount);
+        //            return;
+        //        }
+        //    }
+        //}
+
+        //await Clients.Caller.SendAsync("Error", "Cannot apply damage. Either room not found, player not found, or you don't have the permission.");
     }
 
 
-    /*
-    //создание комнаты
-    public async Task<GameRoom> CreateRoom(string Roomname)
+    //UPDATE FIGHT STATUS ЗАВЕршиться или начаться только гейммастер()
+    public async Task UpdateFight(FightStatusDto fightStatus)
     {
-        var random = new Random();
+        // 1) Получить идентификатор подключения вызывающего абонента
+        var connectionId = Context.ConnectionId;
 
-        var accescode = random.Next(10000000, 99999999).ToString();
-        //var partyId = party.Id;
-        var roomId = party.Id.ToString();
-        var playerName = Context.User.Identity.Name;
-        var gameMasterId = Guid.NewGuid();
+        // ) Проверить, привязан ли идентификатор подключения к комнате
+        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        {
+            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
+        }
+        // 2) Проверить, является ли пользователь Game Master через сервис PartyService
+        var userId = _userManager.GetUserId(Context.User);
+        var isGameMaster = await _partyService.IsGameMaster(Guid.Parse(userId), partyId); // 
 
-        var room = new GameRoom(roomId, Roomname, playerName, accescode, gameMasterId);
-        _rooms.Add(room);
-
-        var newPlayer = new Player(Context.ConnectionId, playerName);
-        room.Players.Add(newPlayer);
-        _connectionRoomMapping[Context.ConnectionId] = roomId;
-
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-        await Clients.All.SendAsync("Rooms", _rooms.OrderBy(r => r.RoomId));
-        Console.WriteLine($"Игрок c id {Context.ConnectionId} Cоздал комнату");
-
-        return room;
-    }*/
+        if (!isGameMaster)
+        {
+            throw new UnauthorizedAccessException("Только Game Master может обновлять статус боя.");
+        }
 
 
-    //принять предмет 
+        // 3) Получить модификатор ловкости каждого живого персонажа
+        var initiativeModifiers = new ConcurrentDictionary<string, int>();
+        foreach (var scoreValue in fightStatus.ScoreValues)
+        {
+            //var characterId = Guid.Parse(scoreValue.CharacterId);
+            //var characterStats = await _characterService.GetCharacterStatsAsync(characterId);
+            //initiativeModifiers[scoreValue.CharacterId] = characterStats.DexterityModifier;
+        }
+
+        // 4) Если пользователь Game Master, отсортировать значения инициативы по убыванию
+        if (isGameMaster)
+        {
+            fightStatus.ScoreValues = fightStatus.ScoreValues.OrderByDescending(sv => sv.Score).ToArray();
+        }
+
+        // 5) Обновить статус боя и разослать событие FIGHT STATUS UPDATE
+        var characterOrder = fightStatus.ScoreValues.Select(sv => Guid.Parse(sv.CharacterId)).ToArray();
+        await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", fightStatus.IsFight, characterOrder);
+        
+        /*
+         * todo ()
+         * 1)Проверяем конекшен Что пользователь гейммастер через сервис 
+         * 2)Получить модификатор ловкостити каждого живого персонажа 
+         * (кол-во живых персонажей должна быть равно = длине массиву значений из аргументов метода)
+
+         * 3)Если пользователь гейммастер - отсортирвоать значения инициатива (по убыванию (desc))
+         * 4)Обновить статус боя и разослать ивент FIGHT STATUS UPDATE {isfight, guid characterorder[]}
+         
+         */
+    }
+
+    //предложить предмет 
     public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInvenotyAbout)
     {
         /*это может прислать обычнйыы игрок и гейммастер
@@ -299,34 +334,74 @@ public class GameHub: Hub
          * 
          */
 
-        var connectionId = Context.ConnectionId;
-        var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
+        //var connectionId = Context.ConnectionId;
+        //var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
 
-        if (room != null)
-        {
-            var player = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
-            if (player != null)
-            {
+        //if (room != null)
+        //{
+        //    var player = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
+        //    if (player != null)
+        //    {
 
-                var inventoryItem = player.Inventory.FirstOrDefault(item => item.Id == itemId);
-                if (inventoryItem != null)
-                {
-                    player.AddItemToInventory(inventoryItem);
-                    await GameRoomState(room);
-                    await Clients.Caller.SendAsync("", inventoryItem);
+        //        var inventoryItem = player.Inventory.FirstOrDefault(item => item.Id == itemId);
+        //        if (inventoryItem != null)
+        //        {
+        //            player.AddItemToInventory(inventoryItem);
+        //            await GameRoomState(room);
+        //            await Clients.Caller.SendAsync("", inventoryItem);
 
 
-                    return;
-                }
-            }
-        }
+        //            return;
+        //        }
+        //    }
+        //}
 
-        await Clients.Caller.SendAsync("Error", "Item not found or you're not authorized to accept this item.");
+        //await Clients.Caller.SendAsync("Error", "Item not found or you're not authorized to accept this item.");
     }
 
     //принять предмет 
     public async Task<bool> AcceptInventory(string suggestionId)
     {
+
+        // Получаем connectionId
+        var connectionId = Context.ConnectionId;
+        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        {
+            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
+        }
+
+        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
+        if (room == null)
+        {
+            throw new InvalidOperationException("Комната не найдена.");
+        }
+
+        var characterId = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId)?.CharacterId;
+        if (characterId == null)
+        {
+            throw new InvalidOperationException("Персонаж не найден в комнате.");
+        }
+
+
+        //// Проверяем наличие предложения
+        //var suggestion = await SuggestionService.GetSuggestionById(suggestionId);
+        //if (suggestion == null)
+        //{
+        //    return false;
+        //}
+
+        //// Обрабатываем добавление предмета
+        //if (suggestion.Item != null)
+        //{
+        //    await InventoryService.CreateItem(characterId, suggestion.Item);
+        //}
+        //else if (suggestion.itemFromInventory != null)
+        //{
+        //    await InventoryService.TakeItemFromAnother(characterId, suggestion.itemFromInventory.InventoryItemId, suggestion.itemFromInventory.Count);
+        //}
+
+        return true;
+
         /*todo
          * 1) Получить по конекшну characterId 
          * 2) Посмотреть если в словаре предложения, Если предложения нет - вернуть false 
@@ -339,28 +414,27 @@ public class GameHub: Hub
          * 
          */
 
-        var connectionId = Context.ConnectionId;
-        var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
+        //var connectionId = Context.ConnectionId;
+        //var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
 
-        if (room != null)
-        {
-            var player = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
-            if (player != null)
-            {
-                var inventoryItem = player.Inventory.FirstOrDefault(item => item.Id == itemId);
-                if (inventoryItem != null)
-                {
-                    player.AddItemToInventory(inventoryItem);
-                    await GameRoomState(room);
-                    await Clients.Caller.SendAsync("", inventoryItem);
+        //if (room != null)
+        //{
+        //    var player = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
+        //    if (player != null)
+        //    {
+        //        var inventoryItem = player.Inventory.FirstOrDefault(item => item.Id == itemId);
+        //        if (inventoryItem != null)
+        //        {
+        //            player.AddItemToInventory(inventoryItem);
+        //            await GameRoomState(room);
+        //            await Clients.Caller.SendAsync("", inventoryItem);
 
+        //            return;
+        //        }
+        //    }
+        //}
 
-                    return;
-                }
-            }
-        }
-
-        await Clients.Caller.SendAsync("Error", "Item not found or you're not authorized to accept this item.");
+        //await Clients.Caller.SendAsync("Error", "Item not found or you're not authorized to accept this item.");
     }
 
     // Метод обновления стат персонажа
@@ -373,7 +447,33 @@ public class GameHub: Hub
          * {id, updatedstats
          * }
          */
-        var a = new { abc = "abc" };
+
+        // 1) Получить идентификатор персонажа, связанного с текущим подключением
+        var connectionId = Context.ConnectionId;
+        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        {
+            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
+        }
+
+        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
+        if (room == null)
+        {
+            throw new InvalidOperationException("Комната не найдена.");
+        }
+
+        var characterId = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId)?.CharacterId;
+        if (characterId == null)
+        {
+            throw new InvalidOperationException("Персонаж не найден в комнате.");
+        }
+
+        // 2) Вызвать метод сервиса для обновления статистики персонажа
+        await _characterService.UpdateCharacterInGameStatsAsync(characterId.Value, updatedStats);
+
+        // 3) Уведомить всех участников комнаты об обновленной статистике персонажа
+        await Clients.Group(partyId.ToString()).SendAsync("CharacterUpdated", characterId.ToString(), updatedStats);
+
+
         /*
         var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
         if (room != null)
@@ -404,6 +504,33 @@ public class GameHub: Hub
     //    }).OrderBy(r => r.RoomName);
     //    await Clients.Caller.SendAsync("Доступные комнаты", availableRooms);
     //}
+
+    /*
+    //создание комнаты
+    public async Task<GameRoom> CreateRoom(string Roomname)
+    {
+        var random = new Random();
+
+        var accescode = random.Next(10000000, 99999999).ToString();
+        //var partyId = party.Id;
+        var roomId = party.Id.ToString();
+        var playerName = Context.User.Identity.Name;
+        var gameMasterId = Guid.NewGuid();
+
+        var room = new GameRoom(roomId, Roomname, playerName, accescode, gameMasterId);
+        _rooms.Add(room);
+
+        var newPlayer = new Player(Context.ConnectionId, playerName);
+        room.Players.Add(newPlayer);
+        _connectionRoomMapping[Context.ConnectionId] = roomId;
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+        await Clients.All.SendAsync("Rooms", _rooms.OrderBy(r => r.RoomId));
+        Console.WriteLine($"Игрок c id {Context.ConnectionId} Cоздал комнату");
+
+        return room;
+    }*/
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         Console.WriteLine(exception);

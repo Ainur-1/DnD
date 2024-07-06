@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Contracs.Online;
 
-namespace Services.Abstractions;
+namespace GameHub;
 
 public interface ICharacterService
 {

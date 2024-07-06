@@ -15,9 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "Infrastructur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHub", "GameHub_V1\GameHub.csproj", "{0FB27C90-3A42-4C37-8D6D-1C531E333E3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracs", "Contracs\Contracs.csproj", "{436269CA-8AE3-4A1C-B25A-78A6C50222A0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Abstractions", "Services.Abstractions\Services.Abstractions.csproj", "{6FB96B6B-95A1-45D6-981E-2C5DE3D2A7C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracs", "Contracs\Contracs.csproj", "{436269CA-8AE3-4A1C-B25A-78A6C50222A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,10 +43,6 @@ Global
 		{436269CA-8AE3-4A1C-B25A-78A6C50222A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{436269CA-8AE3-4A1C-B25A-78A6C50222A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{436269CA-8AE3-4A1C-B25A-78A6C50222A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6FB96B6B-95A1-45D6-981E-2C5DE3D2A7C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6FB96B6B-95A1-45D6-981E-2C5DE3D2A7C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6FB96B6B-95A1-45D6-981E-2C5DE3D2A7C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6FB96B6B-95A1-45D6-981E-2C5DE3D2A7C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,7 +51,6 @@ Global
 		{830FFA82-C5E2-43C9-AF6A-3A88F1E8D9F0} = {D322383F-A97A-43F6-A6B7-49106846D4E9}
 		{68A7A46D-C8FE-4CE0-ABC8-FF55E046C856} = {E9272D28-CEF6-48D1-9289-CD38F14EE23A}
 		{436269CA-8AE3-4A1C-B25A-78A6C50222A0} = {D322383F-A97A-43F6-A6B7-49106846D4E9}
-		{6FB96B6B-95A1-45D6-981E-2C5DE3D2A7C1} = {D322383F-A97A-43F6-A6B7-49106846D4E9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6BC0C9A2-6E1F-485F-ADA6-CA4909AC1E53}

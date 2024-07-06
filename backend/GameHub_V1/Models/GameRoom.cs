@@ -49,10 +49,7 @@ namespace GameHub.Models
             return false;
         }
 
-        public bool IsGameMaster(Guid userId)
-        {
-            return GameMasterId == userId;
-        }
+
 
     }
 }
