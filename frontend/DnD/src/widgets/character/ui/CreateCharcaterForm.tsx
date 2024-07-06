@@ -14,9 +14,10 @@ import AddItemInventoryDialog from "./AddItemInventoryDialog";
 import { InventoryWeight } from "@/entities/item";
 import InventoryList from "@/entities/item/ui/InventoryList";
 import { AlignmentSelector } from "@/entities/character/ui/AlignmentSelector";
-import { Aligments } from "@/shared/types/domainTypes";
+import { Aligments, Currency } from "@/shared/types/domainTypes";
 import { useCreateCharacterMutation } from "@/features/character";
 import { useNavigate } from "react-router-dom";
+import { InventoryCurrencies } from "@/entities/inventory";
 
 interface StepProps {
     state: CreateCharacterFormState,
@@ -259,13 +260,25 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
 
     const [disableButtons] = useState(false);
     if (!state.classId.value) {
-        throw new Error("No class was set!");
+        //throw new Error("No class was set!");
     }
 
     const { data, isFetching, isSuccess } = useClassStartInventoryDescriptionQuery(state.classId.value);
 
     const showForm = () => setShow(true);
     const closeForm = () => setShow(false);
+
+    const setCurrency = (currency: Currency, value: number | undefined) => {
+        const wallet = state.currency?.value;
+        if (!wallet) {
+            return;
+        }
+
+        setField("currency", {
+            ...wallet,
+            [currency]: value
+        });
+    };
 
     const addItem = (item: ExpandedInventoryItem) => setField("inventory", 
         [...state.inventory.value!, item]
@@ -314,6 +327,16 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
             <Typography variant="h5" fontWeight="bold" component="div" textAlign="center">
                 Стартовый инветарь
             </Typography>
+            <Box display="flex" justifyContent="center" marginTop={3}>
+                <InventoryCurrencies 
+                    setCurrency={setCurrency}
+                    gold={state.currency.value?.gold} 
+                    silver={state.currency.value?.silver} 
+                    electrum={state.currency.value?.electrum} 
+                    platinum={state.currency.value?.platinum} 
+                    copper={state.currency.value?.copper} 
+                />
+            </Box>
             <Typography variant="body1" color="GrayText" component="div" marginTop={5}>
                 {isFetching && <Box display="flex" justifyContent="center">
                         <CircularProgress />
@@ -326,9 +349,14 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
                 deleteItem={deleteItem}
                 changeItem={changeItem}
             />
-            <InventoryWeight weightInPounds={state.inventory.value!
-                .map(x => x.item.weightInPounds)
-                .reduce((sum, current) => sum + current, 0)}/>  
+            <InventoryWeight 
+                weightInPounds={state.inventory.value!
+                    .map(x => x.item.weightInPounds)
+                    .reduce((sum, current) => sum + current, 0)
+                    + ((state.currency.value == undefined) ? 0 
+                        : ((state.currency.value?.copper ?? 0) + (state.currency.value?.silver ?? 0) + (state.currency.value?.gold ?? 0) + (state.currency.value?.electrum ?? 0) + (state.currency.value?.platinum ?? 0)) / 50.0)
+                }
+            />
             <Button variant="outlined" onClick={showForm}>Добавить</Button>
             <AddItemInventoryDialog 
                 show={show} 

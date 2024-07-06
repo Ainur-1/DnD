@@ -1,10 +1,10 @@
 import { ClassIdType } from "@/entities/classes";
+import { InventroryWallet } from "@/entities/inventory";
 import { Race } from "@/entities/races";
-import { ExpandedInventoryItem, InventoryItem } from "@/features/inventory";
+import { ExpandedInventoryItem } from "@/features/inventory";
 import { Aligments } from "@/shared/types/domainTypes";
 import { FormField } from "@/shared/types/IFormField";
 import { isDecimal } from "@/shared/utils/isDecimal";
-import { error } from "console";
 import { useReducer } from "react";
 
 const fullyUndefined = {
@@ -111,7 +111,8 @@ const step3Init: Step3State = {
 };
 
 type Step4State = {
-    inventory: FormField<ExpandedInventoryItem[]>
+    inventory: FormField<ExpandedInventoryItem[]>,
+    currency: FormField<InventroryWallet>,
 };
 
 const step4Init: Step4State = {
@@ -119,6 +120,16 @@ const step4Init: Step4State = {
         value: [],
         error: null,
     },
+    currency: {
+        value: {
+            copper: 0,
+            electrum: 0,
+            gold: 0,
+            platinum: 0,
+            silver: 0,
+        },
+        error: null
+    }
 };
 
 type CreateCharacterState = Step1State & Step2State & Step3State & Step4State;
@@ -313,9 +324,54 @@ function isValidStep3(state: CreateCharacterFormState, dispatch: React.Dispatch<
     return true;
 }
 
-function isValidStep4(state: CreateCharacterFormState, _: React.Dispatch<Action>) {
+function isValidStep4(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
+    const setField = carrySetField(dispatch);
 
-    return state.inventory?.value != undefined && state.inventory!.value.every(x => x.count >= 1);
+    const correctItemCount = state.inventory?.value != undefined && state.inventory!.value.every(x => x.count >= 1);
+
+    let correctCurrency = true;
+    if (!state.currency.value) {
+        correctCurrency = false;
+        setField("currency", step4Init.currency);
+    } else {
+        const wallet = state.currency.value!;
+        const fixedCurrency: {
+            copper?: number,
+            silver?: number,
+            electrum?: number,
+            gold?: number,
+            platinum?: number,
+        } = {};
+        if (!wallet.copper || wallet.copper < 0) {
+            correctCurrency = false;
+            fixedCurrency.copper = 0;
+        }
+        if (!wallet.silver || wallet.silver < 0) {
+            correctCurrency = false;
+            fixedCurrency.silver = 0;
+        }
+        if (!wallet.electrum || wallet.electrum < 0) {
+            correctCurrency = false;
+            fixedCurrency.electrum = 0;
+        }
+        if (!wallet.gold || wallet.gold < 0) {
+            correctCurrency = false;
+            fixedCurrency.gold = 0;
+        }
+        if (!wallet.platinum || wallet.platinum < 0) {
+            correctCurrency = false;
+            fixedCurrency.platinum = 0;
+        }
+
+        if (!correctCurrency) {
+            setField("currency", {
+                ...wallet,
+                fixedCurrency
+            });
+        }
+    }
+
+    return correctItemCount && correctCurrency;
 }
 
 

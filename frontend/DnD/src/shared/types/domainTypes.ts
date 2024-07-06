@@ -20,6 +20,8 @@ export enum Dice {
     twoD10 = "2d10"
 }
 
+export type Currency = "gold" | "silver" | "electrum" | "platinum" | "copper";
+
 export type WithId<T> = {
     id: T
 }

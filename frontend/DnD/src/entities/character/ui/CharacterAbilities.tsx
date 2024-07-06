@@ -2,6 +2,7 @@ import { tryParseNumber } from "@/shared/utils/parsers";
 import { Box, ClickAwayListener, Grid, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import { useState } from "react";
+import ClickableToolTip from "@/shared/ui/ClickableToolTip";
 
 interface StrictCharacterAbilityProps {
     abilityValue: number | undefined;
@@ -81,33 +82,10 @@ export default function CharacterAbilities({
             <CharacterAbility abilityLabel="Харизма" abilityValue={charisma.abilityValue} onAbilityValueChange={charisma.onAbilityValueChange} />
         </Grid>
         <Box display="flex" justifyContent="flex-end">
-            <AbilityToolTip/>
+            <ClickableToolTip  
+                icon={<HelpOutlinedIcon/>}
+                title="Бросьте четыре кости 1d6 и запишите сумму трёх наибольших результатов для каждой карактеристики. Или распределите 15, 14, 13, 12, 10, 8."
+            />
         </Box>
     </Stack>
-}
-
-function AbilityToolTip() {
-    const [open, setOpen] = useState(false);
-
-    const handleTooltipClose = () => setOpen(false);
-
-    const handleTooltipOpen= () => setOpen(true);
-
-    return <ClickAwayListener onClickAway={handleTooltipClose}>
-      <Tooltip
-        PopperProps={{
-          disablePortal: true,
-        }}
-        onClose={handleTooltipClose}
-        open={open}
-        disableFocusListener
-        disableHoverListener
-        disableTouchListener
-        title="Бросьте четыре кости 1d6 и запишите сумму трёх наибольших результатов для каждой карактеристики. Или распределите 15, 14, 13, 12, 10, 8."
-      >
-        <IconButton onClick={handleTooltipOpen}>
-            <HelpOutlinedIcon/>
-        </IconButton>
-      </Tooltip>
-  </ClickAwayListener>
 }
