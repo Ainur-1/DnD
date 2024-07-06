@@ -1,6 +1,6 @@
 import { ClassIdType } from "@/entities/classes";
 import { Race } from "@/entities/races";
-import { InventoryItem } from "@/features/inventory";
+import { ExpandedInventoryItem, InventoryItem } from "@/features/inventory";
 import { FormField } from "@/shared/types/IFormField";
 import { useReducer } from "react";
 
@@ -72,11 +72,11 @@ const step3Init: Step3State = {
 };
 
 type Step4State = {
-    inventroy: FormField<InventoryItem[]>
+    inventory: FormField<ExpandedInventoryItem[]>
 };
 
 const step4Init: Step4State = {
-    inventroy: {
+    inventory: {
         value: [],
         error: null,
     },

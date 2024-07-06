@@ -1,6 +1,6 @@
 import { ArmorType, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "../model/types";
-import { ReactNode, useContext, useState,  createContext, useReducer, Dispatch, useEffect } from "react";
-import { Divider, FormControl, FormControlLabel, FormGroup, Grid, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
+import { ReactNode, useContext,  createContext, useReducer, Dispatch, useEffect } from "react";
+import { FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import TagInput from "@/shared/ui/TagInput";
 import { ArmorTypeSelector, WeaponAttackTypeSelector, WeaponDamageTypeSelector, WeaponProficiencyTypeSelector } from "./EnumSelectors";
@@ -9,7 +9,6 @@ import { } from 'react';
 import reducer, { initialState, ItemFormBaseAction, ItemFormBaseActionType, ItemFormBaseStateWithFormSelector, SelectedItemForm } from '../model/ItemFormBaseReducer';
 import { DiceSelector } from "@/shared/ui/DiceSelector";
 import { Dice } from "@/shared/types/domainTypes";
-import FormBox from "@/widgets/sign-in/ui/FormBox";
 import { MuiFileInput } from "mui-file-input";
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 
@@ -31,8 +30,11 @@ const ItemFormBaseStateProvider = ({ children }: { children: ReactNode }) => {
 
 export { ItemFormBaseStateProvider, ItemFormBaseStateContext, ItemFormBaseDispatchContext };
 
+interface WeaponSpecificBodyProps {
+    disabled?: boolean
+}
 
-function WeaponSpecificBody() {
+function WeaponSpecificBody({disabled}: WeaponSpecificBodyProps) {
     const state = useContext(ItemFormBaseStateContext);
     const dispatch = useContext(ItemFormBaseDispatchContext);
     
@@ -179,19 +181,20 @@ function WeaponSpecificBody() {
 
     return <>
         <Grid item sm={6} xs={6}>
-            <WeaponAttackTypeSelector required onValueChange={setWeaponAttackType} />
+            <WeaponAttackTypeSelector disabled={disabled} required onValueChange={setWeaponAttackType} />
         </Grid>
         <Grid item sm={6} xs={6}>
-            <WeaponProficiencyTypeSelector required onValueChange={setWeaponProficiencyType} />
+            <WeaponProficiencyTypeSelector disabled={disabled} required onValueChange={setWeaponProficiencyType} />
         </Grid>
         <Grid item xs={12}>
-            <WeaponDamageTypeSelector required onValueChange={setWeaponDamageType} />
+            <WeaponDamageTypeSelector disabled={disabled} required onValueChange={setWeaponDamageType} />
         </Grid>
         {
             state.damageType?.value === WeaponDamageType.ranged && 
             <>
                 <Grid item sm={6} xs={6}>
                     <TextField
+                      disabled={disabled}
                       value={state.normalDistanceInFoots!.value}
                       onChange={(e) => setDistance(e.target.value)}
                       error={state.normalDistanceInFoots!.error != null}
@@ -204,6 +207,7 @@ function WeaponSpecificBody() {
                 </Grid>
                 <Grid item sm={6} xs={6}>
                     <TextField
+                      disabled={disabled}
                       value={state.criticalDistanceInFoots!.value}
                       error={state.criticalDistanceInFoots!.error != null}
                       helperText={state.criticalDistanceInFoots!.error}
@@ -217,21 +221,24 @@ function WeaponSpecificBody() {
             </>
         }
         <Grid item xs={12}>
-            <WeaponPropertiesAutocomplete selectedProperties={state.properties!.value ?? []} setSelectedProperties={setSelectedProperties}/>
+            <WeaponPropertiesAutocomplete disabled={disabled} selectedProperties={state.properties!.value ?? []} setSelectedProperties={setSelectedProperties}/>
         </Grid>
         <Grid item xs={6} sm={6}>
-            <DiceSelector id="Hit" selectorLabel="Урон" required value={state.hitDice?.value} onValueChange={setDice}  />
+            <DiceSelector disabled={disabled} id="Hit" selectorLabel="Урон" required value={state.hitDice?.value} onValueChange={setDice}  />
         </Grid>
         <Grid item xs={6} sm={6}>
             { 
                 state.properties?.value?.includes(WeaponProperty.versatile) &&
-                 <DiceSelector id="AlternateHit" selectorLabel="Алтернативный урон" value={state.alternateHitDice?.value ?? undefined} required onValueChange={setAlternateDice}  />
+                 <DiceSelector disabled={disabled} id="AlternateHit" selectorLabel="Алтернативный урон" value={state.alternateHitDice?.value ?? undefined} required onValueChange={setAlternateDice}  />
             }
         </Grid>
     </>
 }
 
-function ArmorSpesificBody() {
+interface ArmorSpesificBodyProps {
+    disabled?: boolean
+}
+function ArmorSpesificBody({disabled}: ArmorSpesificBodyProps) {
     const state = useContext(ItemFormBaseStateContext);
     const dispatch = useContext(ItemFormBaseDispatchContext);
     
@@ -370,11 +377,11 @@ function ArmorSpesificBody() {
 
     return <>
         <Grid item sm={6} xs={6}>
-            <ArmorTypeSelector required onValueChange={setArmorType} />
+            <ArmorTypeSelector disabled={disabled} required onValueChange={setArmorType} />
         </Grid>
         <Grid item sm={6} xs={6}>
             <TextField
-                disabled={state.armorType!.value === ArmorType.shield}
+                disabled={state.armorType!.value === ArmorType.shield || disabled}
                 value={state.armorType!.value === ArmorType.shield ? 2 : state.armorClass!.value}
                 onChange={(e) => setArmorClass(e.target.value)}
                 error={state.armorClass!.error != null}
@@ -387,18 +394,21 @@ function ArmorSpesificBody() {
         </Grid>
         <Grid item sm={12} xs={12}>
             <TextField
-            value={state.material!.value}
-            onChange={(e) => setMaterial(e.target.value)}
-            error={state.material!.error != null}
-            helperText={state.material!.error}
-            fullWidth
-            label="Материал"
-            required
+                disabled={disabled}
+                value={state.material!.value}
+                onChange={(e) => setMaterial(e.target.value)}
+                error={state.material!.error != null}
+                helperText={state.material!.error}
+                fullWidth
+                label="Материал"
+                required
         />
         </Grid>
         <Grid item sm={12} xs={12}>
             <FormControlLabel
+                disabled={disabled}
                 control={<Switch
+                    disabled={disabled}
                     value={state.hasStealthDisadvantage!.value != null}
                     onChange={handleStealthDisadvantageSwitchChange}
                     color="secondary" />}
@@ -408,7 +418,9 @@ function ArmorSpesificBody() {
         </Grid>
         <Grid item sm={12} xs={12}>
             <FormControlLabel
+                disabled={disabled}
                 control={<Switch 
+                    disabled={disabled}
                     value={state.maxPossibleDexterityModifier!.value !== null}
                     onChange={handleMaxDexteritySwitchChange}
                     color="secondary" />}
@@ -417,6 +429,7 @@ function ArmorSpesificBody() {
             />
             { state.maxPossibleDexterityModifier!.value !== null && 
                     <TextField
+                        disabled={disabled}
                         margin="dense" 
                         value={state.maxPossibleDexterityModifier!.value}
                         onChange={(e) => setMaxDexterity(e.target.value)}
@@ -430,7 +443,9 @@ function ArmorSpesificBody() {
         </Grid>
         <Grid item sm={12} xs={12}>
             <FormControlLabel
+                disabled={disabled}
                 control={<Switch 
+                    disabled={disabled}
                     value={state.requiredStrength!.value !== null}
                     onChange={handleRequiredStrengthSwitchChange}
                     color="secondary" />}
@@ -439,6 +454,7 @@ function ArmorSpesificBody() {
             />
             {state.requiredStrength!.value !== null && 
                     <TextField
+                        disabled={disabled}
                         margin="dense"
                         value={state.requiredStrength!.value}
                         onChange={(e) => setRequiredStrength(e.target.value)}
@@ -454,9 +470,10 @@ function ArmorSpesificBody() {
 }
 
 interface ItemFormBaseBodyProps {
+    disabled?: boolean
 }
 
-export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
+export function ItemFormBaseBody({disabled=false}: ItemFormBaseBodyProps) {
     const state = useContext(ItemFormBaseStateContext);
     const dispatch = useContext(ItemFormBaseDispatchContext);
     if (!state || !dispatch) {
@@ -574,6 +591,7 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
                 <FormControl fullWidth>
                     <InputLabel id="itemType-select-label">Тип предмета</InputLabel>
                     <Select
+                        disabled={disabled}
                         labelId="itemType-select-label"
                         id="itemType-select"
                         value={state.selectedForm}
@@ -588,6 +606,7 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
             </Grid>
             <Grid item xs={12}>
                 <TextField
+                  disabled={disabled}
                   value={state.name.value}
                   error={state.name.error != null}
                   helperText={state.name.error}
@@ -613,6 +632,7 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
             </Grid>
             <Grid item xs={6} sm={6}>
                 <TextField
+                  disabled={disabled}
                   value={state.weightInPounds.value}
                   onChange={(e) => setWeight(e.target.value)}
                   error={state.weightInPounds.error != null}
@@ -625,6 +645,7 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
             </Grid>
             <Grid item xs={6} sm={6}>
                 <TextField
+                  disabled={disabled}
                   value={state.costInGold.value}
                   onChange={(e) => setCost(e.target.value)}
                   error={state.costInGold.error != null}
@@ -637,6 +658,7 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
             </Grid>
             <Grid item xs={12}>
                 <TextField
+                    disabled={disabled}
                     fullWidth
                     multiline  
                     minRows={3} 
@@ -648,6 +670,7 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
             </Grid>
             <Grid item xs={12}>
                 <TagInput 
+                    disabled={disabled}
                     inputPlaceHolder="Тэги?"
                     tags={state.tags.value ?? []}
                     setTags={setTags}
@@ -656,53 +679,4 @@ export function ItemFormBaseBody({}: ItemFormBaseBodyProps) {
             {state.selectedForm == SelectedItemForm.armor && <ArmorSpesificBody/>}
             {state.selectedForm == SelectedItemForm.weapon && <WeaponSpecificBody/>}
     </>
-}
-
-interface ItemFormProps {
-    chracterId: string,
-}
-export default function ItemForm({}: ItemFormProps) {
-    const [count, setCount] = useState(1);
-    const [countError, setCountError] = useState("");
-    const [itemInUse, setItemInUse] = useState(false);
-    const [itemProficiency, setItemProficiencyOn] = useState(false);
-    
-    const onCountChange = (str: string) => {
-        const {success, value} = tryParseNumber(str);
-        if (success) {
-            const floor = Math.floor(value!);
-            if (floor < 1) {
-                setCount(1);
-                setCountError("Не меннее 1 предмета.");
-            } else {
-                setCount(floor);
-                setCountError("");
-            }
-        } else {
-            setCountError("Не число.")
-            setCount(1);
-        }
-    };
-
-    return <FormBox formTitle={""} handleSubmit={function (event: React.FormEvent<HTMLFormElement>): Promise<void> {
-        throw new Error("Function not implemented.");
-    } }>
-        <Divider/>
-        <FormGroup>
-            <TextField 
-                value={count}
-                onChange={(e) => onCountChange(e.target.value.trim())} 
-                margin="normal" 
-                required 
-                fullWidth  
-                label="Количество предметов" 
-                type="number" 
-                autoFocus
-                helperText={countError}
-                error={countError != ""}
-            />
-            <FormControlLabel control={<Switch value={itemInUse} onChange={() => setItemInUse(x => !x)} />} label="Сразу экипировать" labelPlacement="start" />
-            <FormControlLabel control={<Switch value={itemProficiency} onChange={() => setItemProficiencyOn(x => !x)} />} label="Владение предметом" labelPlacement="start" />
-        </FormGroup>
-    </FormBox>
 }

@@ -117,6 +117,7 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
             open={showForm}
             maxWidth="xs"
             fullWidth={true}
+            scroll="body"
         >
             <DialogTitle>
                 Лечить персонажа
@@ -221,6 +222,7 @@ export function DamageFormDialog({showForm, characterId, closeDialog}: HealFormD
             open={showForm}
             maxWidth="xs"
             fullWidth={true}
+            scroll="body"
         >
             <DialogTitle>
                 Атаковать персонажа
@@ -262,6 +264,7 @@ export function SuggestFormDialog({showForm, characterId, closeDialog}: HealForm
             open={showForm}
             maxWidth="xs"
             fullWidth={true}
+            scroll="body"
         >
             <DialogTitle>
                 Предложить предмет
@@ -363,6 +366,7 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
             open={showForm}
             maxWidth="xs"
             fullWidth={true}
+            scroll="body"
         >
             <DialogTitle>
                 Начать режим боя
@@ -417,6 +421,7 @@ export function ShowInventoryDialog({characterId, showForm}: ShowInventoryDialog
             open={showForm}
             maxWidth="xs"
             fullWidth={true}
+            scroll="paper"
         >
             <DialogTitle>
                 Инвентарь

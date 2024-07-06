@@ -7,8 +7,9 @@ interface TagInputProps {
     inputPlaceHolder: string,
     setTags: (tags: string[]) => void,
     tags: string[],
+    disabled?: boolean
 }
-export default function TagInput({inputPlaceHolder, setTags, tags}: TagInputProps) {
+export default function TagInput({inputPlaceHolder, setTags, tags, disabled=false}: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const theme = useTheme();
 
@@ -25,6 +26,7 @@ export default function TagInput({inputPlaceHolder, setTags, tags}: TagInputProp
   return (
     <Autocomplete
           multiple
+          disabled={disabled}
           value={tags}
           onChange={(_, newValue: string[]) => {
               setTags(newValue);

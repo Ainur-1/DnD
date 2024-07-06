@@ -1,4 +1,4 @@
-import { Box, CircularProgress, FormControl, FormGroup, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, FormControl, FormGroup, Grid, Stack, Typography } from "@mui/material";
 import { CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterXpField, CoinsAffectWeightSwitch } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 import { useState } from "react";
@@ -9,7 +9,10 @@ import CharacterBackgroundField from "@/entities/character/ui/CharacterBackgroun
 import TagInput from "@/shared/ui/TagInput";
 import SkillTraitMasteryField from "./SkillTraitMasteryField";
 import RaceTraitAdjustment from "./RaceTraitsAdjustments";
-import { AddItemToInventoryForm } from "@/features/inventory";
+import { AddItemToInventoryForm, ExpandedInventoryItem } from "@/features/inventory";
+import AddItemInventoryDialog from "./AddItemInventoryDialog";
+import { InventoryWeight } from "@/entities/item";
+import InventoryList from "@/entities/item/ui/InventoryList";
 
 interface StepProps {
     state: CreateCharacterFormState,
@@ -217,13 +220,54 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
     </Stack>
 }
 
-function Step4({ state, setStep }: StepProps) {
+function Step4({ state, setStep, setField }: StepProps) {
+    const [show, setShow] = useState(false);
+
     const [disableButtons] = useState(false);
     if (!state.classId.value) {
         throw new Error("No class was set!");
     }
 
     const { data, isFetching, isSuccess } = useClassStartInventoryDescriptionQuery(state.classId.value);
+
+    const showForm = () => setShow(true);
+    const closeForm = () => setShow(false);
+
+    const addItem = (item: ExpandedInventoryItem) => setField("inventory", 
+        [...state.inventory.value!, item]
+    );
+
+    const deleteItem = (delIndex: number) => {
+        const inventory = state.inventory.value!;
+        if (delIndex < 0 || delIndex > inventory!.length) {
+            return;
+        }
+
+        setField("inventory", inventory.reduce((acc, item, index) => {
+            if (index != delIndex) {
+                acc.push(item);
+            }
+
+            return acc;
+        }, [] as ExpandedInventoryItem[]));
+    };
+
+    const changeItem = (index: number, updatedItem:ExpandedInventoryItem) => {
+        const inventory = state.inventory.value!;
+        if (index < 0 || index > inventory!.length) {
+            return;
+        }
+
+        setField("inventory", inventory.reduce((acc, item, i) => {
+            if (index == i) {
+                acc.push(updatedItem);
+            } else {
+                acc.push(item)
+            }
+
+            return acc;
+        }, [] as ExpandedInventoryItem[]));
+    };
 
     return <Stack>
         <Stack>
@@ -236,9 +280,21 @@ function Step4({ state, setStep }: StepProps) {
                     </Box>}
                 {isSuccess && <>{data}</>}
             </Typography>
-            {/* todo: use already created? */ }
-            <AddItemToInventoryForm />
-            {/* todo: inventory item list from */ }
+            <InventoryList
+                items={state.inventory.value!}
+                maxHeight="50vh"
+                deleteItem={deleteItem}
+                changeItem={changeItem}
+            />
+            <InventoryWeight weightInPounds={state.inventory.value!
+                .map(x => x.item.weightInPounds)
+                .reduce((sum, current) => sum + current, 0)}/>  
+            <Button variant="outlined" onClick={showForm}>Добавить</Button>
+            <AddItemInventoryDialog 
+                show={show} 
+                close={closeForm}
+                onItemAdd={addItem}
+            />
         </Stack>
         <FormStepsButtons 
             onPrevButtonClicked={() => setStep(3)}

@@ -21,10 +21,11 @@ const WeaponPropertiesLabelMap = {
 
 interface WeaponPropertiesAutocompleteProps {
     selectedProperties: WeaponProperty[],
-    setSelectedProperties: (properties: WeaponProperty[]) => void
+    setSelectedProperties: (properties: WeaponProperty[]) => void;
+    disabled?: boolean
 }
 
-export default function WeaponPropertiesAutocomplete({selectedProperties, setSelectedProperties}: WeaponPropertiesAutocompleteProps) {
+export default function WeaponPropertiesAutocomplete({selectedProperties, setSelectedProperties, disabled}: WeaponPropertiesAutocompleteProps) {
     const values = Object.values(WeaponProperty);
     const theme = useTheme();
 
@@ -43,6 +44,7 @@ export default function WeaponPropertiesAutocomplete({selectedProperties, setSel
 
     return (
         <Autocomplete
+            disabled={disabled}
             multiple
             id="weapon-properties"
             options={filteredOptions}

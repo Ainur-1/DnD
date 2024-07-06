@@ -83,7 +83,7 @@ const CreatePrototypeFromItemForm = ({setPrototype}: CreatePrototypeFromItemForm
         setPrototype(item);
     };
 
-    return <form onSubmit={handleSubmit}>
+    return <Box component="form" onSubmit={handleSubmit}>
         <Grid container spacing={2}>
             <Container>
                 <Typography variant="body2" color="error" textAlign="center">
@@ -101,7 +101,7 @@ const CreatePrototypeFromItemForm = ({setPrototype}: CreatePrototypeFromItemForm
                 </Box>
              </Grid>
         </Grid>
-    </form>
+    </Box>
 }
 
 interface SuggesItemFormProps {
