@@ -1,5 +1,6 @@
 import { ClassFeature, RaceTrait } from "@/shared/types/domainTypes"
 
+
 export type Personality = {
     characterName: string | "",
     characterRace: string,
@@ -90,7 +91,6 @@ export type ProficiencyAndInitiative = {
     initiativeModifier: number,
     proficiencyBonus: number,
 }
-
 
 export type DynamicStats = {
     hp: number,

@@ -78,7 +78,8 @@ interface CharacterUploadImageProps {
 
 export default function CharacterUploadImage({base64Image, setImage} : CharacterUploadImageProps) {
 
-    return <CharacterImage 
+    return <CharacterImage
+        height="25vh"
         base64Image={base64Image}
         imageOverlayChildren={
             base64Image ? <DeleteImageOverlay deleteImage={() => setImage(undefined)} /> 

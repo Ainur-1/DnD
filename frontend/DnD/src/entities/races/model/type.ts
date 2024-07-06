@@ -13,7 +13,7 @@ export type RaceInfo = {
     speed: number;
     languages: string[];
     subraces: string[];
-    raceTraits: RaceTrait[]
+    raceTraits: RaceTrait[];
 } & SimpleRace;
 
 export type Race = {

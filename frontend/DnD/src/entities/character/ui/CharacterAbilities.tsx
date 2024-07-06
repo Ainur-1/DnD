@@ -5,14 +5,15 @@ import { useState } from "react";
 
 interface StrictCharacterAbilityProps {
     abilityValue: number | undefined;
-    onAbilityValueChange: (value: number | undefined) => void
+    onAbilityValueChange: (value: number | undefined) => void;
+    errorText?: string
 }
 
 interface CharacterAbilityProps extends StrictCharacterAbilityProps {
     abilityLabel: string;
 }
 
-function CharacterAbility({abilityLabel, abilityValue, onAbilityValueChange}: CharacterAbilityProps) {
+function CharacterAbility({abilityLabel, abilityValue, onAbilityValueChange, errorText}: CharacterAbilityProps) {
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const strValue = e.target.value.trim();
@@ -25,7 +26,7 @@ function CharacterAbility({abilityLabel, abilityValue, onAbilityValueChange}: Ch
         if (success) {
             const floored = Math.floor(value!);
             
-            onAbilityValueChange(floored <= 0 ? 1 : floored);
+            onAbilityValueChange(floored < 3 ? 3 : floored);
             return;
         }
 
@@ -39,11 +40,11 @@ function CharacterAbility({abilityLabel, abilityValue, onAbilityValueChange}: Ch
             </Typography>
         </Grid>
         <Grid item xs={2} >
-            <TextField 
+            <TextField
                 required
                 value={abilityValue}
                 onChange={onChange}
-                error={abilityValue == undefined}
+                error={abilityValue == undefined || errorText != undefined && errorText.length > 0}
             />
         </Grid>
     </>

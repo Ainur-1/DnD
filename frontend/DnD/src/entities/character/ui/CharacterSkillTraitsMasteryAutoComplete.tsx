@@ -6,6 +6,7 @@ interface CharacterSkillTraitsMasteryProps {
     selectedTraits: string[];
     onChange: (values: string[]) => void;
     isLoading: boolean;
+    error?: string;
 }
 
 export default function CharacterSkillTraitsMasteryAutoComplete({
@@ -14,6 +15,7 @@ export default function CharacterSkillTraitsMasteryAutoComplete({
     onChange, 
     selectedTraits,
     isLoading,
+    error,
 }: CharacterSkillTraitsMasteryProps) {
     const theme = useTheme();
 
@@ -51,6 +53,8 @@ export default function CharacterSkillTraitsMasteryAutoComplete({
         renderInput={(params) => (
             <TextField
                 {...params}
+                error={error != undefined && error.length > 0}
+                helperText={error}
                 variant="outlined"
                 label={label}
             />

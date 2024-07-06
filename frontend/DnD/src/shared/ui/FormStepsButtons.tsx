@@ -27,11 +27,11 @@ export function FormStepsButtons({
         marginTop={5}
     >
         {
-            showPrevButton && <Button disabled={prevButtonDisabled} size="small" variant="text" onClick={onPrevButtonClicked}>
+            showPrevButton && <Button disabled={prevButtonDisabled} size="medium" variant="text" onClick={onPrevButtonClicked}>
                 {prevButtonText}
             </Button>
         }
-        <Button disabled={nextButtonDisabled} type={nextButtonType} size="small" variant="contained" onClick={onNextButtonClicked}>
+        <Button disabled={nextButtonDisabled} type={nextButtonType} size="medium" variant="contained" onClick={onNextButtonClicked}>
             {nextButtonText}
         </Button>
     </Box>

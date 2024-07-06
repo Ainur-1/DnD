@@ -1,9 +1,9 @@
-import { Box, Button, CircularProgress, FormControl, FormGroup, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Container, FormControl, FormGroup, Grid, Stack, Typography } from "@mui/material";
 import { CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterUploadImage, CharacterXpField, CoinsAffectWeightSwitch } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 import { useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
-import { RaceSelector } from "@/features/races";
+import { RaceSelector, useRaceInfoQuery } from "@/features/races";
 import { ClassSelector, useClassStartInventoryDescriptionQuery } from "@/features/classes";
 import CharacterBackgroundField from "@/entities/character/ui/CharacterBackgroundField";
 import TagInput from "@/shared/ui/TagInput";
@@ -13,6 +13,8 @@ import { ExpandedInventoryItem } from "@/features/inventory";
 import AddItemInventoryDialog from "./AddItemInventoryDialog";
 import { InventoryWeight } from "@/entities/item";
 import InventoryList from "@/entities/item/ui/InventoryList";
+import { AlignmentSelector } from "@/entities/character/ui/AlignmentSelector";
+import { Aligments } from "@/shared/types/domainTypes";
 
 interface StepProps {
     state: CreateCharacterFormState,
@@ -69,28 +71,28 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
 
     const characterAbilitiesProps = {
         strength: {
-            abilityValue: 0,
-            onAbilityValueChange: (_: number | undefined) => {}
+            abilityValue: state.strength.value,
+            onAbilityValueChange: (value: number | undefined) => setField("strength", value)
         },
         dexterity:  {
-            abilityValue: 0,
-            onAbilityValueChange: (_: number | undefined) => {}
+            abilityValue: state.dexterity.value,
+            onAbilityValueChange: (value: number | undefined) => setField("dexterity", value)
         },
         constitution:  {
-            abilityValue: 0,
-            onAbilityValueChange: (_: number | undefined) => {}
+            abilityValue: state.constitution.value,
+            onAbilityValueChange: (value: number | undefined) => setField("constitution", value)
         },
         intelligence:  {
-            abilityValue: 0,
-            onAbilityValueChange: (_: number | undefined) => {}
+            abilityValue: state.intelligence.value,
+            onAbilityValueChange: (value: number | undefined) => setField("intelligence", value)
         },
         wisdom:  {
-            abilityValue: 0,
-            onAbilityValueChange: (_: number | undefined) => {}
+            abilityValue: state.wisdom.value,
+            onAbilityValueChange: (value: number | undefined) => setField("wisdom", value)
         },
         charisma: {
-            abilityValue: 0,
-            onAbilityValueChange: (_: number | undefined) => {}
+            abilityValue: state.charisma.value,
+            onAbilityValueChange: (value: number | undefined) => setField("charisma", value)
         },
     };
 
@@ -124,8 +126,7 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
     }
 
     return <Stack>
-        <Stack alignItems="center">
-            <Grid container alignItems="center" justifyContent="center" rowSpacing={1}>
+        <Grid container rowSpacing={1} spacing={2}>
                 <RaceSelector onRaceSelected={(race) => setField("race", race)} />
                 {state.race.value && <Grid item xs={12}>
                     <RaceTraitAdjustment 
@@ -148,11 +149,11 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
                         classId={state.classId.value} 
                         selectedTraits={state.skillTraitsMastery.value ?? []} 
                         setSelectedTraits={(values) => setField("skillTraitsMastery", values)}
+                        error={state.skillTraitsMastery.error ?? undefined}
                     />
                 </Grid>
-            </Grid>
-            <CharacterAbilities {...characterAbilitiesProps} />
-        </Stack>
+        </Grid>
+        <CharacterAbilities {...characterAbilitiesProps} />
         <FormStepsButtons 
             onPrevButtonClicked={() => setStep(1)}
             prevButtonText="Назад"
@@ -164,8 +165,13 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
     </Stack>
 }
 
-
 function Step3({ state, setStep, setField, isValid }: StepProps) {
+    if (!state.race.value?.id) {
+        throw new Error("Race required!");
+    }
+
+    const { data } = useRaceInfoQuery(state.race.value.id);
+
     const [disableButtons, setDisableButtons] = useState(false);
 
     const onNextButtonClicked = () => {
@@ -179,37 +185,62 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
         }
     };
 
+    const onAligmentChange = (alignment: Aligments) => {
+        if (alignment != Aligments.any)
+            setField("alignment", alignment);
+    }
+
     return <Stack>
-        <Stack alignItems="center">
-            <Box width={200} height={200}>
+        <Grid container rowSpacing={1} spacing={2}>
+            <Grid item xs={12} alignItems="center">
                 <CharacterUploadImage base64Image={state.base64Image.value} setImage={(base64Iamge) => setField("base64Image", base64Iamge)}/>
-            </Box>
-            <CharacterBackgroundField
-                label="Лор"
-                value={state.background.value}
-                onChange={(value) => setField("background", value)}
-            />
-            <TagInput 
-                inputPlaceHolder="Языки"
-                tags={state.languages.value ?? []}
-                setTags={(tags) => setField("languages", tags)}   
-            />
-            <TagInput 
-                inputPlaceHolder="Слабости"
-                tags={state.flaws.value ?? []}
-                setTags={(tags) => setField("flaws", tags)}   
-            />
-            <TagInput 
-                inputPlaceHolder="Привязанности"
-                tags={state.bonds.value ?? []}
-                setTags={(tags) => setField("bonds", tags)}   
-            />
-            <TagInput 
-                inputPlaceHolder="Прочие черты"
-                tags={state.otherTraits.value ?? []}
-                setTags={(tags) => setField("otherTraits", tags)}   
-            />
-        </Stack>
+            </Grid>
+            <Grid item xs={12}>
+                <Typography variant="body1" color="GrayText" marginTop={3} style={{ wordWrap: 'break-word', wordBreak: 'break-all' }}>
+                    {data?.data?.recommendedAlignmentDescription}
+                    dgdfgdgmdkjgndkfjgndfkjgndkfgndkfngdkjfngkdjfngkdjfngkjdfngkdngkdfngkjdfngkdjfngkdfjngkdfjngdkfjgnjfndkfjgndfkjgndfkjgndfkjgndfkgjndfkgjndfkgjndfkgjndfk
+                </Typography>
+            </Grid>
+            <Grid item xs={12}>
+                <AlignmentSelector required={true} value={state.alignment.value} errorText={state.alignment.error ?? undefined} onValueChange={onAligmentChange}/>
+            </Grid>
+            
+            <Grid item xs={12}>
+                <CharacterBackgroundField
+                    label="Лор"
+                    value={state.background.value}
+                    onChange={(value) => setField("background", value)}
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <TagInput 
+                    inputPlaceHolder="Языки"
+                    tags={state.languages.value ?? []}
+                    setTags={(tags) => setField("languages", tags)}   
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <TagInput 
+                    inputPlaceHolder="Слабости"
+                    tags={state.flaws.value ?? []}
+                    setTags={(tags) => setField("flaws", tags)}   
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <TagInput 
+                    inputPlaceHolder="Привязанности"
+                    tags={state.bonds.value ?? []}
+                    setTags={(tags) => setField("bonds", tags)}   
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <TagInput 
+                    inputPlaceHolder="Прочие черты"
+                    tags={state.otherTraits.value ?? []}
+                    setTags={(tags) => setField("otherTraits", tags)}   
+                />
+            </Grid>
+        </Grid>
         <FormStepsButtons 
             onPrevButtonClicked={() => setStep(2)}
             prevButtonText="Назад"
@@ -314,6 +345,7 @@ export default function CreateCharcaterForm() {
         setStep,
         isValidStep1,
         isValidStep2,
+        isValidStep3,
         isValidStep4
      } = useCreateCharacterReducer();
 
@@ -321,13 +353,11 @@ export default function CreateCharcaterForm() {
         event.preventDefault();
     }
 
-    const skipValidation = () => true;
-
     return <>
         <Box component="form" noValidate onSubmit={handleSubmit} padding={2}>
             {state.step === 1 && <Step1 state={state} isValid={isValidStep1} setField={setField} setStep={setStep} />}
             {state.step === 2 && <Step2 state={state} isValid={isValidStep2} setField={setField} setStep={setStep} />}
-            {state.step === 3 && <Step3 state={state} isValid={skipValidation} setField={setField} setStep={setStep} />}
+            {state.step === 3 && <Step3 state={state} isValid={isValidStep3} setField={setField} setStep={setStep} />}
             {state.step === 4 && <Step4 state={state} isValid={isValidStep4} setField={setField} setStep={setStep} />}
         </Box>
     </>

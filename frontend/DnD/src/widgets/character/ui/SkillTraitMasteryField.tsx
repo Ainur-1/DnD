@@ -6,9 +6,10 @@ interface SkillTraitMasteryFieldProps {
     classId: string | undefined;
     selectedTraits: string[];
     setSelectedTraits: (values: string[]) => void;
+    error?: string;
 }
 
-export default function  SkillTraitMasteryField({classId, selectedTraits, setSelectedTraits}: SkillTraitMasteryFieldProps) {
+export default function  SkillTraitMasteryField({classId, selectedTraits, setSelectedTraits, error,}: SkillTraitMasteryFieldProps) {
     const { data, isFetching, isSuccess } = useClassInfoQuery(classId ?? "", {
         skip: classId == undefined
     });
@@ -20,6 +21,7 @@ export default function  SkillTraitMasteryField({classId, selectedTraits, setSel
     }, [data, isSuccess]);
 
     return <CharacterSkillTraitsMasteryAutoComplete
+        error={error}
         isLoading={isFetching}
         availableSkillTraits={data?.data?.skillTraitsMastery ?? []}
         onChange={setSelectedTraits}

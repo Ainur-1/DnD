@@ -1,3 +1,4 @@
+import { Aligments } from "./model/types";
 import CharacterAbilities from "./ui/CharacterAbilities";
 import CharacterCard, { CharacterCardSkeletone } from "./ui/characterCard";
 import { CarouselCardOverlay, InGameLiveOverlay, LoadImageOverlay } from "./ui/characterCardTopOverlays";
@@ -26,3 +27,8 @@ export { CharacterCard,
     CharacterImage,
     CharacterUploadImage,
  };
+
+export type {
+    Aligments,
+    
+}

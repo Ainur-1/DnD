@@ -23,3 +23,17 @@ export enum Dice {
 export type WithId<T> = {
     id: T
 }
+
+export enum Aligments {
+    lawfulGood = "LawfulGood",
+    neutralGood = "NeutralGood",
+    chaoticGood = "ChaoticGood",
+    lawfulNeutral = "LawfulNeutral",
+    trueNeutral = "TrueNeutral",
+    chaoticNeutral = "ChaoticNeutral",
+    lawfulEvil = "LawfulEvil",
+    neutralEvil = "NeutralEvil",
+    chaoticEvil = "ChaoticEvil",
+    unaligned = "Unaligned",
+    any = "Any",
+}
