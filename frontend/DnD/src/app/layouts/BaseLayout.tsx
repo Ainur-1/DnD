@@ -6,6 +6,8 @@ import { AppBar } from "@/widgets/navbar";
 import LiveGameSessionPage from "@/pages/game";
 import { MyCharactersPage } from "@/pages/characters";
 import { PartiesPage } from "@/pages/parties";
+import { CreateCharacterPage } from "@/pages/character-create";
+
 
 function BaseLayout() {
     return (
@@ -14,9 +16,12 @@ function BaseLayout() {
         <Routes>
             <Route path="/sign-in" element={<SignInPage/>}/>
             <Route path="/sign-up" element={<SignUpPage/>}/>
-            <Route path="/my-characters" element={<MyCharactersPage/>} />
-            <Route path="/my-parties" element={<PartiesPage/>} />
             <Route /*element={<PrivateRoute/>}*/>
+              <Route path="/my-characters">
+                <Route path="" index element={<MyCharactersPage/>} />
+                <Route path="create" element={<CreateCharacterPage/>}/>
+              </Route>
+              <Route path="/my-parties" element={<PartiesPage/>} />
               <Route path="/game/:partyId" element={<LiveGameSessionPage/>} />
             </Route>
         </Routes>

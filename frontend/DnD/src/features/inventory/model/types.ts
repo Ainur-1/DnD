@@ -1,5 +1,4 @@
-import { CharacterWallet } from "@/entities/character/model/types";
-import { ExpandedInventoryItem, InventoryItem, } from "@/entities/item/model/types";
+import { ExpandedInventoryItem, InventoryItem, InventoryWallet } from "@/entities/item/model/types";
 
 export interface InventoryItemsQueryResult  {
     items: ExpandedInventoryItem[];
@@ -19,7 +18,7 @@ export interface UpdateInventoryItemMutationResult {
 
 export type InventoryState = {
     characterId: string | null;
-    wallet: CharacterWallet;
+    wallet: InventoryWallet;
     weight: number;
     items: ExpandedInventoryItem[];
 }

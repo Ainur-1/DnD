@@ -1,6 +1,6 @@
 import { BASE_URL } from "@/shared/configuration/enviromentConstants";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { CreatePartyResult, CreatePartyVariables, JoinPartyResult, JoinPartyVariables, MyPartiesQueryResult, PartyQueryResult, StrictPartyQueryResult } from "./apiVariables";
+import { CreatePartyResult, CreatePartyVariables, JoinPartyResult, JoinPartyVariables, PartyQueryResult, StrictPartyQueryResult } from "./apiVariables";
 
 export const partyApi = createApi({
     reducerPath: 'party/api',
@@ -18,6 +18,7 @@ export const partyApi = createApi({
             query: (partyId) => ({
                 url: "party query",
                 method: "POST",
+                partyId
             }),
         }),
         myParties: build.query<PartyQueryResult[], void>({

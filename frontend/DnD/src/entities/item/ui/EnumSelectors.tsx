@@ -1,9 +1,8 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { ArmorType, WeaponAttackType, WeaponDamageType, WeaponProficiencyType } from "../model/types";
-import { GenericSelectorProps } from "@/shared/types/IGenericSelectorProps";
+import { SelectorProps } from "@/shared/types/IGenericSelectorProps";
 
-
-interface ArmorTypeSelectorProps extends GenericSelectorProps<ArmorType> {
+interface ArmorTypeSelectorProps extends SelectorProps<ArmorType> {
 }
 
 export function ArmorTypeSelector({value, onValueChange, required}: ArmorTypeSelectorProps) {
@@ -34,7 +33,7 @@ export function ArmorTypeSelector({value, onValueChange, required}: ArmorTypeSel
   </FormControl>
 }
 
-export function WeaponProficiencyTypeSelector({required, value, onValueChange}: GenericSelectorProps<WeaponProficiencyType>) {
+export function WeaponProficiencyTypeSelector({required, value, onValueChange}: SelectorProps<WeaponProficiencyType>) {
     const handleChange = (value: WeaponProficiencyType | string) => {
         onValueChange(typeof value === 'string' ? WeaponProficiencyType[(value.toLowerCase() as keyof typeof WeaponProficiencyType)] : value);
     };
@@ -55,7 +54,7 @@ export function WeaponProficiencyTypeSelector({required, value, onValueChange}: 
   </FormControl>
 }
 
-export function WeaponAttackTypeSelector({required, value, onValueChange}: GenericSelectorProps<WeaponAttackType>) {
+export function WeaponAttackTypeSelector({required, value, onValueChange}: SelectorProps<WeaponAttackType>) {
     const handleChange = (value: WeaponAttackType | string) => {
         onValueChange(typeof value === 'string' ? WeaponAttackType[(value.toLowerCase() as keyof typeof WeaponAttackType)] : value);
     };
@@ -77,7 +76,7 @@ export function WeaponAttackTypeSelector({required, value, onValueChange}: Gener
   </FormControl>
 }
 
-export function WeaponDamageTypeSelector({required, value, onValueChange}: GenericSelectorProps<WeaponDamageType>) {
+export function WeaponDamageTypeSelector({required, value, onValueChange}: SelectorProps<WeaponDamageType>) {
     const handleChange = (value: WeaponDamageType | string) => {
         onValueChange(typeof value === 'string' ? WeaponDamageType[(value.toLowerCase() as keyof typeof WeaponDamageType)] : value);
     };

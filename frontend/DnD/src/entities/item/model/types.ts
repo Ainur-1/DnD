@@ -1,3 +1,4 @@
+import { WithId } from "@/shared/types/domainTypes";
 
 export type ItemBase = {
     name: string;
@@ -76,12 +77,20 @@ type Armor = {
 export type Item = Weapon | Armor | Stuff;
 
 export type InventoryItem = {
-    id: string,
     count: number;
     inUse: boolean;
     isItemProficiencyOn: boolean;
-}
+} & WithId<string>;
 
 export type ExpandedInventoryItem = InventoryItem & {
     item: Item,
+}
+
+export type InventoryWallet = {
+    goldCoins: number;
+    copperCoins: number;
+    platinumCoins: number;
+    silverCoins: number;
+    electrumCoins: number;
+    totalInGoldCoins: number;
 }

@@ -11,6 +11,7 @@ import { suggestItem } from "@/features/game/model/gameSlice";
 import { InventoryItemCard, Item, ItemFormBaseStateProvider } from "@/entities/item";
 import { ItemFormBaseBody, ItemFormBaseDispatchContext, ItemFormBaseStateContext } from "@/entities/item/ui/ItemForm";
 import { anyError, ItemFormBaseActionType, stateToItem } from "@/entities/item/model/ItemFormBaseReducer";
+import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 
 interface InventoryItemSelectorProps {
     characterId: string,
@@ -82,7 +83,7 @@ const CreatePrototypeFromItemForm = ({setPrototype}: CreatePrototypeFromItemForm
         setPrototype(item);
     };
 
-    return <form onSubmit={handleSubmit}>
+    return <Box component="form" onSubmit={handleSubmit}>
         <Grid container spacing={2}>
             <Container>
                 <Typography variant="body2" color="error" textAlign="center">
@@ -100,7 +101,7 @@ const CreatePrototypeFromItemForm = ({setPrototype}: CreatePrototypeFromItemForm
                 </Box>
              </Grid>
         </Grid>
-    </form>
+    </Box>
 }
 
 interface SuggesItemFormProps {
@@ -215,18 +216,14 @@ export default function SuggesItemForm({characterId, loadInventory = false, clos
                         helperText={countError}
                         error={countError != ""}
                     />
-                    <Box sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignContent: "center"
-                    }}>
-                        <Button disabled={requestSent} size="small" variant="text" onClick={backwardButtonClick}>
-                            Назад
-                        </Button>
-                        <Button disabled={requestSent} type="submit" size="small" variant="contained">
-                            Передать
-                        </Button>
-                    </Box>
+                    <FormStepsButtons
+                        prevButtonText="Назад"
+                        prevButtonDisabled={requestSent}
+                        onPrevButtonClicked={backwardButtonClick}
+                        nextButtonText="Передать"
+                        nextButtonDisabled={requestSent}
+                        nextButtonType="submit"
+                    />
                 </FormBox>} 
             </>}
             {!loadInventory && <FormBox formTitle="Создать и передать предмет" handleSubmit={handleSubmit}>
@@ -251,15 +248,12 @@ export default function SuggesItemForm({characterId, loadInventory = false, clos
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <Box sx={{
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                alignContent: "center"
-                            }}>
-                                <Button disabled={requestSent} type="submit" size="small" variant="contained">
-                                    Передать
-                                </Button>
-                            </Box>
+                            <FormStepsButtons
+                                showPrevButton={false}
+                                nextButtonText="Передать"
+                                nextButtonDisabled={requestSent}
+                                nextButtonType="submit"
+                            />
                         </Grid>
                     </Grid>
                 </FormBox>}

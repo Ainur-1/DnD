@@ -1,12 +1,11 @@
 import IconWithCenteredValue, { iconWithCenteredValueFont } from "@/shared/ui/IconWithCenteredValue ";
-import { Box, CardActionArea, Container, Grid, styled, Typography } from "@mui/material";
+import { Box, CardActionArea, Grid, styled, Typography } from "@mui/material";
 import ShieldIcon from '@mui/icons-material/Shield';
 import SquareIcon from '@mui/icons-material/Square';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CircleIcon from '@mui/icons-material/Circle';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import CloseIcon from '@mui/icons-material/Close';
-import UpgradeIcon from '@mui/icons-material/Upgrade';
 import KeyboardDoubleArrowUpTwoToneIcon from '@mui/icons-material/KeyboardDoubleArrowUpTwoTone';
 
 interface InGameLiveOverlay {
@@ -139,4 +138,24 @@ export function CarouselCardOverlay({showDeadIcon, showInPartyLabel, showCanUpda
             </Grid>
         </Box>
     </>
+}
+
+interface LoadImageOverlayProps {
+
+}
+
+export function LoadImageOverlay({}: LoadImageOverlayProps) {
+    return <CardActionArea 
+    sx={{
+        display: "flex",
+        height: "100%",
+        alignItems: "center",
+        flexDirection: "column",
+        justifyContent: "center"
+    }}>
+        <Box sx={{
+            display: "flex",
+        }}>
+        </Box>
+    </CardActionArea>
 }

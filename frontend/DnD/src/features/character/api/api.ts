@@ -38,6 +38,15 @@ export const characterApi = createApi({
             query: (characterId) => ({
                 url: "deleteCharacter",
                 method: "POST",
+                characterId
+            }),
+            invalidatesTags: ["MyCharactersList"]
+        }),
+        createCharacter: build.mutation<void, {}>({
+            query: (body) => ({
+                url: "createCharacter",
+                method: "POST",
+                body
             }),
             invalidatesTags: ["MyCharactersList"]
         }),
@@ -49,5 +58,6 @@ export const { useDeathSavesQuery,
     useMyCharactersQuery, 
     useDeleteMyCharacterMutation,
     useOnlyCharacterNameQuery,
-    useLazyOnlyCharacterNameQuery
+    useLazyOnlyCharacterNameQuery,
+    useCreateCharacterMutation,
 } = characterApi;

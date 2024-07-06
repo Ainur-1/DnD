@@ -1,9 +1,8 @@
 import { CarouselCardOverlay, CharacterCard, CharacterCardSkeletone } from "@/entities/character"
-import { CarouselCharacter, useMyCharactersQuery } from "@/features/character";
+import { CarouselCharacter, DeleteCharacterButton, useMyCharactersQuery } from "@/features/character";
 import Carousel from "@/shared/ui/Carousel"
 import ErrorWithRetryButton from "@/shared/ui/ErrorWithRetryButton";
 import { Box, Button, Stack } from "@mui/material";
-import DeleteCharacterButton from "./DeleteCharacterButton";
 import { AbsoluteCenterContent } from "@/shared/ui/AbsoluteSenterContent";
 
 interface CharacterCardActionsProps {

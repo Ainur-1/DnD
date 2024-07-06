@@ -1,5 +1,6 @@
-export interface GenericSelectorProps<T> {
+export interface SelectorProps<T> {
     value?: T;
     onValueChange: (value: T) => void;
-    required?: boolean,
+    required?: boolean;
+    disabled?: boolean;
 }
