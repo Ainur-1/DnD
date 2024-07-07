@@ -18,6 +18,7 @@ public class GameHub : Hub
 {
 
     private static readonly ConcurrentDictionary<string, Guid> _connectionRoomMapping = new();
+    private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
 
     private readonly OldCharacterService _characterService;
     private readonly IPartyService _partyService;
@@ -60,8 +61,7 @@ public class GameHub : Hub
 
             if (character != null)
             {
-                _connectionRoomMapping[Context.ConnectionId] = character.Id;
-
+                _connectionCharacterMapping[Context.ConnectionId] = character.Id;
             }
             else
             {
@@ -80,29 +80,36 @@ public class GameHub : Hub
         };
     }
 
-    //endgame только гейммастер()
-    public async Task<bool> EndGame(int xp, Guid partyId)
+    public async Task<bool> EndGame(int xp)
     {
-        var user = await _userManager.GetUserAsync(Context.User);
-
-        // 1) Проверка, является ли пользователь игровым мастером
-        if (!await _partyService.IsGameMasterAsync(user.Id, partyId))
+        if (!_connectionRoomMapping.TryGetValue(Context.ConnectionId, out var partyId) 
+            || !await _partyService.IsGameMasterAsync(UserId, partyId))
         {
-            await Clients.Caller.SendAsync("Error", "Вы не являетесь игровым мастером");
             return false;
         }
 
-        // 2) Вызов метода EndGameAsync из PartyService
-        await _partyService.DisbandPartyAsync(partyId, xp);
+        try
+        {
+            await _partyService.DisbandPartyAsync(partyId, xp);
+        }
+        catch 
+        { 
+            return false; 
+        }
+
+        RoomRepository.Delete(partyId);
+
+        foreach (var (key, value) in _connectionCharacterMapping.ToList())
+        {
+            if (value == partyId)
+            {
+                _connectionCharacterMapping.TryRemove(key, out _);
+            }
+        }
+
         return true;
-
-        /*todo
-         * 1) возврат true false только гейммастер
-         * 2) Вызвать метод PartyService EndGameAsync {partyid, xp}
-         * 
-         */
-
     }
+
     //обновление состояние игры
     private async Task GameRoomState(GameRoomState room)
     {
