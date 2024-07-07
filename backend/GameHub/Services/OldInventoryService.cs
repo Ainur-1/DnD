@@ -10,21 +10,21 @@ namespace GameHub.Services;
 public class OldInventoryService
 {
     // old party service
-    private readonly List<GameRoom> _rooms;
+    private readonly List<GameRoomState> _rooms;
     public Guid PartyId { get; set; }
     public int xp { get; set; }
 
-    public OldInventoryService(List<GameRoom> rooms)
+    public OldInventoryService(List<GameRoomState> rooms)
     {
         _rooms = rooms;
     }
 
-    public async Task<bool> IsGameMasterAsync(Guid userId, Guid partyId)
-    {
-        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-        return room.GameMasterId == userId;
+    //public async Task<bool> IsGameMasterAsync(Guid userId, Guid partyId)
+    //{
+    //    var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
+    //    return room.GameMasterId == userId;
 
-    }
+    //}
 
     public async Task DisbandPartyAsync(Guid partyId, int xp)
     {
@@ -40,7 +40,7 @@ public class OldInventoryService
         }
     }
 
-    internal async Task HandleItemSuggestion(GameRoom room, Guid? characterId, InventoryItemSuggestion suggestion)
+    internal async Task HandleItemSuggestion(GameRoomState room, Guid? characterId, InventoryItemSuggestion suggestion)
     {
         throw new NotImplementedException();
     }

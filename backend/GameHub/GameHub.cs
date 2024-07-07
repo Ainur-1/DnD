@@ -2,6 +2,7 @@
 using Domain.Entities.User;
 using GameHub.Dtos;
 using GameHub.Models;
+using GameHub.Repositories;
 using GameHub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,20 +14,18 @@ using System.Collections.Concurrent;
 namespace GameHub;
 
 [Authorize]
-public class GameHub: Hub
+public class GameHub : Hub
 {
-    //public static List<Party> _party { get; set; }
-    private static readonly List<GameRoom> _rooms = new ();
+
     private static readonly ConcurrentDictionary<string, Guid> _connectionRoomMapping = new();
-    
-    private readonly UserManager<User> _userManager;
+
     private readonly OldCharacterService _characterService;
     private readonly IPartyService _partyService;
     private readonly OldInventoryService _iventoryService;
+    private Guid UserId => Guid.Parse(Context.UserIdentifier);
 
-    public GameHub (OldCharacterService characterService, UserManager<User> userManager, IPartyService partyService, OldInventoryService iventoryService)
+    public GameHub(OldCharacterService characterService, IPartyService partyService, OldInventoryService iventoryService)
     {
-        _userManager = userManager;
         _characterService = characterService;
         _partyService = partyService;
         _iventoryService = iventoryService;
@@ -34,102 +33,51 @@ public class GameHub: Hub
 
     public override async Task OnConnectedAsync()
     {
-        Console.WriteLine($"Игрок {_userManager.GetUserNameAsync} с ID '{Context.ConnectionId}' подключен");
+        Console.WriteLine($"Игрок с ID:{Context.UserIdentifier} ConId:'{Context.ConnectionId}' подключен");
     }
 
-    //вход в комнату
-    public async Task<GameRoom?> JoinRoomAsync(string accessCode, Guid partyId)
+    public async Task<GameRoomDto?> JoinRoomAsync(Guid partyId)
     {
-        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-
-        if (room == null)
+        if (await _partyService.IsUserInPartyAsync(partyId))
         {
-            await Clients.Caller.SendAsync("Error", "Комната не найдена");
-            return null;
-        }
-        if (room.AccessCode != accessCode)
-        {
-            await Clients.Caller.SendAsync("Error", "Неверный код доступа");
             return null;
         }
 
-        var user = await _userManager.GetUserAsync(Context.User);
-        var newPlayer = new Player(Context.ConnectionId, user.Id);
+        await Groups.AddToGroupAsync(Context.ConnectionId, partyId.ToString());
 
-        //Добавляем игрока в комнату
-        if (room.TryAddPlayer(newPlayer))
+        if (!RoomRepository.Contains(partyId))
         {
+            RoomRepository.Add(new GameRoomState(partyId));
+        }
+        var room = RoomRepository.Get(partyId);
 
-            GameCharacterDto? characterDTO = null;
+        var userId = UserId;
+        _connectionRoomMapping[Context.ConnectionId] = partyId;
 
-            if (await _partyService.IsGameMasterAsync(user.Id, partyId))
+        if (!await _partyService.IsGameMasterAsync(userId, partyId))
+        {
+            var character = await _characterService.GetByIdAsync(userId, partyId);
+
+            if (character != null)
             {
-                // Если игрок является игровым мастером, присваиваем только PartyId
-                _connectionRoomMapping[Context.ConnectionId] = partyId;
+                _connectionRoomMapping[Context.ConnectionId] = character.Id;
+
             }
             else
             {
-                
-                var character = await _characterService.GetByIdAsync(user.Id, partyId);
-
-                if (character != null)
-                {
-                    _connectionRoomMapping[Context.ConnectionId] = partyId;
-                    _connectionRoomMapping[Context.ConnectionId] = character.Id;
-
-                    
-                    characterDTO = new GameCharacterDto
-                    {
-                        Id = character.Id,
-                    };
-                }
-                else
-                {
-                    await Clients.Caller.SendAsync("Error", "Персонаж не найден");
-                    return null;
-                }
+                throw new InvalidOperationException();
+                //todo: Логировать исключителньую ситуацию 
             }
-
-
-            await Groups.AddToGroupAsync(Context.ConnectionId, partyId.ToString());
-            await Clients.Group(partyId.ToString()).SendAsync($"Игрок {_userManager.GetUserNameAsync} Присоединился", newPlayer);
-            Console.WriteLine($"Игрок {_userManager.GetUserNameAsync} c id {Context.ConnectionId} присоединился к комнате");
-
-            //room.IsFighting = room.IsFight;
-            if (room.IsFight)
-            {
-                room.Order = room.SortedInitiativeScores?.OrderByDescending(x => x.Score)
-                                                         .Select(x => x.CharacterId.ToString())
-                                                         .ToArray();
-            }
-            room.Character = characterDTO;
-
-            return room;
-
         }
-        else
+
+        var characters = await _partyService.GetCharactersInfoAsync(partyId);
+
+        return new GameRoomDto
         {
-            await Clients.Caller.SendAsync("Комната заполнена");
-            return null;
-        }
-
-        /*todo
-         * 1) Получить парти по айдишнику
-         * 2) Проверить аксесс код 
-         * 3) Проверить что пользователь есть в парти и получить айди персонажа пользователя 
-         * (если это гейммастер пропустить связанное с персонажем)
-           4) Сохранить всю инфу по конекшену {}
-                con_id - partyid
-                con_id - characterid
-            
-
-           5) Вернуть isfighting bool
-                      order массив стрингов // characterid персонажей по порядку desc //иначе null
-                      CharacterDTO    
-           
-           (1-3) иначе возвращем null
-         */
-
+            Characters = characters,
+            IsFight = room.IsFight,
+            Order = room.SortedInitiativeScores?.Select(x => x.CharacterId)
+        };
     }
 
     //endgame только гейммастер()
@@ -156,9 +104,9 @@ public class GameHub: Hub
 
     }
     //обновление состояние игры
-    private async Task GameRoomState(GameRoom room)
+    private async Task GameRoomState(GameRoomState room)
     {
-        
+
         //идет ли бой сейчаc isfighting bool
         //order массив стрингов // characterid персонажей по порядку desc //иначе null
         //
@@ -305,7 +253,7 @@ public class GameHub: Hub
         // 5) Обновить статус боя и разослать событие FIGHT STATUS UPDATE
         var characterOrder = fightStatus.ScoreValues.Select(sv => Guid.Parse(sv.CharacterId)).ToArray();
         await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", fightStatus.IsFight, characterOrder);
-        
+
         /*
          * todo ()
          * 1)Проверяем конекшен Что пользователь гейммастер через сервис 
@@ -453,7 +401,7 @@ public class GameHub: Hub
             return false;
         }
         return true;
-        
+
 
         /*todo
          * 1) Получить по конекшну characterId 
@@ -589,5 +537,4 @@ public class GameHub: Hub
         Console.WriteLine(exception);
     }
 
-    
 }

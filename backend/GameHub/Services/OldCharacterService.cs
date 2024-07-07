@@ -6,7 +6,7 @@ namespace GameHub.Services;
 
 public class OldCharacterService
 {
-    private readonly List<GameRoom> _rooms;
+    private readonly List<GameRoomState> _rooms;
     //public Guid PartyId { get; set; }
     public async Task TakeDamageAsync(Guid characterId, int damageAmount)
     {
@@ -116,7 +116,7 @@ public class OldCharacterService
         throw new InvalidOperationException("Персонаж не найден.");
     }
 
-    public async Task HandleItemSuggestion(GameRoom room, Guid? characterId, InventoryItemSuggestion suggestion)
+    public async Task HandleItemSuggestion(GameRoomState room, Guid? characterId, InventoryItemSuggestion suggestion)
     {
         //
     }
