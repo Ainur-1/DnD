@@ -1,6 +1,4 @@
-﻿
-
-using GameHub.Models;
+﻿using GameHub.Models;
 
 namespace GameHub.Services;
 
@@ -9,44 +7,44 @@ namespace GameHub.Services;
 // взаимодействие с доменными моделями внутри твоего сервиса (прочитать из базы/ заюзать сервис) через абстракции из Core
 public class OldInventoryService
 {
-    // old party service
-    private readonly List<GameRoomState> _rooms;
-    public Guid PartyId { get; set; }
-    public int xp { get; set; }
+    //// old party service
+    //private readonly List<GameRoomState> _rooms;
+    //public Guid PartyId { get; set; }
+    //public int xp { get; set; }
 
-    public OldInventoryService(List<GameRoomState> rooms)
-    {
-        _rooms = rooms;
-    }
-
-    //public async Task<bool> IsGameMasterAsync(Guid userId, Guid partyId)
+    //public OldInventoryService(List<GameRoomState> rooms)
     //{
-    //    var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-    //    return room.GameMasterId == userId;
-
+    //    _rooms = rooms;
     //}
 
-    public async Task DisbandPartyAsync(Guid partyId, int xp)
-    {
-        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-        if (room != null)
-        {
-            foreach (var player in room.Players)
-            {
-                player.XP += xp;
-            }
+    ////public async Task<bool> IsGameMasterAsync(Guid userId, Guid partyId)
+    ////{
+    ////    var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
+    ////    return room.GameMasterId == userId;
 
-            _rooms.Remove(room);
-        }
-    }
+    ////}
 
-    internal async Task HandleItemSuggestion(GameRoomState room, Guid? characterId, InventoryItemSuggestion suggestion)
-    {
-        throw new NotImplementedException();
-    }
+    //public async Task DisbandPartyAsync(Guid partyId, int xp)
+    //{
+    //    var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
+    //    if (room != null)
+    //    {
+    //        foreach (var player in room.Players)
+    //        {
+    //            player.XP += xp;
+    //        }
 
-    internal async Task<bool> CheckInventoryItem(Guid guid, string v, int count)
-    {
-        throw new NotImplementedException();
-    }
+    //        _rooms.Remove(room);
+    //    }
+    //}
+
+    //internal async Task HandleItemSuggestion(GameRoomState room, Guid? characterId, InventoryItemSuggestion suggestion)
+    //{
+    //    throw new NotImplementedException();
+    //}
+
+    //internal async Task<bool> CheckInventoryItem(Guid guid, string v, int count)
+    //{
+    //    throw new NotImplementedException();
+    //}
 }

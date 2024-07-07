@@ -20,17 +20,13 @@ public class GameHub : Hub
 
     private static readonly ConcurrentDictionary<string, Guid> _connectionPartyMapping = new();
     private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
-
     private readonly ICharacterService _characterService;
     private readonly IPartyService _partyService;
-    private readonly OldInventoryService _iventoryService;
     private Guid UserId => Guid.Parse(Context.UserIdentifier);
-
-    public GameHub(ICharacterService characterService, IPartyService partyService, OldInventoryService iventoryService)
+    public GameHub(ICharacterService characterService, IPartyService partyService)
     {
         _characterService = characterService;
         _partyService = partyService;
-        _iventoryService = iventoryService;
     }
 
     public override async Task OnConnectedAsync()
@@ -189,65 +185,8 @@ public class GameHub : Hub
             orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
         });
     }
-
-    //предложить предмет 
-    public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)////пока не трогаем
+    public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
     {
-
-        // Получаем connectionId
-        var connectionId = Context.ConnectionId;
-        if (!_connectionPartyMapping.TryGetValue(connectionId, out var partyId))
-        {
-            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
-        }
-
-        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-        if (room == null)
-        {
-            throw new InvalidOperationException("Комната не найдена.");
-        }
-
-        var characterId = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId)?.CharacterId;
-        if (characterId == null)
-        {
-            throw new InvalidOperationException("Персонаж не найден в комнате.");
-        }
-        var isGameMaster = await _partyService.IsGameMasterAsync(partyId, partyId);/////
-
-        if (isGameMaster)
-        {
-            // Если присылает гейммастер, то должно быть заполнено поле Item
-            if (suggestInventoryAbout.ItemDescription == null)
-            {
-                throw new InvalidOperationException("Поле Item должно быть заполнено для гейммастера.");
-            }
-        }
-        else
-        {
-            // Если присылает игрок, должны быть заполнены оба поля Item и ItemfromInventory
-            if (suggestInventoryAbout.ItemDescription == null || suggestInventoryAbout.ItemfromInventory == null)
-            {
-                throw new InvalidOperationException("Для игрока должны быть заполнены оба поля: Item и ItemfromInventory.");
-            }
-
-            // Проверяем наличие предмета в инвентаре
-            var suggestionItem = suggestInventoryAbout!.ItemfromInventory;
-            var itemExists = await _iventoryService.CheckInventoryItem(characterId.Value!, suggestionItem.InventoryItemId.ToString(), suggestionItem.Count);
-            if (!itemExists)
-            {
-                throw new InvalidOperationException("Предмет не найден в инвентаре персонажа.");
-            }
-        }
-
-        // Обрабатываем предложение предмета
-        var suggestion = new InventoryItemSuggestion
-        {
-            Item = suggestInventoryAbout.ItemDescription,
-            ItemFromInventory = suggestInventoryAbout.ItemfromInventory
-        };
-
-        await _iventoryService.HandleItemSuggestion(room, characterId, suggestion);
-
         /*это может прислать обычнйыы игрок и гейммастер
          * если присылает гейммастер то это поле item
          * ecли присылает игрок оба поля item и inventory item 
@@ -262,71 +201,10 @@ public class GameHub : Hub
          * 
          * 
          */
-
-        //var connectionId = Context.ConnectionId;
-        //var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
-
-        //if (room != null)
-        //{
-        //    var player = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
-        //    if (player != null)
-        //    {
-
-        //        var inventoryItem = player.Inventory.FirstOrDefault(item => item.Id == itemId);
-        //        if (inventoryItem != null)
-        //        {
-        //            player.AddItemToInventory(inventoryItem);
-        //            await GameRoomState(room);
-        //            await Clients.Caller.SendAsync("", inventoryItem);
-
-
-        //            return;
-        //        }
-        //    }
-        //}
-
-        //await Clients.Caller.SendAsync("Error", "Item not found or you're not authorized to accept this item.");
+        throw new NotImplementedException(nameof(SuggestInventoryItem));
     }
-
-    //принять предмет 
-    public async Task<bool> AcceptInventory(string suggestionId)//пока не трогаем
+    public async Task<bool> AcceptInventory(string suggestionId)
     {
-
-        // Получаем connectionId
-        var connectionId = Context.ConnectionId;
-        if (!_connectionPartyMapping.TryGetValue(connectionId, out var partyId))
-        {
-            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
-        }
-
-        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-        if (room == null)
-        {
-            throw new InvalidOperationException("Комната не найдена.");
-        }
-
-        var characterId = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId)?.CharacterId;
-        if (characterId == null)
-        {
-            throw new InvalidOperationException("Персонаж не найден в комнате.");
-        }
-
-        // Получаем предложение инвентаря
-
-        // Обработка принятия предложения
-        try
-        {
-
-        }
-        catch (Exception ex)
-        {
-            // Обработка ошибок
-            Console.WriteLine($"Ошибка при принятии предложения инвентаря: {ex.Message}");
-            return false;
-        }
-        return true;
-
-
         /*todo
          * 1) Получить по конекшну characterId 
          * 2) Посмотреть если в словаре предложения, Если предложения нет - вернуть false 
@@ -338,28 +216,7 @@ public class GameHub : Hub
          * 4) Вернуть true если все ок, иначе false (trycatch)
          * 
          */
-
-        //var connectionId = Context.ConnectionId;
-        //var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
-
-        //if (room != null)
-        //{
-        //    var player = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
-        //    if (player != null)
-        //    {
-        //        var inventoryItem = player.Inventory.FirstOrDefault(item => item.Id == itemId);
-        //        if (inventoryItem != null)
-        //        {
-        //            player.AddItemToInventory(inventoryItem);
-        //            await GameRoomState(room);
-        //            await Clients.Caller.SendAsync("", inventoryItem);
-
-        //            return;
-        //        }
-        //    }
-        //}
-
-        //await Clients.Caller.SendAsync("Error", "Item not found or you're not authorized to accept this item.");
+        throw new NotImplementedException(nameof(AcceptInventory));
     }
 
     public async Task UpdateCharacterStat(Guid? targetCharacterId, DynamicStatsDto updatedStats)
