@@ -1,6 +1,6 @@
 import { TextField, FormControlLabel, Checkbox, Button, Grid } from "@mui/material";
 import FormBox from "./FormBox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { containsWhitespace } from "../model/utils";
 import { useSignInMutation } from "@/features/auth";
 import { useAuthReducer } from "@/features/auth";
@@ -17,7 +17,7 @@ export function SignInForm({ afterSuccessfulSignIn }: SignInFormProps) {
   const [passwordError, setPasswordError] = useState(false);
   const [remeberMe, setRememberMe] = useState(false);
   const [requestError, setRequestError] = useState('');
-  const [ signIn, { data, isLoading, isError, /*error*/ }] = useSignInMutation();
+  const [ signIn, { isLoading, isError, isSuccess, data }] = useSignInMutation();
   const { setUser } = useAuthReducer();
 
   const toggleRememberMe = () => setRememberMe(old => !old);
@@ -51,18 +51,22 @@ export function SignInForm({ afterSuccessfulSignIn }: SignInFormProps) {
       return;
     }
 
-    await signIn({login: actualLogin, password: actualPassword, persistSession: remeberMe});
+    await signIn({login: actualLogin, password: actualPassword, rememberMe: remeberMe});
+  }
 
+  useEffect(() => {
     if (isError) {
       // todo error handle if network error or 
       setRequestError("Неверный логин или пароль.")
-    } else {
-      if (data) {
-        setUser({userId: data.userId});
+    } else if (isSuccess) {
+      if (data && data.signIn.uuid) {
+        setUser({userId: data.signIn.uuid});
         afterSuccessfulSignIn();
+      } else {
+        setRequestError("Ошибка авторизации.");
       }
     }
-  }
+  }, [isSuccess, isError, data])
 
   return <FormBox formTitle="Вход" formError={requestError} handleSubmit={handleSubmit}>
           <TextField 

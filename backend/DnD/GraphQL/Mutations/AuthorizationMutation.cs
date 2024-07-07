@@ -9,7 +9,7 @@ public class AuthorizationMutation
 
     [Error(typeof(FieldNameTakenError))]
     [Error(typeof(InvalidArgumentValueError))]
-    public async Task<bool> SignUpAsync([Service] IUserService userService, string email, string username, string password, string name)
+    public async Task<bool> SignUpAsync([Service] IUserService userService, string email, string username, string password, string? name = default)
     {
         await userService.CreateAsync(email, username, password, name);
 
@@ -21,7 +21,7 @@ public class AuthorizationMutation
         return await authorizationService.SignOutAsync();
     }
 
-    public async Task<bool> SignInAsync([Service] IAuthorizationService authorizationService, string login, string password, bool rememberMe)
+    public async Task<Guid?> SignInAsync([Service] IAuthorizationService authorizationService, string login, string password, bool rememberMe)
     {
         return await authorizationService.SignInAsync(login, password, rememberMe);
     }

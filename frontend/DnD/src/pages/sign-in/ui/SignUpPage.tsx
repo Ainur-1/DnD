@@ -9,7 +9,7 @@ export default function SignUpPage() {
     const { state } = useAuthReducer();
     const navigate = useNavigate();
 
-    const redirectToLogin = () => navigate('/login');
+    const redirectToLogin = () => navigate('/sign-in');
 
     if (state.isAuthenticated) {
         return <Navigate to="/"/>

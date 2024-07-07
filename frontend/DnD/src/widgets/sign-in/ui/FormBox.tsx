@@ -25,7 +25,7 @@ export default function FormBox({children, formTitle, formError=null, handleSubm
         <Typography component="h4" variant="h4" color="error">
             {formError}
         </Typography>
-        <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit}>
+        <Box component="form" sx={{ mt: 1 }} onSubmit={handleSubmit}>
             {children}
         </Box>
     </Box>

@@ -2,7 +2,7 @@
 
 public interface IAuthorizationService
 {
-    Task<bool> SignInAsync(string usernameOrEmail, string password, bool persist);
+    Task<Guid?> SignInAsync(string usernameOrEmail, string password, bool persist);
 
     Task<bool> SignOutAsync();
 }

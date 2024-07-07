@@ -38,7 +38,7 @@ internal class UserManagementService : IUserService, IAuthorizationService
         ThrowExceptionAccordingError(result.Errors!, email, username);
     }
 
-    public async Task<bool> SignInAsync(string usernameOrEmail, string password, bool persist)
+    public async Task<Guid?> SignInAsync(string usernameOrEmail, string password, bool persist)
     {
         try
         {
@@ -48,24 +48,24 @@ internal class UserManagementService : IUserService, IAuthorizationService
                 mayBeUser = await _userManager.FindByNameAsync(usernameOrEmail);
                 if (mayBeUser == null)
                 {
-                    return false;
+                    return default;
                 }
             }
 
             var passwordIsCorrect = await _userManager.CheckPasswordAsync(mayBeUser, password);
             if (!passwordIsCorrect)
             {
-                return false;
+                return default;
             }
 
             await _signInManager.SignInAsync(mayBeUser, persist);
+
+            return mayBeUser.Id;
         }
         catch
         {
-            return false;
+            return default;
         }
-
-        return true;
     }
 
     public async Task<bool> SignOutAsync()
