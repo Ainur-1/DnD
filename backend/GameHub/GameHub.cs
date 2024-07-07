@@ -54,6 +54,7 @@ public class GameHub : Hub
             RoomRepository.Add(new GameRoomState(partyId));
         }
         var room = RoomRepository.Get(partyId);
+        room.IncrementConnectedPlayers();
         
         _connectionPartyMapping[Context.ConnectionId] = partyId;
 
@@ -449,48 +450,22 @@ public class GameHub : Hub
         return null;*/
     }
 
-
-    //public async Task GetAvailableRooms()//список доступных комнат которые не заполненные
-    //{
-    //    var availableRooms = _rooms.Select(room => new
-    //    {
-    //        room.RoomId,
-    //        room.RoomName,
-    //        room.CreatorName,
-    //        CreatedDate = room.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")
-    //    }).OrderBy(r => r.RoomName);
-    //    await Clients.Caller.SendAsync("Доступные комнаты", availableRooms);
-    //}
-
-    /*
-    //создание комнаты
-    public async Task<GameRoom> CreateRoom(string Roomname)
+    public override Task OnDisconnectedAsync(Exception? exception)
     {
-        var random = new Random();
+        var conncetionId = Context.ConnectionId;
+        _connectionCharacterMapping.TryRemove(conncetionId, out _);
+        _connectionPartyMapping.TryRemove(conncetionId, out var partyId);
+        if (partyId != default && RoomRepository.Contains(partyId))
+        {
+            var room = RoomRepository.Get(partyId);
+            room.DecrementConnectedPlayers();
+            if (room.ConnectedPlayersCount < 1)
+            {
+                RoomRepository.Delete(partyId);
+            }
+        }
 
-        var accescode = random.Next(10000000, 99999999).ToString();
-        //var partyId = party.Id;
-        var roomId = party.Id.ToString();
-        var playerName = Context.User.Identity.Name;
-        var gameMasterId = Guid.NewGuid();
-
-        var room = new GameRoom(roomId, Roomname, playerName, accescode, gameMasterId);
-        _rooms.Add(room);
-
-        var newPlayer = new Player(Context.ConnectionId, playerName);
-        room.Players.Add(newPlayer);
-        _connectionRoomMapping[Context.ConnectionId] = roomId;
-
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-        await Clients.All.SendAsync("Rooms", _rooms.OrderBy(r => r.RoomId));
-        Console.WriteLine($"Игрок c id {Context.ConnectionId} Cоздал комнату");
-
-        return room;
-    }*/
-
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        Console.WriteLine(exception);
+        return base.OnDisconnectedAsync(exception);
     }
     private async Task<bool> IsGameMasterAsync(Guid partyId)
     {
