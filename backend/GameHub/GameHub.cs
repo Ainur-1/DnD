@@ -17,7 +17,7 @@ namespace GameHub;
 public class GameHub : Hub
 {
 
-    private static readonly ConcurrentDictionary<string, Guid> _connectionRoomMapping = new();
+    private static readonly ConcurrentDictionary<string, Guid> _connectionPartyMapping = new();
     private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
 
     private readonly OldCharacterService _characterService;
@@ -39,7 +39,9 @@ public class GameHub : Hub
 
     public async Task<GameRoomDto?> JoinRoomAsync(Guid partyId)
     {
-        if (await _partyService.IsUserInPartyAsync(partyId))
+        var userId = UserId;
+
+        if (await _partyService.IsUserInPartyAsync(userId, partyId))
         {
             return null;
         }
@@ -51,11 +53,10 @@ public class GameHub : Hub
             RoomRepository.Add(new GameRoomState(partyId));
         }
         var room = RoomRepository.Get(partyId);
+        
+        _connectionPartyMapping[Context.ConnectionId] = partyId;
 
-        var userId = UserId;
-        _connectionRoomMapping[Context.ConnectionId] = partyId;
-
-        if (!await _partyService.IsGameMasterAsync(userId, partyId))
+        if (!await IsGameMasterAsync(partyId))
         {
             var character = await _characterService.GetByIdAsync(userId, partyId);
 
@@ -82,8 +83,8 @@ public class GameHub : Hub
 
     public async Task<bool> EndGame(int xp)
     {
-        if (!_connectionRoomMapping.TryGetValue(Context.ConnectionId, out var partyId) 
-            || !await _partyService.IsGameMasterAsync(UserId, partyId))
+        if (!_connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId) 
+            || !await IsGameMasterAsync(partyId))
         {
             return false;
         }
@@ -144,84 +145,36 @@ public class GameHub : Hub
 
     }
 
-    //нанесения уровна
-    public async Task Damage(string targetCharacterId, int damageAmount)
+    public async Task Damage(Guid targetCharacterId, int damageAmount)
     {
-
-        /*todo
-         * 1) Проверить получить комнату партиайди по конекшену, проверить что в парти есть таргет,PARTYsERVICES 
-         * 2) Через сервис обновить hp (takedamge добавить в characterservic)
-         * 3) Разослать в сервисе всем в комнате персонаж обновился 
-         * 
-         *
-         */
-
-        // ) Проверить, привязан ли идентификатор подключения к комнате
-        if (!_connectionRoomMapping.TryGetValue(Context.ConnectionId, out var partyId))
+        if (!_connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId) || 
+            !await IsCharacterInParty(targetCharacterId, partyId) || damageAmount <= 0)
         {
-            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
+            return;
         }
 
-        // ) Получить комнату по идентификатору комнаты
-        var room = _rooms.FirstOrDefault(r => r.PartyId == partyId);
-        if (room == null)
-        {
-            throw new InvalidOperationException("Комната не найдена.");
-        }
-
-        // ) Проверить, находится ли целевой персонаж в партии
-        var targetCharacter = room.Players.FirstOrDefault(p => p.CharacterId.ToString() == targetCharacterId);
-        if (targetCharacter == null)
-        {
-            throw new InvalidOperationException("Целевой персонаж не найден в партии.");
-        }
-
-        // ) Использовать CharacterService для обновления HP целевого персонажа
-        var characterStats = await _characterService.GetCharacterInGameStatsAsync(Guid.Parse(targetCharacterId));
-        if (characterStats == null)
-        {
-            throw new InvalidOperationException("Статистика персонажа не найдена.");
-        }
-
-        // ) Применить урон к HP персонажа
-        await _characterService.TakeDamageAsync(Guid.Parse(targetCharacterId), damageAmount);
-
-        // ) Уведомить всех участников комнаты об обновленном состоянии персонажа
-        await Clients.Group(partyId.ToString()).SendAsync("CharacterUpdated", targetCharacterId, characterStats);
-
-
-        //var connectionId = Context.ConnectionId;
-        //var room = _rooms.FirstOrDefault(r => r.RoomId == roomId);
-
-        //if (room != null)
-        //{
-        //    var gameMaster = room.Players.FirstOrDefault(p => p.ConnectionId == connectionId && p.IsGameMaster);
-        //    if (gameMaster != null)
-        //    {
-        //        var targetPlayer = room.Players.FirstOrDefault(p => p.Id == targetPlayerId);
-        //        if (targetPlayer != null)
-        //        {
-        //            targetPlayer.Health -= damageAmount; //??
-
-        //            await GameRoomState(room);
-        //            await Clients.Group(roomId).SendAsync("PlayerDamaged", targetPlayer, damageAmount);
-        //            return;
-        //        }
-        //    }
-        //}
-
-        //await Clients.Caller.SendAsync("Error", "Cannot apply damage. Either room not found, player not found, or you don't have the permission.");
+        await _characterService.TakeDamageAsync(targetCharacterId, damageAmount);
     }
-
 
     //UPDATE FIGHT STATUS ЗАВЕршиться или начаться только гейммастер()
     public async Task UpdateFight(FightStatusDto fightStatus)
     {
+
+        /*
+ * todo ()
+ * 1)Проверяем конекшен Что пользователь гейммастер через сервис 
+ * 2)Получить модификатор ловкостити каждого живого персонажа 
+ * (кол-во живых персонажей должна быть равно = длине массиву значений из аргументов метода)
+
+ * 3)Если пользователь гейммастер - отсортирвоать значения инициатива (по убыванию (desc))
+ * 4)Обновить статус боя и разослать ивент FIGHT STATUS UPDATE {isfight, guid characterorder[]}
+
+ */
         // 1) Получить идентификатор подключения вызывающего абонента
         var connectionId = Context.ConnectionId;
 
         // ) Проверить, привязан ли идентификатор подключения к комнате
-        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        if (!_connectionPartyMapping.TryGetValue(connectionId, out var partyId))
         {
             throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
         }
@@ -261,16 +214,7 @@ public class GameHub : Hub
         var characterOrder = fightStatus.ScoreValues.Select(sv => Guid.Parse(sv.CharacterId)).ToArray();
         await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", fightStatus.IsFight, characterOrder);
 
-        /*
-         * todo ()
-         * 1)Проверяем конекшен Что пользователь гейммастер через сервис 
-         * 2)Получить модификатор ловкостити каждого живого персонажа 
-         * (кол-во живых персонажей должна быть равно = длине массиву значений из аргументов метода)
 
-         * 3)Если пользователь гейммастер - отсортирвоать значения инициатива (по убыванию (desc))
-         * 4)Обновить статус боя и разослать ивент FIGHT STATUS UPDATE {isfight, guid characterorder[]}
-         
-         */
     }
 
     //предложить предмет 
@@ -279,7 +223,7 @@ public class GameHub : Hub
 
         // Получаем connectionId
         var connectionId = Context.ConnectionId;
-        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        if (!_connectionPartyMapping.TryGetValue(connectionId, out var partyId))
         {
             throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
         }
@@ -377,7 +321,7 @@ public class GameHub : Hub
 
         // Получаем connectionId
         var connectionId = Context.ConnectionId;
-        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        if (!_connectionPartyMapping.TryGetValue(connectionId, out var partyId))
         {
             throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
         }
@@ -458,7 +402,7 @@ public class GameHub : Hub
 
         // 1) Получить идентификатор персонажа, связанного с текущим подключением
         var connectionId = Context.ConnectionId;
-        if (!_connectionRoomMapping.TryGetValue(connectionId, out var partyId))
+        if (!_connectionPartyMapping.TryGetValue(connectionId, out var partyId))
         {
             throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
         }
@@ -543,5 +487,17 @@ public class GameHub : Hub
     {
         Console.WriteLine(exception);
     }
+    private async Task<bool> IsGameMasterAsync(Guid partyId)
+    {
+        var party = await _partyService.GetPartyByIdAsync(partyId);
+        
+        return party != null && party.GameMasterId == UserId;
+    }
 
+    private async Task<bool> IsCharacterInParty(Guid characterId, Guid partyId)
+    {
+        var party = await _partyService.GetPartyByIdAsync(partyId);
+
+        return party != null && party.InGameCharactersIds.Contains(characterId);
+    }
 }
