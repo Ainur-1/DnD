@@ -14,6 +14,6 @@ public class FightStatusDto
 }
 public class CharacterInitciativeScoreDto
 {
-    public string CharacterId { get; set; }
+    public Guid CharacterId { get; set; }
     public int Score { get; set; }
 }
