@@ -1,6 +1,5 @@
 using DataAccess;
 using DataAccess.DependencyInjection;
-using DnD.Areas.Identity.Data;
 using DnD.Areas.Identity.Pages.Account;
 using DnD.Data;
 using Microsoft.AspNetCore.Identity;
@@ -9,9 +8,9 @@ using Domain.Entities.User;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using GameHub.blazor;
-using DataAccess;
 using DnD.GraphQL;
 using DnD.GraphQL.Services;
+using Services.Implementation.Extensions;
 
 namespace DnD;
 
@@ -39,7 +38,7 @@ public class Program
         services.AddRazorPages();
         services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddServerSideBlazor();
-        
+
         services.TryAddEnumerable(ServiceDescriptor.Scoped<CircuitHandler, InitializeCircuitHandler>());
         services.AddScoped<HubConnectionService>();
 
@@ -56,20 +55,16 @@ public class Program
                 options.AddPolicy("DevFrontEnds",
                     builder =>
                         builder.WithOrigins(allowHosts)
+                               .AllowAnyMethod()
+                               .AllowAnyHeader()
+                               .AllowCredentials()
                             .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials()
-                            .SetIsOriginAllowed(origin => true)
                 );
             });
         }
 
-        builder.Services.AddGraphQLServer()
-            .AddGraphQLServer()
-            .AddQueryType<Query>()
-            .AddMutationType<Mutation>()
-            .AddFiltering()
-            .AddSorting();
+        services.AddGraphQlApi();
+        services.AddDomainServicesImplementations();
 
         var app = builder.Build();
 
