@@ -36,7 +36,7 @@ export function SignUpForm({ afterSuccessfulSignUp }: SignUpFormProps) {
       }
       
       const nameValue = state.name.value.trim();
-      await signUp({
+      const { data } = await signUp({
           email: state.email.value!.trim(),
           name: nameValue === '' ? null : nameValue,
           password: state.password.value!.trim(),
@@ -44,11 +44,12 @@ export function SignUpForm({ afterSuccessfulSignUp }: SignUpFormProps) {
       });
 
       if (isError) {
-        // todo error handle if network error or model errors
         setRequestError("Ошибка при регистрации.");
         resetPasswords();
-      } else {
+      } else if (data && data.signUp.boolean) {
         afterSuccessfulSignUp();
+      } else if (data && data.signUp.errors && data.signUp.errors.length > 0) {
+        setRequestError(data.signUp.errors[0].message);
       }
     }
 

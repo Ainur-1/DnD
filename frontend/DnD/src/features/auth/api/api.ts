@@ -1,32 +1,44 @@
-import { BASE_URL } from "@/shared/configuration/enviromentConstants";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { SignInMutationResult, SignInMutationVariables, SignUpMutationResult, SignUpMutationVariables } from "./types";
+import { createApi,  } from "@reduxjs/toolkit/query/react";
+import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+import { client } from "@/shared/api";
+import { SignInInput, SignInMutation, SignUpInput, SignUpMutation } from "@/shared/api/gql/graphql";
+import { SignOutMutation } from "./queries/SignOut.generated";
 
 export const authApi = createApi({
     reducerPath: 'auth/api',
-    baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    baseQuery:  graphqlRequestBaseQuery({client}),
     endpoints: (build) => ({
-        signIn: build.mutation<SignInMutationResult, SignInMutationVariables>({
-            query: (body) => ({
-                url: "login mutation",
-                method: "POST",
-                body
+        signIn: build.mutation<SignInMutation, SignInInput>({
+            query: (variables) => ({
+                document: `
+                    mutation signIn($login: String!, $password: String!,$rememberMe:Boolean!) {
+                        signIn(input: { login: $login, password: $password, rememberMe: $rememberMe}) {
+                            uuid
+                        }
+                }`, 
+                variables,
+            })
+        }),
+        signUp: build.mutation<SignUpMutation, SignUpInput>({
+            query: (variables) => ({
+                document:`mutation signUp($email: String!, $name: String, $password: String!, $username: String!) {
+                signUp(input: { email: $email, name: $name, password: $password, username: $username }) {
+                boolean
+                errors {
+                    ... on FieldNameTakenError { message }
+                    ... on InvalidArgumentValueError { message }
+                    }
+                }
+                }`,
+                variables
             }),
         }),
-        signUp: build.mutation<SignUpMutationResult, SignUpMutationVariables>({
-            query: (body) => ({
-                url: "register mutation",
-                method: "POST",
-                body
-            }),
+        signOut: build.mutation<SignOutMutation, void>({
+            query: (variables) => ({
+                document: `mutation signOut { signOut { boolean } }`,
+                variables}),
         }),
-        signOut: build.mutation({
-            query: (_) => ({
-                url: "logout mutation",
-                method: "POST"
-            }),
-        }),
-    })
+    }),
 });
 
 export const { useSignInMutation, useSignUpMutation, useSignOutMutation } = authApi;

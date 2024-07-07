@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Domain.Entities.User;
 using DnD.GraphQL;
 using DnD.GraphQL.Services;
+using Services.Implementation.Extensions;
 
 namespace DnD;
 
@@ -40,20 +41,16 @@ public class Program
                 options.AddPolicy("DevFrontEnds",
                     builder =>
                         builder.WithOrigins(allowHosts)
+                               .AllowAnyMethod()
+                               .AllowAnyHeader()
+                               .AllowCredentials()
                             .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials()
-                            .SetIsOriginAllowed(origin => true)
                 );
             });
         }
 
-        builder.Services.AddGraphQLServer()
-            .AddGraphQLServer()
-            .AddQueryType<Query>()
-            .AddMutationType<Mutation>()
-            .AddFiltering()
-            .AddSorting();
+        services.AddGraphQlApi();
+        services.AddDomainServicesImplementations();
 
         var app = builder.Build();
 
