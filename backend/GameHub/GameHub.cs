@@ -1,4 +1,5 @@
 ﻿using Contracts.Online;
+using Domain.Entities.Character;
 using Domain.Entities.User;
 using GameHub.Dtos;
 using GameHub.Models;
@@ -20,12 +21,12 @@ public class GameHub : Hub
     private static readonly ConcurrentDictionary<string, Guid> _connectionPartyMapping = new();
     private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
 
-    private readonly OldCharacterService _characterService;
+    private readonly ICharacterService _characterService;
     private readonly IPartyService _partyService;
     private readonly OldInventoryService _iventoryService;
     private Guid UserId => Guid.Parse(Context.UserIdentifier);
 
-    public GameHub(OldCharacterService characterService, IPartyService partyService, OldInventoryService iventoryService)
+    public GameHub(ICharacterService characterService, IPartyService partyService, OldInventoryService iventoryService)
     {
         _characterService = characterService;
         _partyService = partyService;
@@ -83,11 +84,13 @@ public class GameHub : Hub
 
     public async Task<bool> EndGame(int xp)
     {
-        if (!_connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId) 
-            || !await IsGameMasterAsync(partyId))
+        
+        if (!await CheckIfPartyKnownAndUserGameMasterAsync())
         {
             return false;
         }
+
+        var partyId = GetPartyByConnection();
 
         try
         {
@@ -155,66 +158,68 @@ public class GameHub : Hub
 
         await _characterService.TakeDamageAsync(targetCharacterId, damageAmount);
     }
-
-    //UPDATE FIGHT STATUS ЗАВЕршиться или начаться только гейммастер()
     public async Task UpdateFight(FightStatusDto fightStatus)
     {
-
-        /*
- * todo ()
- * 1)Проверяем конекшен Что пользователь гейммастер через сервис 
- * 2)Получить модификатор ловкостити каждого живого персонажа 
- * (кол-во живых персонажей должна быть равно = длине массиву значений из аргументов метода)
-
- * 3)Если пользователь гейммастер - отсортирвоать значения инициатива (по убыванию (desc))
- * 4)Обновить статус боя и разослать ивент FIGHT STATUS UPDATE {isfight, guid characterorder[]}
-
- */
-        // 1) Получить идентификатор подключения вызывающего абонента
-        var connectionId = Context.ConnectionId;
-
-        // ) Проверить, привязан ли идентификатор подключения к комнате
-        if (!_connectionPartyMapping.TryGetValue(connectionId, out var partyId))
+        if(!await CheckIfPartyKnownAndUserGameMasterAsync() || !RoomRepository.Contains(GetPartyByConnection()))
         {
-            throw new InvalidOperationException("Подключение не связано ни с одной комнатой.");
+            return;
         }
-        // 2) Проверить, является ли пользователь Game Master через сервис PartyService
-        var userId = _userManager.GetUserId(Context.User);
-        var isGameMaster = await _partyService.IsGameMasterAsync(Guid.Parse(userId), partyId); // 
+        var partyId = GetPartyByConnection();
+        var room = RoomRepository.Get(partyId);
 
-        if (!isGameMaster)
+        if (fightStatus.IsFight)
         {
-            throw new UnauthorizedAccessException("Только Game Master может обновлять статус боя.");
-        }
-
-
-        // 4) Получить модификатор ловкости каждого живого персонажа
-        var initiativeModifiers = new ConcurrentDictionary<string, int>();
-        foreach (var scoreValue in fightStatus.ScoreValues)
-        {
-            var characterId = Guid.Parse(scoreValue.CharacterId);
-            var characterStats = await _characterService.GetCharacterInGameStatsAsync(characterId);
-
-            if (characterStats == null || characterStats.IsDead) // Проверяем, что персонаж живой
+            if (fightStatus.ScoreValues == null)
             {
-                throw new InvalidOperationException("Все персонажи в списке должны быть живыми.");
+                return;
             }
 
-            initiativeModifiers[scoreValue.CharacterId] = characterStats.Initiative;
-        }
+            var initiativeScores = new Dictionary<Guid, int>();
+            var party = await _partyService.GetPartyByIdAsync(partyId);
+            
+            if (party == null)
+            {
+                return;
+            }
 
-        // 4) Если пользователь Game Master, отсортировать значения инициативы по убыванию
-        if (isGameMaster)
+            foreach (var characterId in party.InGameCharactersIds)
+            {
+                var characterStats = await _characterService.GetCharacterInGameStatsAsync(characterId);
+
+                if (characterStats == null || characterStats.IsDead)
+                {
+                    continue;
+                }
+                
+                var score = fightStatus.ScoreValues.FirstOrDefault(x => x.CharacterId == characterId)?.Score ?? 1;
+
+                if (score < 1)
+                {
+                    score = 1;
+                }
+                else if (score > 20)
+                {
+                    score = 20;
+                }
+
+                initiativeScores[characterId] = characterStats.Initiative + score;
+            }
+
+            room.SortedInitiativeScores = initiativeScores
+                .OrderByDescending(scoreValue => scoreValue.Value)
+                .Select(x => (x.Key, x.Value))
+                .ToArray();
+        }
+        else
         {
-
-            fightStatus.ScoreValues = fightStatus.ScoreValues.OrderByDescending(sv => sv.Score).ToArray();
+            room.SortedInitiativeScores = default;
         }
 
-        // 5) Обновить статус боя и разослать событие FIGHT STATUS UPDATE
-        var characterOrder = fightStatus.ScoreValues.Select(sv => Guid.Parse(sv.CharacterId)).ToArray();
-        await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", fightStatus.IsFight, characterOrder);
-
-
+        await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", new
+        {
+            isFight = room.IsFight,
+            orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
+        });
     }
 
     //предложить предмет 
@@ -499,5 +504,17 @@ public class GameHub : Hub
         var party = await _partyService.GetPartyByIdAsync(partyId);
 
         return party != null && party.InGameCharactersIds.Contains(characterId);
+    }
+
+    private async Task<bool> CheckIfPartyKnownAndUserGameMasterAsync()
+    {
+        return _connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId)
+        && await IsGameMasterAsync(partyId);
+    }
+
+    private Guid GetPartyByConnection()
+    {
+        _connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId);
+        return partyId;
     }
 }
