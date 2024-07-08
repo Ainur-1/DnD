@@ -15,9 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "Infrastructur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameHub", "Infrastructure\GameHub\GameHub.csproj", "{B2D8BB7E-1393-4B02-98A1-583FB9D2EE35}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Core\Contracs\Contracts.csproj", "{4EB11507-7378-46E4-B882-ABB9DC78B60D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Core\Contracts\Contracts.csproj", "{4EB11507-7378-46E4-B882-ABB9DC78B60D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services.Abstractions", "Core\Service.Abstractions\Services.Abstractions.csproj", "{A35F3B3D-7694-40A3-A9E6-CE54EF4877C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services.Abstractions", "Core\Services.Abstractions\Services.Abstractions.csproj", "{A35F3B3D-7694-40A3-A9E6-CE54EF4877C1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services.Implementation", "Infrastructure\Services.Implementation\Services.Implementation.csproj", "{858BD38D-8103-4C94-95DD-B012B6ED925A}"
 EndProject
