@@ -1,5 +1,5 @@
 ﻿using Contracts.Online;
-using Contracts.Party;
+using Contracts.Parties;
 using Domain.Entities.Parties;
 
 namespace Service.Abstractions;
