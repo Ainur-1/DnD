@@ -1,4 +1,3 @@
-import { MuiFileInput } from "mui-file-input";
 import { CharacterImage } from "./CharacterImage";
 import { useRef, useState } from "react";
 import { convertFileToBase64 } from "@/shared/utils/fileConverter";

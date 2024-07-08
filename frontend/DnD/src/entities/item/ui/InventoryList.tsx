@@ -1,7 +1,6 @@
-import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Box, Button, Chip, Container, FormControl, FormControlLabel, FormGroup, Grid, List, ListItem, Switch, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Box, Button, Chip, FormControl, FormControlLabel, FormGroup, List, ListItem, Switch, TextField, Typography } from "@mui/material";
 import { ExpandedInventoryItem } from "../model/types";
 import InventoryItemCard from "./inventoryItem";
-import TagInput from "@/shared/ui/TagInput";
 import { useState } from "react";
 import { tryParseNumber } from "@/shared/utils/parsers";
 

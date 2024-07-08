@@ -1,55 +1,75 @@
-import { BASE_URL } from "@/shared/configuration/enviromentConstants";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { CreatePartyResult, CreatePartyVariables, JoinPartyResult, JoinPartyVariables, PartyQueryResult, StrictPartyQueryResult } from "./apiVariables";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { CreatePartyMutation, CreatePartyMutationVariables, JoinPartyMutationVariables, UserPartyInfoQuery, UserPartyInfoQueryVariables } from "@/shared/api/gql/graphql";
+import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+import { client } from "@/shared/api";
+import { UserPartiesQuery } from "./queries/UserParties.generated";
+import { JoinPartyMutation } from "./queries/JoinParty.generated";
 
 export const partyApi = createApi({
     reducerPath: 'party/api',
-    baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    baseQuery: graphqlRequestBaseQuery({client}),
     tagTypes: ["MyParties"],
     endpoints: (build) => ({
-        strictParty: build.query<StrictPartyQueryResult, string>({
-            query: (body) => ({
-                url: "party query",
-                method: "POST",
-                body
+        party: build.query<UserPartyInfoQuery, UserPartyInfoQueryVariables>({
+            query: (variables) => ({
+                document: `query userPartyInfo($partyId: UUID!) {
+                    party(partyId: $partyId) {
+                        accessCode
+                        gameMasterId
+                        inGameCharacterName
+                        inGameCharactersIds
+                    }
+                }`,
+                variables
             }),
         }),
-        party: build.query<PartyQueryResult, string>({
-            query: (partyId) => ({
-                url: "party query",
-                method: "POST",
-                partyId
-            }),
-        }),
-        myParties: build.query<PartyQueryResult[], void>({
-            query: (body) => ({
-                url: "my party query",
-                method: "POST",
-                body
+        myParties: build.query<UserPartiesQuery, void>({
+            query: (_) => ({
+                document: `query userParties {
+                    myParties {
+                        accessCode
+                        gameMasterId
+                        id
+                        inGameCharacterName
+                    }
+                }`,
             }),
             providesTags: ["MyParties"]
         }),
 
-        joinParty: build.mutation<JoinPartyResult, JoinPartyVariables>({
-            query: (body) => ({
-                url: "join party",
-                method: "POST",
-                body
+        /* mutations */
+        joinParty: build.mutation<JoinPartyMutation, JoinPartyMutationVariables>({
+            query: (variables) => ({
+                document: `mutation joinParty($accessCode: String!, $characterId: UUID!, $partyId: UUID!) {
+                        joinParty(input: { 
+                            accessCode: $accessCode, 
+                            characterId: $characterId, 
+                            partyId: $partyId }) {
+        
+                                userPartyDto {
+                                    id
+                                }
+                        }
+                }`,
+                variables
             }),
             invalidatesTags: ["MyParties"]
         }),
-        createParty: build.mutation<CreatePartyResult, CreatePartyVariables>({
-            query: (body) => ({
-                url: "join party",
-                method: "POST",
-                body
+        createParty: build.mutation<CreatePartyMutation, CreatePartyMutationVariables>({
+            query: (variables) => ({
+                document: `mutation createParty($accessCode: String!){
+                    createParty(input: { accessCode: $accessCode }) {
+                        uuid
+                    }
+                }`,
+                variables
             }),
             invalidatesTags: ["MyParties"]
         }),
     })
 });
 
-export const { useStrictPartyQuery, 
+export const {
     useMyPartiesQuery, 
     usePartyQuery, 
     useLazyPartyQuery, 

@@ -1,46 +1,34 @@
 import { DeathSaves } from "@/entities/character/model/types";
+import { useAuthReducer } from "@/features/auth";
 import { useLazyDeathSavesQuery } from "@/features/character/api/api";
 import useGameReducer from "@/features/game";
-import { RoomState } from "@/features/game/model/signalRTypes";
-import { GameState } from "@/features/game/model/types";
 import { useLazyPartyQuery } from "@/features/party";
-import { HUB_URL } from "@/shared/configuration/enviromentConstants";
-import { HubConnectionBuilder } from "@microsoft/signalr";
 import { Box, CircularProgress, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 
 interface GameLoaderProps {
     partyId: string | undefined,
     onLoaded: () => void,
-    onFailure: () => void,
-}
-
-async function openConnection() {
-    const connection = new HubConnectionBuilder()
-        .withUrl(HUB_URL)
-        .withAutomaticReconnect()
-        .build();
-    
-    await connection.start();
-
-    return connection;
+    onFailure: (error?:string) => void,
 }
 
 export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderProps) {
+
     const [progress, setProggress] = useState(0);
-    const { init, reset } = useGameReducer();
+    const { initGameState, reset } = useGameReducer();
+    const { state:authState } = useAuthReducer();
 
     const [party] = useLazyPartyQuery();
     const [deathSaves] = useLazyDeathSavesQuery();
 
     const notifyProgress = (progress: number) => setProggress(progress);
 
-    const fetchParty = (partyId: string) => party(partyId)
+    const fetchParty = (partyId: string) => party({partyId})
         .unwrap()
         .then(x => x)
         .catch(() => null);
     
-    const fetchDeathSaves = (characterId: string) => deathSaves(characterId)
+    const fetchDeathSaves = (characterId: string) => deathSaves({characterId})
         .unwrap()
         .then(x => x)
         .catch(() => null);
@@ -48,69 +36,59 @@ export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderPro
     async function load() {
         try{
             if (partyId === undefined) {
-                onFailure();
+                onFailure("Отряд не найден.");
                 return;
             }
             notifyProgress(7);
     
             const response = await fetchParty(partyId!);
             if (response === null) {
-                onFailure();
+                onFailure("Отряд не найден.");
                 return;
             }
             notifyProgress(25);
     
-            const { code, isUserGameMaster, userCharacterId } = response;
-            const connection = await openConnection();
-            notifyProgress(58);
+            const { gameMasterId, inGameCharacter } = response.party;
+            const isUserGameMaster = authState.currentUserId === gameMasterId;
+        
+            notifyProgress(45);
     
             let deathSaves: DeathSaves | undefined;
             if (!isUserGameMaster) {
-                if (userCharacterId == null) {
+                if (!inGameCharacter) {
                     onFailure();
                     return;
                 }
     
-                const response = await fetchDeathSaves(userCharacterId);
-                notifyProgress(66);
+                const response = await fetchDeathSaves(inGameCharacter.id);
+                notifyProgress(55);
                 if (response == null) {
                     onFailure();
                     return;
                 }
+
+                const { isDead, isDying, deathSaves:dS } = response.character.dynamicStats;
     
-                deathSaves = response.isDying ? {
-                    successCount: response.failureCount,
-                    failureCount: response.successCount
+                deathSaves = !isDead && isDying && dS != null ? {
+                    successCount: dS.successCount,
+                    failureCount: dS.failureCount
                 } : undefined;
             }
             notifyProgress(75);
     
-            const state = await connection.invoke<RoomState | null>("JoinRoom", partyId, code);
-            notifyProgress(85);
-    
-            if (state === null) {
+            const initResult = await initGameState({
+                isUserGameMaster: isUserGameMaster,
+                partyId: partyId,
+                userCharacterId: inGameCharacter!.id as string,
+                deathSaves: deathSaves,
+            });
+
+            if (!initResult) {
                 onFailure();
                 return;
+            } else {
+                notifyProgress(100);
             }
-            notifyProgress(95);
-    
-            const initialState: GameState = {
-                partyId: partyId!,
-                roomCode: code,
-                isUserGameMaster,
-                fatalErrorOccured: false,
-                connection,
-                gameInfo: {
-                    userCharacterId,
-                    partyCharacters: state.characters,
-                    isFighting: state.isFighting,
-                    characterStepOrder: state.order ?? undefined,
-                    deathSaves
-                },
-            }
-
-            init(initialState);
-            notifyProgress(100);
         } catch {
             onFailure();
             return;

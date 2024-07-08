@@ -1,17 +1,31 @@
 import { useJoinPartyMutation } from "@/features/party";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { error } from "console";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SelectCharacterDialog from "./SelectCharacterDialog";
 
 export default function JoinPartyForm() {
     const navigate = useNavigate();
     const [partyId, setPartyId] = useState<string | undefined>();
+    const [characterId, setCharacterId] = useState<string | undefined>();
     const [partyError, setPartyError] = useState<string>();
     const [accessCode, setAccessCode] = useState<string | undefined>();
     const [accessCodeError, setAccessCodeError] = useState<string>();
     const [requestError, setRequestError] = useState<string>();
 
-    const [joinParty, { isLoading, isSuccess, data }] = useJoinPartyMutation();
+    const [showChracterList, setShowCharacterList] = useState(false);
+    const ref = useRef<HTMLFormElement>(null);
+
+    const [joinParty, { isLoading, isSuccess, data, isError }] = useJoinPartyMutation();
+
+    const onCloseCharacterList = (characterId: string | undefined) => {
+        setCharacterId(characterId);
+        setShowCharacterList(false);
+        if (characterId) {
+            ref.current?.submit();
+        }
+    };
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -39,24 +53,26 @@ export default function JoinPartyForm() {
             setPartyError(empty)
         }
 
-        await joinParty({ partyId: partyId!, accessCode: accessCode!});
-        
-        if (isSuccess) {
-            const { success, error } = data;
-
-            if (success) {
-                navigate(`/game/${partyId}`);
-            } else if(error) {
-                setRequestError(error);
-            } else {
-                setRequestError("Не возможно присоединиться к игре.");
-            }
-        } else {
-            setRequestError("Ошибка при запросе.");
-        }
+        await joinParty({ partyId: partyId!, accessCode: accessCode!, characterId: characterId!});
     }
 
-    return  <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+    useEffect(() => {
+        if (isLoading) {
+            return;
+        }
+
+        if (isSuccess) {
+            navigate(`/game/${data.joinParty.userPartyDto?.id ?? partyId}`);
+            return;
+        } 
+
+        if (isError) {
+            setRequestError("Ошибка при запросе.");
+        }
+
+    }, [isSuccess, error, isLoading, data]);
+
+    return  <Box ref={ref} component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
         <TextField
             value={partyId}
             onChange={(e) => setPartyId(e.target.value.trim())}
@@ -83,9 +99,10 @@ export default function JoinPartyForm() {
                     {requestError}
                 </Typography>
             }
-            <Button variant="contained" type="submit"  size="large" fullWidth disabled={isLoading}>
+            <Button variant="contained" onClick={() => setShowCharacterList(true)}  size="large" fullWidth disabled={isLoading}>
                 Присоединиться
             </Button>
         </Stack>
+        <SelectCharacterDialog onClose={onCloseCharacterList} open={showChracterList} />
     </Box>
 }

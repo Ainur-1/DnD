@@ -1,0 +1,10 @@
+query userParties {
+  myParties {
+    accessCode
+    gameMasterId
+    id
+    inGameCharacter {
+      characterName
+    }
+  }
+}

@@ -3,6 +3,7 @@ import UncompletedSessionCard, { UncompletedSessionCardSkeletone } from "./Uncom
 import { useMyPartiesQuery } from "@/features/party";
 import { AbsoluteCenterContent } from "@/shared/ui/AbsoluteSenterContent";
 import ErrorWithRetryButton from "@/shared/ui/ErrorWithRetryButton";
+import { useAuthReducer } from "@/features/auth";
 
 function getArrayForSkeletone() {
     const array = [];
@@ -19,6 +20,7 @@ interface UncompletedSessionCardListProps {
 
 export default function UncompletedSessionList({}: UncompletedSessionCardListProps) {
     const { data, isFetching, isError, isSuccess } = useMyPartiesQuery();
+    const { state } = useAuthReducer();
 
     return <>
         { isError && <AbsoluteCenterContent>
@@ -33,11 +35,16 @@ export default function UncompletedSessionList({}: UncompletedSessionCardListPro
                 {
                     isSuccess && <>
                         {
-                            (!data || data.length == 0) && <Typography>У Вас нет начатых игр.</Typography>
+                            (!data || data.myParties.length == 0) && <Typography>У Вас нет начатых игр.</Typography>
                         }
                         {
-                            data && data.length > 0 && data.map(x => <ListItem>
-                                <UncompletedSessionCard code={x.code} partyId={x.id} isUserPartyCreator={x.isUserGameMaster} mayBeInGameCharacterId={x.userCharacterId} />
+                            data && data.myParties.length > 0 && data.myParties.map(({id, accessCode, gameMasterId, inGameCharacter}) => <ListItem>
+                                <UncompletedSessionCard 
+                                    code={accessCode} 
+                                    partyId={id} 
+                                    isUserPartyCreator={gameMasterId == state.currentUserId} 
+                                    mayBeInGameCharacterName={inGameCharacter?.characterName ?? null} 
+                                />
                             </ListItem>)
                         }
                     </>

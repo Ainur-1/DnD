@@ -1,4 +1,3 @@
-import { useOnlyCharacterNameQuery } from "@/features/character";
 import { Button, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
@@ -49,19 +48,14 @@ interface UncompletedSessionCardProps {
     code: string,
     partyId: string,
     isUserPartyCreator: boolean,
-    mayBeInGameCharacterId: string | null,
+    mayBeInGameCharacterName: string | null,
 }
 
-export default function UncompletedSessionCard({ code, partyId, isUserPartyCreator, mayBeInGameCharacterId }: UncompletedSessionCardProps) {
-
-    const { data, isLoading, isSuccess } = useOnlyCharacterNameQuery(mayBeInGameCharacterId ?? '', {
-        skip: mayBeInGameCharacterId == null,
-    });
-
+export default function UncompletedSessionCard({ code, partyId, isUserPartyCreator, mayBeInGameCharacterName }: UncompletedSessionCardProps) {
     const navigate = useNavigate();
 
     return <UncompletedSessionWrap 
-            alignRightToEnd = {mayBeInGameCharacterId == null || isLoading}
+            alignRightToEnd = {mayBeInGameCharacterName == null}
             leftNode={<>
                 <Typography component="div" variant="h6">
                     {code}
@@ -71,8 +65,7 @@ export default function UncompletedSessionCard({ code, partyId, isUserPartyCreat
                 </Typography>
             </>} 
             rightNode={<>
-                        { isLoading && <CharacterNameLoadingSkeletone/> }
-                        { isSuccess && data}
+                        {mayBeInGameCharacterName}
                         <Button
                                 onClick={() => navigate(`/game/${partyId}`)} 
                                 sx={{

@@ -1,7 +1,6 @@
 import { tryParseNumber } from "@/shared/utils/parsers";
-import { Box, ClickAwayListener, Grid, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Grid, Stack, TextField, Typography } from "@mui/material";
 import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
-import { useState } from "react";
 import ClickableToolTip from "@/shared/ui/ClickableToolTip";
 
 interface StrictCharacterAbilityProps {

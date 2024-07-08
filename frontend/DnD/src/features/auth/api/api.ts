@@ -1,8 +1,7 @@
 import { createApi,  } from "@reduxjs/toolkit/query/react";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 import { client } from "@/shared/api";
-import { SignInInput, SignInMutation, SignUpInput, SignUpMutation } from "@/shared/api/gql/graphql";
-import { SignOutMutation } from "./queries/SignOut.generated";
+import { SignInInput, SignInMutation, SignOutMutation, SignUpInput, SignUpMutation } from "@/shared/api/gql/graphql";
 
 export const authApi = createApi({
     reducerPath: 'auth/api',

@@ -1,0 +1,11 @@
+query userPartyInfo($partyId: UUID!) {
+  party(partyId: $partyId) {
+    accessCode
+    gameMasterId
+    inGameCharacter {
+      characterName
+      id
+    }
+    inGameCharactersIds
+  }
+}
