@@ -11,11 +11,6 @@ export type RoomState = {
     order: string[] | null,
 };
 
-export interface JoinRoomResult {
-    success: boolean,
-    payload?: RoomState
-}
-
 export interface DamageCharacterVariables {
     characterId: string,
     damage: number,

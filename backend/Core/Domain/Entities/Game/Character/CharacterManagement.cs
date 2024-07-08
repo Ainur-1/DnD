@@ -2,7 +2,7 @@
 
 public class CharacterManagement
 {
-    public Guid JoinedPartyId { get; set; }
+    public Guid? JoinedPartyId { get; set; }
 
     public Guid OwnerId { get; set; }
 

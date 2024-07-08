@@ -4,7 +4,6 @@ import { HubConnection } from "@microsoft/signalr"
 
 export type GameState = {
     partyId: string,
-    roomCode: string,
     isUserGameMaster: boolean,
     gameInfo: GameInfo,
     connection: HubConnection,
@@ -25,4 +24,9 @@ export type GameCharacter = {
     personality: FullPersonality,
 } & WithId<string>
 
-export type GameStateOrNull = GameState | null;
+export interface InitGameStateVariables {
+    partyId: string;
+    isUserGameMaster: boolean;
+    deathSaves?: DeathSaves;
+    userCharacterId: string | null;
+}

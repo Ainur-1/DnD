@@ -1,5 +1,5 @@
 import { AddItemToInventoryForm, ExpandedInventoryItem } from "@/features/inventory";
-import { Container, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 
 interface AddItemInventoryDialogProps {

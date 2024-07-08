@@ -29,5 +29,6 @@
       "@/*": ["src/*"],
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "files": ["src/shared/types/graphql.d.ts"],
 }

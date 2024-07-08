@@ -1,4 +1,5 @@
-﻿using Contracts.Online;
+﻿using Contracts;
+using Contracts.Online;
 using Service.Abstractions;
 
 namespace Services.Implementation;
@@ -10,7 +11,17 @@ public class CharacterService : ICharacterService
         throw new NotImplementedException();
     }
 
+    public Task<CharacterDto?> GetCharacterForUserAsync(Guid issuerId, Guid characterId)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<DynamicStatsDto> GetCharacterInGameStatsAsync(Guid characterId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IEnumerable<CharacterDto>> GetUserCharactersAsync(Guid userId)
     {
         throw new NotImplementedException();
     }

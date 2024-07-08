@@ -1,0 +1,9 @@
+query myAliveCharacters {
+  myCharacters(where: { isInParty: { eq: true } }) {
+    id
+    personality {
+      name
+      base64Image
+    }
+  }
+}

@@ -1,8 +1,10 @@
 import { createApi,  } from "@reduxjs/toolkit/query/react";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 import { client } from "@/shared/api";
-import { SignInInput, SignInMutation, SignUpInput, SignUpMutation } from "@/shared/api/gql/graphql";
-import { SignOutMutation } from "./queries/SignOut.generated";
+import { SignInInput, SignInMutation, SignOutMutation, SignUpInput, SignUpMutation } from "@/shared/api/gql/graphql";
+import signInDocumnet from './queries/SignIn.graphql';
+import signUpDocumnet from './queries/SignUp.graphql';
+import signOutDocumnet from './queries/SignOut.graphql';
 
 export const authApi = createApi({
     reducerPath: 'auth/api',
@@ -10,32 +12,19 @@ export const authApi = createApi({
     endpoints: (build) => ({
         signIn: build.mutation<SignInMutation, SignInInput>({
             query: (variables) => ({
-                document: `
-                    mutation signIn($login: String!, $password: String!,$rememberMe:Boolean!) {
-                        signIn(input: { login: $login, password: $password, rememberMe: $rememberMe}) {
-                            uuid
-                        }
-                }`, 
+                document: signInDocumnet, 
                 variables,
             })
         }),
         signUp: build.mutation<SignUpMutation, SignUpInput>({
             query: (variables) => ({
-                document:`mutation signUp($email: String!, $name: String, $password: String!, $username: String!) {
-                signUp(input: { email: $email, name: $name, password: $password, username: $username }) {
-                boolean
-                errors {
-                    ... on FieldNameTakenError { message }
-                    ... on InvalidArgumentValueError { message }
-                    }
-                }
-                }`,
+                document: signUpDocumnet,
                 variables
             }),
         }),
         signOut: build.mutation<SignOutMutation, void>({
             query: (variables) => ({
-                document: `mutation signOut { signOut { boolean } }`,
+                document: signOutDocumnet,
                 variables}),
         }),
     }),

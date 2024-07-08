@@ -1,5 +1,5 @@
 
 //todo: get from vite env
-export const BASE_URL = 'http://localhost:8080/graphql'
+export const BASE_URL = 'http://localhost:5092/graphql'
 
-export const HUB_URL = 'http://localhost:8080/gamehub'
+export const HUB_URL = 'http://localhost:5092/gamehub'

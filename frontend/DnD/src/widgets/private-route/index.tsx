@@ -11,7 +11,7 @@ export default function PrivateRoute({redirectPath, children}: PrivateRouteProps
     const { state } = useAuthReducer();
     const location = useLocation();
     if (!state.isAuthenticated) {
-        return <Navigate to={`${redirectPath ?? '/login'}?return_uri=${location.pathname}`} replace={true} />
+        return <Navigate to={`${redirectPath ?? '/sign-in'}?return_uri=${location.pathname}`} replace={true} />
     }
 
     return children ?? <Outlet/>

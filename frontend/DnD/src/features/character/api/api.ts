@@ -1,29 +1,30 @@
-import { BASE_URL } from "@/shared/configuration/enviromentConstants";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { DeathSavesResult } from "./variables";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { CarouselCharacter } from "../model/types";
+import { CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables, MyAliveCharactersQuery } from "@/shared/api/gql/graphql";
+import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+import { client } from "@/shared/api";
+import MY_ALIVE_CHARACTERS from "./queries/MyAliveCharacters.graphql";
+import CHRACTER_DEATH_SAVES from "./queries/ChracterDeathSaves.graphql";
 
 export const characterApi = createApi({
     reducerPath: 'character/api',
-    baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    baseQuery: graphqlRequestBaseQuery({client}),
     tagTypes: ["MyCharactersList"],
     endpoints: (build) => ({
         /* recieve character info */
-        deathSaves: build.query<DeathSavesResult, string>({
-            query: (body) => ({
-                url: "character deathsaves",
-                method: "POST",
-                body
+        deathSaves: build.query<CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables>({
+            query: (variables) => ({
+                document: CHRACTER_DEATH_SAVES,
+                variables
             }),
             //todo: провайд тегов
         }),
-        onlyCharacterName:  build.query<string, string>({
-            query: (body) => ({
-                url: "character name",
-                method: "POST",
-                body
+        myAliveCharacters:  build.query<MyAliveCharactersQuery, void>({
+            query: (variables) => ({
+                document: MY_ALIVE_CHARACTERS,
+                variables
             }),
-            //todo: провайд тегов
+            providesTags: ["MyCharactersList"]
         }),
 
         /* mutations */
@@ -57,7 +58,6 @@ export const { useDeathSavesQuery,
     useLazyDeathSavesQuery, 
     useMyCharactersQuery, 
     useDeleteMyCharacterMutation,
-    useOnlyCharacterNameQuery,
-    useLazyOnlyCharacterNameQuery,
+    useMyAliveCharactersQuery,
     useCreateCharacterMutation,
 } = characterApi;

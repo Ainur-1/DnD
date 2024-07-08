@@ -8,20 +8,20 @@ import { useParams } from "react-router-dom";
 export default function LiveGameSessionPage() {
    const { partyId } = useParams();
    const [isLoaded, setIsLoaded] = useState(false);
-   const [failure, setFailure] = useState(false);
+   const [failure, setFailure] = useState<string>('');
 
    const reset = () => {
-      setFailure(false);
+      setFailure('');
       setIsLoaded(false);
    };
 
-   const onFailure = () => {
-      setFailure(true);
+   const onFailure = (error: string | undefined) => {
+      setFailure(error ?? "Ошибка при загрузке");
       setIsLoaded(true);
    }
 
    const onSuccess = () => {
-      setFailure(false);
+      setFailure('');
       setIsLoaded(true);
    }
 
@@ -31,7 +31,7 @@ export default function LiveGameSessionPage() {
          {!isLoaded && <GameLoader onFailure={onFailure} onLoaded={onSuccess} partyId={partyId} />}
          {isLoaded && <>
             {!failure && <GameController/>}
-            {failure && <ErrorWithRetryButton errorText="Ошибка" retryButtonText="Загрузить еще раз" onRetryClicked={reset}/>}
+            {failure && <ErrorWithRetryButton errorText={failure} retryButtonText="Загрузить еще раз" onRetryClicked={reset}/>}
          </>} 
       </CenterContent>
    </>

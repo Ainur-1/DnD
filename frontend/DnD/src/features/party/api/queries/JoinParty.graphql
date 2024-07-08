@@ -1,0 +1,13 @@
+mutation joinParty($accessCode: String!, 
+  $characterId: UUID!, 
+  $partyId: UUID!) {
+  joinParty(input: { 
+      accessCode: $accessCode, 
+      characterId: $characterId, 
+      partyId: $partyId }) {
+        
+    userPartyDto {
+      id
+    }
+  }
+}

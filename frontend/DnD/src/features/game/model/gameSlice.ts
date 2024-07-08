@@ -1,11 +1,14 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { GameState } from "./types";
+import { GameState, InitGameStateVariables } from "./types";
 import { DamageCharacterVariables, EndGameVariables,
-         ItemFromInventory, JoinRoomResult, RoomState, 
+         ItemFromInventory, RoomState, 
          SuggestItemVariables, UpdateCharacterVariables, 
          UpdateFightVariables } from "./signalRTypes";
 import { Item } from "@/entities/item/model/types";
 import { inventoryApi } from "@/features/inventory/api/api";
+import { RootState } from "@/app/appStore";
+import { HubConnectionBuilder } from "@microsoft/signalr";
+import { HUB_URL } from "@/shared/configuration/enviromentConstants";
 
 
 export const damageCharacter = createAsyncThunk<void, DamageCharacterVariables, {state: GameState}>(
@@ -112,23 +115,48 @@ export const endGame = createAsyncThunk<boolean, EndGameVariables, {state: GameS
     }
 )
 
-export const joinRoom = createAsyncThunk<JoinRoomResult, {}, { state: GameState }>(
-    "game/joinRoom",
-    async function (_, { getState }) {
-        const { connection, partyId, roomCode } = getState();
+export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, { state: RootState }>(
+    "game/initGameState",
+    async function (args, { dispatch }) {
 
-        const state = await connection.invoke<RoomState | null>("JoinRoom", partyId, roomCode);
+        const connection = new HubConnectionBuilder()
+            .withUrl(HUB_URL)
+            .withAutomaticReconnect()
+            .build();
+        
+        try {
+            //todo: set up connection
 
-        if (state == null) {
-            return { 
-                success: false,
+            await connection.start();
+
+            const roomState = await connection.invoke<RoomState | null>("JoinRoom", args.partyId);
+
+            if (roomState == null) {
+                dispatch(setState(undefined));
+                return false;
             }
-        }
 
-        return {
-            success: true,
-            payload: state as RoomState,
-        };
+            const newGameState: GameState = {
+                connection: connection,
+                fatalErrorOccured: false,
+                gameInfo: {
+                    isFighting: roomState.isFighting,
+                    partyCharacters: [], // todo,
+                    userCharacterId: args.userCharacterId,
+                    characterStepOrder: roomState.order ?? undefined,
+                    deathSaves: args.deathSaves,
+                },
+                isUserGameMaster: args.isUserGameMaster,
+                partyId: args.partyId
+            }
+            dispatch(setState(newGameState));
+
+            return true;
+
+        } catch {
+            dispatch(setState(undefined));
+            return false;
+        }
     }
 )
 
@@ -142,7 +170,7 @@ const gameSlice = createSlice({
     name: 'game',
     initialState: initialState,
     reducers: {
-        init(state, action: PayloadAction<GameState>) {
+        setState(state, action: PayloadAction<GameState | undefined>) {
             state.state = action.payload;
         },
         reset(state) {
@@ -157,6 +185,6 @@ const gameSlice = createSlice({
     },
 });
 
-export const { init, reset, setFatalErrorOccured } = gameSlice.actions;
+export const { setState, reset, setFatalErrorOccured } = gameSlice.actions;
 
 export default gameSlice.reducer;
