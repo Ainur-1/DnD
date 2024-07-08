@@ -10,7 +10,7 @@ interface SelectCharacterDialogProps {
 }
 
 export default function SelectCharacterDialog({open, onClose}:SelectCharacterDialogProps) {
-    const { data, isFetching, isError, refetch } = useMyAliveCharactersQuery();
+    const { data, isFetching, isError, refetch, error } = useMyAliveCharactersQuery();
     let refetchCount = 0; 
 
     const theme = useTheme();
@@ -26,8 +26,8 @@ export default function SelectCharacterDialog({open, onClose}:SelectCharacterDia
             refetch();
         } else {
             onClose(undefined);
-        }
-    }, [isError]);
+      }
+    }, [isError, refetch, error]);
 
     return (
         <Dialog onClose={() => onClose(undefined)} open={open}>

@@ -1,6 +1,5 @@
 import { useJoinPartyMutation } from "@/features/party";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
-import { error } from "console";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SelectCharacterDialog from "./SelectCharacterDialog";
@@ -17,7 +16,7 @@ export default function JoinPartyForm() {
     const [showChracterList, setShowCharacterList] = useState(false);
     const ref = useRef<HTMLFormElement>(null);
 
-    const [joinParty, { isLoading, isSuccess, data, isError }] = useJoinPartyMutation();
+    const [joinParty, { isLoading, isSuccess, data, isError, error }] = useJoinPartyMutation();
 
     const onCloseCharacterList = (characterId: string | undefined) => {
         setCharacterId(characterId);

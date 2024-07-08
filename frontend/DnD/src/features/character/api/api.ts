@@ -3,6 +3,8 @@ import { CarouselCharacter } from "../model/types";
 import { CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables, MyAliveCharactersQuery } from "@/shared/api/gql/graphql";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 import { client } from "@/shared/api";
+import MY_ALIVE_CHARACTERS from "./queries/MyAliveCharacters.graphql";
+import CHRACTER_DEATH_SAVES from "./queries/ChracterDeathSaves.graphql";
 
 export const characterApi = createApi({
     reducerPath: 'character/api',
@@ -12,33 +14,15 @@ export const characterApi = createApi({
         /* recieve character info */
         deathSaves: build.query<CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables>({
             query: (variables) => ({
-                document: `query characterDeathSaves($characterId: UUID!) {
-                    character(characterId: $characterId) {
-                        dynamicStats {
-                            deathSaves {
-                                failureCount
-                                successCount
-                            }
-                            isDying
-                            isDead
-                        }
-                    }
-                }`,
+                document: CHRACTER_DEATH_SAVES,
                 variables
             }),
             //todo: провайд тегов
         }),
         myAliveCharacters:  build.query<MyAliveCharactersQuery, void>({
-            query: (_) => ({
-                documents: `query myAliveCharacters {
-                    myCharacters(where: { isInParty: { eq: true } }) {
-                        id
-                        personality {
-                            name
-                            image
-                        }
-                    }
-                }`,
+            query: (variables) => ({
+                document: MY_ALIVE_CHARACTERS,
+                variables
             }),
             providesTags: ["MyCharactersList"]
         }),

@@ -43,7 +43,7 @@ export default function CreatePartyForm() {
             value={accessCode}
             onChange={(e) => setAccessCode(e.target.value.trim())}
             helperText={accessCodeError}
-            error={accessCodeError != ""}
+            error={accessCodeError != "" && accessCodeError != undefined}
             margin="dense"
             required
             fullWidth
