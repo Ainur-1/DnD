@@ -23,7 +23,7 @@
     <ProjectReference Include="..\Core\Contracs\Contracts.csproj" />
     <ProjectReference Include="..\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\Core\Service.Abstractions\Services.Abstractions.csproj" />
-    <ProjectReference Include="..\GameHub\GameHub.csproj" />
+    <ProjectReference Include="..\Infrastructure\GameHub\GameHub.csproj" />
     <ProjectReference Include="..\Infrastructure\DataAccess\DataAccess.csproj" />
     <ProjectReference Include="..\Infrastructure\Services.Implementation\Services.Implementation.csproj" />
   </ItemGroup>

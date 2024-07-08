@@ -47,6 +47,8 @@ public class Program
         services.RegisterDatabaseServices(mongoDbSettings);
         services.AddMongoCollections();
 
+        services.AddLogging();
+
         if (builder.Environment.IsDevelopment())
         {
             services.AddCors(options =>

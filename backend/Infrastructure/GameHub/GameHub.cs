@@ -1,16 +1,12 @@
-﻿using Contracts;
+﻿using Amazon.Runtime.Internal.Util;
 using Contracts.Online;
-using Domain.Entities.Character;
-using Domain.Entities.User;
 using GameHub.Dtos;
 using GameHub.Models;
 using GameHub.Repositories;
-using GameHub.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Service.Abstractions;
-using Services.Implementation;
 using System.Collections.Concurrent;
 
 namespace GameHub;
@@ -18,13 +14,13 @@ namespace GameHub;
 [Authorize]
 public class GameHub : Hub
 {
-
     private static readonly ConcurrentDictionary<string, Guid> _connectionPartyMapping = new();
     private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
     private readonly ICharacterService _characterService;
     private readonly IPartyService _partyService;
+    private readonly ILogger<GameHub> _logger;
     private Guid UserId => Guid.Parse(Context.UserIdentifier);
-    public GameHub(ICharacterService characterService, IPartyService partyService)
+    public GameHub(ICharacterService characterService, IPartyService partyService, ILogger<GameHub> logger)
     {
         _characterService = characterService;
         _partyService = partyService;
@@ -32,7 +28,7 @@ public class GameHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        Console.WriteLine($"Игрок с ID:{Context.UserIdentifier} ConId:'{Context.ConnectionId}' подключен");
+        _logger.LogInformation("Игрок с ID {ID} ConId '{ConId}' подключен.", Context.UserIdentifier, Context.ConnectionId);
     }
 
     public async Task<GameRoomDto?> JoinRoomAsync(Guid partyId)
@@ -65,8 +61,8 @@ public class GameHub : Hub
             }
             else
             {
+                _logger.LogError("Игрок({Id}) находится в пати({partyId}), но его персонаж не найден.", Context.UserIdentifier, partyId);
                 throw new InvalidOperationException();
-                //todo: Логировать исключителньую ситуацию 
             }
         }
 
