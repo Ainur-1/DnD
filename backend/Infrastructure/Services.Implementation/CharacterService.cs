@@ -31,7 +31,7 @@ public class CharacterService : ICharacterService
         throw new NotImplementedException();
     }
 
-    public Task UpdateCharacterInGameStatsAsync(Guid characterId, DynamicStatsDto updateStats)
+    public Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats)
     {
         throw new NotImplementedException();
     }

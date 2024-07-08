@@ -1,4 +1,4 @@
-import { ClassFeature, RaceTrait } from "@/shared/types/domainTypes"
+import { ClassFeature, Dice, RaceTrait } from "@/shared/types/domainTypes"
 
 
 export type Personality = {
@@ -78,14 +78,17 @@ export type DeathSaves = {
     failureCount: number
 }
 
+export type BaseHp = {
+    hitPointDice: Dice,
+    hitPointsDiceMaximumCount: number,
+    hitPointsMaximum: number,
+}
+
 export type BaseCharacterStats = {
-    maxHp: number,
     baseArmor: number,
     baseSpeed: number,
-    hpDice: string,
-    hpDiceMaxCount: number,
     proficiencyBonus: number,
-}
+} & BaseHp;
 
 export type ProficiencyAndInitiative = {
     initiativeModifier: number,
@@ -101,8 +104,7 @@ export type DynamicStats = {
     hitDicesLeftCount: number,
     isDead: boolean,
     isDying: boolean,
-    deathSaves: DeathSaves | null
-} & ProficiencyAndInitiative;
+}
 
 export type HitDices = {
     hitDice: string,

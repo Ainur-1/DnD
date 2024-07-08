@@ -1,13 +1,43 @@
 import { Item } from "@/entities/item/model/types";
-import { GameCharacter } from "./types";
-import { DeathSaves } from "@/entities/character/model/types";
+import { BaseHp, DeathSaves, FullAbility, SkillModifiers } from "@/entities/character/";
+import { Aligments, NamePlusDescription, WithId } from "@/shared/types/domainTypes";
 
-export interface JoinRoomVariables {
-}
+export type GameCharacter = {
+    personality: {
+        name: string;
+        base64Image: string | null;
+        age: number;
+        race: string;
+        class: string;
+        alignment: Aligments;
+        bonds: string[];
+        flaws: string[];
+        background: string;
+        classFeatures: NamePlusDescription[];
+        raceTraits: NamePlusDescription[];
+        languages: string[];
+        otherTraits: string[];
+        level: number;
+    },
+    characterStats: SkillModifiers & FullAbility & BaseHp,
+    dynamicStats: {
+        hp: number;
+        tempHp: number;
+        armorClass: number;
+        proficiency: number;
+        initiative: number;
+        inspiration: number;
+        speed: number;
+        hitDicesLeftCount: number;
+        isDead: boolean;
+        isDying: boolean;
+        deathSaves: DeathSaves | null;
+    }
+} & WithId<string>;
 
 export type RoomState = {
     characters: GameCharacter[] 
-    isFighting: boolean,
+    isFight: boolean,
     order: string[] | null,
 };
 
@@ -42,9 +72,6 @@ export interface UpdateCharacterVariables {
     targetCharacterId: string | null,
     hp?: number,
     tempHp?: number,
-    armorClass?: number,
-    profiency?: number,
-    initiative?: number,
     inspiration?: number
     speed?: number,
     hitDicesLeftCount?: number,

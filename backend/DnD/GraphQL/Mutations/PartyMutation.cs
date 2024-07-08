@@ -1,4 +1,4 @@
-﻿using Contracts.Party;
+﻿using Contracts.Parties;
 using DnD.GraphQL.Extensions;
 using HotChocolate.Authorization;
 using Service.Abstractions;

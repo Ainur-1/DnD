@@ -1,5 +1,5 @@
 ﻿using Contracts.Online;
-using Contracts.Party;
+using Contracts.Parties;
 using Domain.Entities.Parties;
 using Service.Abstractions;
 
@@ -34,12 +34,6 @@ public class PartyService : IPartyService
 
     public Task<UserPartyDto> GetUserPartyAsync(Guid userId, Guid partyId)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> IsGameMasterAsync(Guid userId, Guid partyId)
-    {
-
         throw new NotImplementedException();
     }
 

@@ -1,4 +1,5 @@
 ﻿using Contracts;
+using Contracts.Online;
 using Domain.Entities.Character;
 using Domain.Entities.User;
 using GameHub.Dtos;
@@ -219,7 +220,7 @@ public class GameHub : Hub
         throw new NotImplementedException(nameof(AcceptInventory));
     }
 
-    public async Task UpdateCharacterStat(Guid? targetCharacterId, DynamicStatsDto updatedStats)
+    public async Task UpdateCharacterStat(Guid? targetCharacterId, InGameStatsUpdateDto updatedStats)
     {
         if (!_connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId))
         {
@@ -247,9 +248,9 @@ public class GameHub : Hub
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        var conncetionId = Context.ConnectionId;
-        _connectionCharacterMapping.TryRemove(conncetionId, out _);
-        _connectionPartyMapping.TryRemove(conncetionId, out var partyId);
+        var connectionId = Context.ConnectionId;
+        _connectionCharacterMapping.TryRemove(connectionId, out _);
+        _connectionPartyMapping.TryRemove(connectionId, out var partyId);
         if (partyId != default && RoomRepository.Contains(partyId))
         {
             var room = RoomRepository.Get(partyId);

@@ -1,4 +1,4 @@
-﻿namespace Contracts.Party;
+﻿namespace Contracts.Parties;
 
 public record PartyCharacterDto
 {
