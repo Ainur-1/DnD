@@ -1,4 +1,4 @@
-﻿using Contracts.Online;
+﻿using Contracts;
 using Domain.Entities.Character;
 using Domain.Entities.User;
 using GameHub.Dtos;

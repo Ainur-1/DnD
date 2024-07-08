@@ -1,4 +1,4 @@
-﻿using Contracts.Online;
+﻿using Contracts;
 
 namespace GameHub
 {

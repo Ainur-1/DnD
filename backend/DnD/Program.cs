@@ -6,6 +6,8 @@ using Domain.Entities.User;
 using DnD.GraphQL;
 using DnD.GraphQL.Services;
 using Services.Implementation.Extensions;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace DnD;
 
@@ -24,10 +26,22 @@ public class Program
                 {
                     options.SignIn.RequireConfirmedEmail = false;
                     options.SignIn.RequireConfirmedAccount = false;
+                    options.User.RequireUniqueEmail = true;
+                    options.User.AllowedUserNameCharacters = new string(Enumerable.Range(65, 25)
+                        .Select(upperEnglishLetterCode => (char)upperEnglishLetterCode)
+                        .Concat(Enumerable.Range(97, 25)
+                            .Select(lowerEnglishLetterCode => (char)lowerEnglishLetterCode)
+                        )
+                        .Concat(Enumerable.Range(48, 10)
+                            .Select(numberCode => (char)numberCode)
+                        )
+                        .Concat(['_', '.', '@',])
+                        .ToArray()
+                    );
+                    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
                 })
                 .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
-                .AddDefaultTokenProviders()
-                .AddDefaultUI();
+                .AddDefaultTokenProviders();
 
         services.AddSignalR();
         services.RegisterDatabaseServices(mongoDbSettings);
@@ -59,9 +73,10 @@ public class Program
             app.UseCors("DevFrontEnds");
         }
 
-        app.UseRouting();
-        app.UseAuthentication();
-        app.UseAuthorization();
+        app.UseRouting()
+           .UseAuthentication()
+           .UseAuthorization();
+
         app.MapHub<GameHub.GameHub>("/gamehub");
         app.MapGraphQL();
 

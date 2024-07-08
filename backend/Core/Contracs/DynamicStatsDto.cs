@@ -1,4 +1,4 @@
-﻿namespace Contracts.Online;
+﻿namespace Contracts;
 
 public class DynamicStatsDto
 {

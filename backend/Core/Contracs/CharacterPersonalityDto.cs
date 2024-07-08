@@ -2,13 +2,13 @@
 using Domain.Entities.Classes;
 using Domain.Entities.Races;
 
-namespace Contracts.Online;
+namespace Contracts;
 
 public class CharacterPersonalityDto
 {
     public string Name { get; protected set; } = string.Empty;
 
-    public byte[]? Image { get; protected set; }
+    public string? Base64Image { get; protected set; }
 
     public int Age { get; protected set; }
 

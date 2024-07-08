@@ -9,11 +9,14 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddGraphQLServer()
+            .AddAuthorization()
             .AddMutationConventions(applyToAllMutations: true)
             .AddQueryType(x => x.Name("Query"))
-                .AddTypeExtension<SampleQuery>()
+                .AddTypeExtension<PartyQuery>()
+                .AddTypeExtension<CharacterQuery>()
             .AddMutationType(x => x.Name("Mutation"))
                 .AddTypeExtension<AuthorizationMutation>()
+                .AddTypeExtension<PartyMutation>()
             .AddFiltering()
             .AddSorting();
     }
