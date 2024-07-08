@@ -20,9 +20,10 @@ export type GameInfo = {
 
 export type GameCharacter = {
     mainStats: DynamicStats,
-    otherStats: FullAbility & SkillModifiers & BaseCharacterStats,
+    otherStats: FullAbility & SkillModifiers & { proficiencyBonus: number;},
     personality: FullPersonality,
 } & WithId<string>
+
 
 export interface InitGameStateVariables {
     partyId: string;

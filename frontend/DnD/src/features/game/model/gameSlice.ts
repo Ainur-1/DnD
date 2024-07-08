@@ -9,16 +9,24 @@ import { inventoryApi } from "@/features/inventory/api/api";
 import { RootState } from "@/app/appStore";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { HUB_URL } from "@/shared/configuration/enviromentConstants";
+import { mapDtoToGameCharacter } from "./mapDtoToGameCharter";
 
 
-export const damageCharacter = createAsyncThunk<void, DamageCharacterVariables, {state: GameState}>(
+export const damageCharacter = createAsyncThunk<void, DamageCharacterVariables, {state: RootState}>(
     'game/damageCharacter', 
-    // might throw an error
-    async function(args, {getState}) {
+    async function(args, {getState, dispatch}) {
         const { characterId, damage } = args;
-        const { connection } = getState();
+        const { state } = getState().game;
+        if (!state) {
+            return;
+        }
 
-        await connection.invoke("Damage", characterId, damage);
+        const { connection } = state;
+        try {
+            await connection.invoke("Damage", characterId, damage);
+        } catch {
+            dispatch(setFatalErrorOccured(true));
+        }
     }
 );
 
@@ -60,58 +68,78 @@ export const acceptInventoryItem = createAsyncThunk<boolean, {suggestionId: stri
     }
 );
 
-export const updateFight = createAsyncThunk<void, UpdateFightVariables, {state: GameState}>(
+export const updateFight = createAsyncThunk<void, UpdateFightVariables, {state: RootState}>(
     'game/updateFight',
-    async function(args, { getState }){
-        const { connection } = getState();
+    async function(args, { getState, dispatch }){
+        const { state } = getState().game;
+        if (!state) {
+            return;
+        }
+        const { connection } = state;
         const { isFight, basicInitiativeScoreValues } = args;
-        
-        await connection.invoke("UpdateFight", {
-            isFight: isFight,
-            scoreValues: basicInitiativeScoreValues?.map(x => {
-                return {
-                    characterId: x.characterId,
-                    score: x.score,
-                };
-            }),
-        });
-    }
-);
-
-export const updateCharacter = createAsyncThunk<void, UpdateCharacterVariables, {state: GameState}>(
-    'game/updateCharacter',
-    async function(args, { getState }){
-        const { connection, gameInfo } = getState();
-        const { userCharacterId, partyCharacters } = gameInfo;
-
-        const character = partyCharacters.find(x => x.id == userCharacterId);
-        if (character) {
-            const currentStats = character.mainStats;
-            await connection.invoke("UpdateCharacterStat", {
-                targetCharacterId: args.targetCharacterId ?? gameInfo.userCharacterId,
-
-                hp: args.hp ?? currentStats.hp,
-                tempHp: args.tempHp ?? currentStats.tempHp,
-                armorClass: args.armorClass ?? currentStats.armorClass,
-                profiency: args.profiency ?? currentStats.proficiencyBonus,
-                initiative: args.initiative ?? currentStats.initiativeModifier,
-                inspiration: args.inspiration ?? currentStats.inspiration,
-                speed: args.speed ?? currentStats.speed,
-                hitDicesLeftCount: args.hitDicesLeftCount ?? currentStats.hitDicesLeftCount,
-                isDead: args.isDead ?? currentStats.isDead,
-                isDying: args.isDying ?? currentStats.isDying,
-                deathSaves: args.deathSavesUpdate?.deathSaves ?? currentStats.deathSaves,
+        try {
+            await connection.invoke("UpdateFight", {
+                isFight: isFight,
+                scoreValues: basicInitiativeScoreValues?.map(x => {
+                    return {
+                        characterId: x.characterId,
+                        score: x.score,
+                    };
+                }),
             });
+        } catch {
+            dispatch(setFatalErrorOccured(true));
         }
     }
 );
 
-export const endGame = createAsyncThunk<boolean, EndGameVariables, {state: GameState}>(
-    "game/endGame",
-    async function (args, { getState }) {
-        const { connection } = getState();
+export const updateCharacter = createAsyncThunk<void, UpdateCharacterVariables, {state: RootState}>(
+    'game/updateCharacter',
+    async function(args, { getState, dispatch }){
+        const { state } = getState().game;
+        if (!state) {
+            return;
+        }
+        const { connection, gameInfo } = state;
+        const { userCharacterId, partyCharacters } = gameInfo;
+        try {
+            const character = partyCharacters.find(x => x.id == userCharacterId);
+            if (character) {
+                const currentStats = character.mainStats;
+                await connection.invoke("UpdateCharacterStat", {
+                    targetCharacterId: args.targetCharacterId ?? gameInfo.userCharacterId,
+    
+                    hp: args.hp ?? currentStats.hp,
+                    tempHp: args.tempHp ?? currentStats.tempHp,
+                    inspiration: args.inspiration ?? currentStats.inspiration,
+                    speed: args.speed ?? currentStats.speed,
+                    hitDicesLeftCount: args.hitDicesLeftCount ?? currentStats.hitDicesLeftCount,
+                    isDead: args.isDead ?? currentStats.isDead,
+                    isDying: args.isDying ?? currentStats.isDying,
+                    deathSaves: args.deathSavesUpdate?.deathSaves ?? gameInfo.deathSaves
+                });
+            }
+        } catch{
+            dispatch(setFatalErrorOccured(true));
+        }
+    }
+);
 
-        return await connection.invoke("EndGame", args.xp)
+export const endGame = createAsyncThunk<boolean, EndGameVariables, {state: RootState}>(
+    "game/endGame",
+    async function (args, { getState, dispatch }) {
+        const  { state }  = getState().game;
+        if (!state) {
+            return false;
+        }
+        const { connection } = state;
+        try {
+            const result = await connection.invoke("EndGame", args.xp);
+            return result;
+        } catch {
+            dispatch(setFatalErrorOccured(true));
+            return false;
+        }
     }
 )
 
@@ -140,8 +168,9 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
                 connection: connection,
                 fatalErrorOccured: false,
                 gameInfo: {
-                    isFighting: roomState.isFighting,
-                    partyCharacters: [], // todo,
+                    isFighting: roomState.isFight,
+                    partyCharacters: roomState.characters
+                        .map(x => mapDtoToGameCharacter(x)),
                     userCharacterId: args.userCharacterId,
                     characterStepOrder: roomState.order ?? undefined,
                     deathSaves: args.deathSaves,

@@ -8,7 +8,7 @@ public interface ICharacterService
 {
     Task<GameCharacterDto> GetByIdAsync(Guid id, Guid partyId);
     Task<DynamicStatsDto> GetCharacterInGameStatsAsync(Guid characterId);
-    Task UpdateCharacterInGameStatsAsync(Guid characterId, DynamicStatsDto updateStats);
+    Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats);
     Task TakeDamageAsync(Guid characterId, int damage);
 
     /// <summary>
