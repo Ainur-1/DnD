@@ -11,11 +11,11 @@ public class CharacterDynamicProperties
 
     public int InspirationBonus { get; set; }
 
-    public int InitiativeModifier { get; set; }
-
     public int ActualSpeed { get; set; }
 
     public int DeathSavesSuccessCount { get; set; }
 
     public int DeathSavesFailureCount { get; set; }
+
+    public bool IsDying { get; set; }
 }

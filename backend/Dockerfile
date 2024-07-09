@@ -7,8 +7,12 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["Core/Contracts/Contracts.csproj", "Core/Contracts/"]
+COPY ["Core/Services.Abstractions/Services.Abstractions.csproj", "Core/Services.Abstractions/"]
 COPY ["Core/Domain/Domain.csproj", "Core/Domain/"]
 COPY ["Infrastructure/DataAccess/DataAccess.csproj", "Infrastructure/DataAccess/"]
+COPY ["Infrastructure/GameHub/GameHub.csproj", "Infrastructure/GameHub/"]
+COPY ["Infrastructure/Services.Implementation/Services.Implementation.csproj", "Infrastructure/Services.Implementation/"]
 COPY ["DnD/DnD.csproj", "DnD/"]
 RUN dotnet restore "./DnD/DnD.csproj"
 

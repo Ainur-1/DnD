@@ -12,10 +12,12 @@ public record UserPartyDto
     public string AccessCode { get; init; }
 
     public PartyCharacterDto? InGameCharacter { get; init; }
+
     private UserPartyDto() { }
+
     public static UserPartyDto FromPartyAndCharacterInfo(Party party, Guid characterId, string characterName)
     {
-        return new UserPartyDto
+        return new UserPartyDto()
         {
             AccessCode = party.AccessCode,
             GameMasterId = party.GameMasterId,

@@ -1,13 +1,11 @@
-﻿using Contracts;
-using Domain.Entities.Character;
-using Domain.Entities.User;
+﻿using Amazon.Runtime.Internal.Util;
+using Contracts.Online;
 using GameHub.Dtos;
 using GameHub.Models;
 using GameHub.Repositories;
-using GameHub.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Service.Abstractions;
 using System.Collections.Concurrent;
 
@@ -20,8 +18,9 @@ public class GameHub : Hub<IHubEventActions>
     private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
     private readonly ICharacterService _characterService;
     private readonly IPartyService _partyService;
+    private readonly ILogger<GameHub> _logger;
     private Guid UserId => Guid.Parse(Context.UserIdentifier);
-    public GameHub(ICharacterService characterService, IPartyService partyService)
+    public GameHub(ICharacterService characterService, IPartyService partyService, ILogger<GameHub> logger)
     {
         _characterService = characterService;
         _partyService = partyService;
@@ -29,7 +28,7 @@ public class GameHub : Hub<IHubEventActions>
 
     public override async Task OnConnectedAsync()
     {
-        Console.WriteLine($"Игрок с ID:{Context.UserIdentifier} ConId:'{Context.ConnectionId}' подключен");
+        _logger.LogInformation("Игрок с ID {ID} ConId '{ConId}' подключен.", Context.UserIdentifier, Context.ConnectionId);
     }
 
     public async Task<GameRoomDto?> JoinRoomAsync(Guid partyId)
@@ -62,8 +61,8 @@ public class GameHub : Hub<IHubEventActions>
             }
             else
             {
+                _logger.LogError("Игрок({Id}) находится в пати({partyId}), но его персонаж не найден.", Context.UserIdentifier, partyId);
                 throw new InvalidOperationException();
-                //todo: Логировать исключителньую ситуацию 
             }
         }
 
@@ -146,9 +145,9 @@ public class GameHub : Hub<IHubEventActions>
 
             foreach (var characterId in party.InGameCharactersIds)
             {
-                var characterStats = await _characterService.GetCharacterInGameStatsAsync(characterId);
+                var characterStats = await _characterService.GetCharacterFightOrderCalculationParametersAsync(characterId);
 
-                if (characterStats == null || characterStats.IsDead)
+                if (characterStats == null || characterStats.Value.IsDead)
                 {
                     continue;
                 }
@@ -164,7 +163,7 @@ public class GameHub : Hub<IHubEventActions>
                     score = 20;
                 }
 
-                initiativeScores[characterId] = characterStats.Initiative + score;
+                initiativeScores[characterId] = characterStats.Value.InitiativeModifier + score;
             }
 
             room.SortedInitiativeScores = initiativeScores
@@ -217,7 +216,7 @@ public class GameHub : Hub<IHubEventActions>
         throw new NotImplementedException(nameof(AcceptInventory));
     }
 
-    public async Task UpdateCharacterStat(Guid? targetCharacterId, DynamicStatsDto updatedStats)
+    public async Task UpdateCharacterStat(Guid? targetCharacterId, InGameStatsUpdateDto updatedStats)
     {
         if (!_connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId))
         {
@@ -245,9 +244,9 @@ public class GameHub : Hub<IHubEventActions>
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        var conncetionId = Context.ConnectionId;
-        _connectionCharacterMapping.TryRemove(conncetionId, out _);
-        _connectionPartyMapping.TryRemove(conncetionId, out var partyId);
+        var connectionId = Context.ConnectionId;
+        _connectionCharacterMapping.TryRemove(connectionId, out _);
+        _connectionPartyMapping.TryRemove(connectionId, out var partyId);
         if (partyId != default && RoomRepository.Contains(partyId))
         {
             var room = RoomRepository.Get(partyId);

@@ -11,12 +11,12 @@ public class CharacterService : ICharacterService
         throw new NotImplementedException();
     }
 
-    public Task<CharacterDto?> GetCharacterForUserAsync(Guid issuerId, Guid characterId)
+    public Task<(bool IsDead, int InitiativeModifier)?> GetCharacterFightOrderCalculationParametersAsync(Guid characterId)
     {
         throw new NotImplementedException();
     }
 
-    public Task<DynamicStatsDto> GetCharacterInGameStatsAsync(Guid characterId)
+    public Task<CharacterDto?> GetCharacterForUserAsync(Guid issuerId, Guid characterId)
     {
         throw new NotImplementedException();
     }
@@ -31,7 +31,7 @@ public class CharacterService : ICharacterService
         throw new NotImplementedException();
     }
 
-    public Task UpdateCharacterInGameStatsAsync(Guid characterId, DynamicStatsDto updateStats)
+    public Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats)
     {
         throw new NotImplementedException();
     }
