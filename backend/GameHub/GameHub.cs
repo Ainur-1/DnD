@@ -9,15 +9,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Service.Abstractions;
-using Services.Implementation;
 using System.Collections.Concurrent;
 
 namespace GameHub;
 
 [Authorize]
-public class GameHub : Hub
+public class GameHub : Hub<IHubEventActions>
 {
-
     private static readonly ConcurrentDictionary<string, Guid> _connectionPartyMapping = new();
     private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
     private readonly ICharacterService _characterService;
