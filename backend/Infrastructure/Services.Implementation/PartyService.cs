@@ -1,6 +1,8 @@
-﻿using Contracts;
+﻿using AutoMapper;
+using Contracts;
 using Contracts.Online;
 using Contracts.Parties;
+using DataAccess.Extensions;
 using Domain.Entities.Character;
 using Domain.Entities.Parties;
 using Domain.Entities.User;
@@ -17,6 +19,20 @@ public class PartyService : IPartyService
     private readonly IMongoCollection<Party> _partyCollection;
     private readonly IMongoCollection<CharacterAggregate> _characterCollection;
     private readonly IMongoClient _client;
+    private readonly IMapper _mapper;
+
+    public PartyService(IMongoCollection<Party> partyCollection, 
+        IMongoCollection<CharacterAggregate> characterCollection, 
+        IMongoClient client, 
+        IMapper mapper
+        )
+    {
+        _partyCollection = partyCollection;
+        _characterCollection = characterCollection;
+        _client = client;
+        _mapper = mapper;
+    }
+
     public async Task<Guid> CreatePartyAsync(Guid gameMasterId, string accessCode)
     {
         var newParty = new Party(gameMasterId, accessCode);
@@ -60,26 +76,28 @@ public class PartyService : IPartyService
 
     public async Task<IEnumerable<GameCharacterDto>> GetCharactersInfoAsync(Guid partyId)
     {
-        var party = await _partyCollection.Find(p => p.Id == partyId).FirstOrDefaultAsync();
-        if (party == null) throw new ObjectNotFoundException();
-         
-        var characters = party.InGameCharactersIds;
-        var characterDtos = new List<GameCharacterDto>();
+        var characterIdsOnlyProjection = Builders<Party>.Projection
+            .Exclude(x => x.Id)
+            .Exclude(x => x.GameMasterId)
+            .Exclude(x => x.AccessCode)
+            .Include(x => x.InGameCharactersIds);
 
-        //var fetchTask = _characterCollection
-        //    .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId != null)
-        //    .ForEachAsync(async character =>
-        //    {
-        //        var party = await GetPartyByIdAsync(character.Info.JoinedPartyId!.Value);
-        //        if (party != null)
-        //        {
-        //            result.Add(UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name));
-        //        }
-        //    });
+        var charactersIds = (await _partyCollection
+            .GetParty(partyId)
+            .Project<Party>(characterIdsOnlyProjection)
+            .SingleOrDefaultAsync())
+            ?.InGameCharactersIds ?? throw new ObjectNotFoundException();
 
-        //await fetchTask;
-        //return result;
-        return characterDtos;
+        var characterFilter = Builders<CharacterAggregate>.Filter
+            .In(c => c.Id, charactersIds);
+
+        var characters = await _characterCollection
+            .Find(characterFilter)
+            .ToListAsync();
+
+        return characters
+            .Select(_mapper.Map<GameCharacterDto>)
+            .ToArray();
     }
 
     public Task<Party?> GetPartyByIdAsync(Guid partyId)
@@ -113,10 +131,11 @@ public class PartyService : IPartyService
         if (party == null)
             throw new ObjectNotFoundException();
         
-        var userCharacter = await _characterCollection
+        var userCharacter = (await _characterCollection
             .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId == partyId)
-            .FirstOrDefaultAsync();
-        throw new NotImplementedException();
+            .FirstOrDefaultAsync()) ?? throw new ObjectNotFoundException();
+
+        return UserPartyDto.FromPartyAndCharacterInfo(party, userCharacter.Id, userCharacter.Personality.Name);
     }
 
     public async Task<bool> IsGameMasterAsync(Guid userId, Guid partyId)

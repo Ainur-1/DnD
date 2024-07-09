@@ -6,6 +6,8 @@ public class CharacterStats
 
     public int ProficiencyBonus { get; protected set; }
 
+    public int InitiativeModifier { get; set; }
+
     #region Abilities
     public int StrengthAbility { get; protected set; }
 

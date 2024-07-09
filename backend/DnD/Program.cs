@@ -4,10 +4,8 @@ using DnD.Data;
 using Microsoft.AspNetCore.Identity;
 using Domain.Entities.User;
 using DnD.GraphQL;
-using DnD.GraphQL.Services;
 using Services.Implementation.Extensions;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace DnD;
 
@@ -43,10 +41,6 @@ public class Program
                 .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
                 .AddDefaultTokenProviders();
 
-        services.AddSignalR();
-        services.RegisterDatabaseServices(mongoDbSettings);
-        services.AddMongoCollections();
-
         services.AddLogging();
 
         if (builder.Environment.IsDevelopment())
@@ -65,7 +59,10 @@ public class Program
             });
         }
 
+        services.AddSignalR();
         services.AddGraphQlApi();
+
+        services.RegisterDatabaseServices(mongoDbSettings);
         services.AddDomainServicesImplementations();
 
         var app = builder.Build();

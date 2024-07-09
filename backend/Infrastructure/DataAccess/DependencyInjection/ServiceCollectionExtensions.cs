@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         AddDatabaseProvider(serviceCollection, mongoDbSettings);
         AddRepositories(serviceCollection);
 
+
         return serviceCollection;
     }
 
@@ -125,8 +126,36 @@ public static class ServiceCollectionExtensions
         });
     }
 
-    private static void AddRepositories(IServiceCollection serviceCollection)
+    private static void AddRepositories(IServiceCollection services)
     {
-        //todo: register repositories here
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<CharacterAggregate>(Constants.CHARACTER_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Party>(Constants.PARTIES_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Race>(Constants.RACES_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Class>(Constants.CLASSES_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Item>(Constants.ITEMS_COLLECTION_NAME);
+        });
     }
 }

@@ -145,9 +145,9 @@ public class GameHub : Hub
 
             foreach (var characterId in party.InGameCharactersIds)
             {
-                var characterStats = await _characterService.GetCharacterInGameStatsAsync(characterId);
+                var characterStats = await _characterService.GetCharacterFightOrderCalculationParametersAsync(characterId);
 
-                if (characterStats == null || characterStats.IsDead)
+                if (characterStats == null || characterStats.Value.IsDead)
                 {
                     continue;
                 }
@@ -163,7 +163,7 @@ public class GameHub : Hub
                     score = 20;
                 }
 
-                initiativeScores[characterId] = characterStats.Initiative + score;
+                initiativeScores[characterId] = characterStats.Value.InitiativeModifier + score;
             }
 
             room.SortedInitiativeScores = initiativeScores
