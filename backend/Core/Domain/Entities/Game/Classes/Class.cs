@@ -7,7 +7,11 @@ public class Class
 {
     public ClassType Id { get; set; }
 
+    public string Name { get; set; }
+
     public string Description { get; set; }
+
+    public string StartInventoryDescription { get; set; }
 
     public Dice HitDice { get; set; }
 
