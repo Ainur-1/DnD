@@ -5,5 +5,5 @@ namespace DataAccess.Extensions;
 
 public static class PartyCollectionExtensions
 {
-    public static IFindFluent<Party, Party> GetParty(this IMongoCollection<Party> collection, Guid id) => collection.Find(x => x.Id == id);
+    public static IFindFluent<Party, Party> FindById(this IMongoCollection<Party> collection, Guid id) => collection.Find(x => x.Id == id);
 }

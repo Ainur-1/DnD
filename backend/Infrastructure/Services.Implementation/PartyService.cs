@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-using Contracts;
 using Contracts.Online;
 using Contracts.Parties;
 using DataAccess.Extensions;
 using Domain.Entities.Character;
 using Domain.Entities.Parties;
-using Domain.Entities.User;
 using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
@@ -83,16 +81,12 @@ public class PartyService : IPartyService
             .Include(x => x.InGameCharactersIds);
 
         var charactersIds = (await _partyCollection
-            .GetParty(partyId)
-            .Project<Party>(characterIdsOnlyProjection)
-            .SingleOrDefaultAsync())
-            ?.InGameCharactersIds ?? throw new ObjectNotFoundException();
-
-        var characterFilter = Builders<CharacterAggregate>.Filter
-            .In(c => c.Id, charactersIds);
+            .FindById(partyId)
+            .Project(x => x.InGameCharactersIds)
+            .SingleOrDefaultAsync()) ?? throw new ObjectNotFoundException();
 
         var characters = await _characterCollection
-            .Find(characterFilter)
+            .WhereIdIsIn(charactersIds)
             .ToListAsync();
 
         return characters
@@ -102,7 +96,8 @@ public class PartyService : IPartyService
 
     public Task<Party?> GetPartyByIdAsync(Guid partyId)
     {
-        return _partyCollection.Find(x => x.Id == partyId).
+        return _partyCollection
+            .FindById(partyId).
             FirstOrDefaultAsync()!;
     }
 
@@ -110,8 +105,19 @@ public class PartyService : IPartyService
     {
         var result = new ConcurrentBag<UserPartyDto>();
 
+        var onlyIdAndNameProjection = Builders<CharacterAggregate>.Projection
+            .Exclude(x => x.Inventory)
+            .Exclude(x => x.Info)
+            .Exclude(x => x.Stats)
+            .Exclude(x => x.InGameStats)
+            .Exclude(x => x.Personality)
+            .Include(x => x.Id)
+            .Include(x => x.Personality.Name);
+
+
         var fetchTask = _characterCollection
             .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId != null)
+            .ProjectOnlyIdAndPersonalityAndInfo()
             .ForEachAsync(async character =>
             {
                 var party = await GetPartyByIdAsync(character.Info.JoinedPartyId!.Value);
@@ -132,7 +138,7 @@ public class PartyService : IPartyService
             throw new ObjectNotFoundException();
         
         var userCharacter = (await _characterCollection
-            .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId == partyId)
+            .FindByOwnerAndParty(ownerId: userId, partyId: partyId)
             .FirstOrDefaultAsync()) ?? throw new ObjectNotFoundException();
 
         return UserPartyDto.FromPartyAndCharacterInfo(party, userCharacter.Id, userCharacter.Personality.Name);
@@ -148,13 +154,15 @@ public class PartyService : IPartyService
     public async Task<bool> IsUserInPartyAsync(Guid userId, Guid partyId)
     {
         return await _characterCollection
-            .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId == partyId)
+            .FindByOwnerAndParty(ownerId: userId, partyId: partyId)
             .AnyAsync();
     }
 
     public async Task<UserPartyDto> JoinPartyAsync(JoinPartyVariablesDto variables)
     {
-        var party = await _partyCollection.Find(p => p.Id == variables.PartyId).FirstOrDefaultAsync();
+        var party = await _partyCollection
+            .FindById(variables.PartyId)
+            .SingleOrDefaultAsync();
         
         if (party == null) throw new ObjectNotFoundException();
 
@@ -176,6 +184,8 @@ public class PartyService : IPartyService
             throw new AccessDeniedException();
         }
 
+        party.AddCharacter(character.Id);
+
         using var session = await _client.StartSessionAsync();
         session.StartTransaction();
         try
@@ -195,7 +205,7 @@ public class PartyService : IPartyService
         {
             await session.AbortTransactionAsync();
         }
-        party.AddCharacter(character.Id);
+        
         return UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name);
     }
 }
