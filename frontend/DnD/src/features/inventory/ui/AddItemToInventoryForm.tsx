@@ -64,8 +64,7 @@ function Form({onItemSubmit, formError, submitButtonText}: AddItemToInventoryFor
         setProficiencyOn(false);
     }
 
-    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
+    async function onSubmit() {
         if (requestSent) {
             dispatch!({
                 type: ItemFormBaseActionType.setFormError,
@@ -120,7 +119,7 @@ function Form({onItemSubmit, formError, submitButtonText}: AddItemToInventoryFor
         }
     }
 
-    return <Box paddingTop={1} component="form" onSubmit={onSubmit}>
+    return <Box paddingTop={1} component="form">
         <Grid container spacing={2}>
             <Container>
                 <Typography variant="body2" color="error" textAlign="center">
@@ -167,7 +166,7 @@ function Form({onItemSubmit, formError, submitButtonText}: AddItemToInventoryFor
             </Grid>
             <Grid item xs={12}>
                 <Box display="flex" justifyContent="flex-end" alignContent="center">
-                    <Button disabled={requestSent} type="submit" variant="contained">
+                    <Button disabled={requestSent} onClick={onSubmit} variant="contained">
                         {submitButtonText}
                     </Button>
                 </Box>

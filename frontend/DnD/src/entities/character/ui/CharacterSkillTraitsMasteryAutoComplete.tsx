@@ -1,4 +1,26 @@
+import { CharacterSkillType } from "@/shared/api/gql/graphql";
 import { Autocomplete, Chip, TextField, useTheme } from "@mui/material";
+
+const labelMap = {
+    [CharacterSkillType.Acrobatics]: "Акробатика",
+    [CharacterSkillType.AnimalHanding]: "Уход за животными",
+    [CharacterSkillType.Arcana]: "Магия",
+    [CharacterSkillType.Athletics]: "Атлетика",
+    [CharacterSkillType.Deception]: "Обман",
+    [CharacterSkillType.HandSleight]: "Ловкость рук",
+    [CharacterSkillType.History]: "История",
+    [CharacterSkillType.Insight]: "Проницательность",
+    [CharacterSkillType.Intimidation]: "Запугивание",
+    [CharacterSkillType.Investigation]: "Анализ",
+    [CharacterSkillType.Medicine]: "Медицина",
+    [CharacterSkillType.Nature]: "Природа",
+    [CharacterSkillType.Perception]: "Внимательность",
+    [CharacterSkillType.Performance]: "Выступление",
+    [CharacterSkillType.Persuasion]: "Убеждение",
+    [CharacterSkillType.Religion]: "Религия",
+    [CharacterSkillType.Stealth]: "Скрытность",
+    [CharacterSkillType.Survival]: "Выживание",
+};
 
 interface CharacterSkillTraitsMasteryProps {
     availableSkillTraits: string[];
@@ -43,16 +65,18 @@ export default function CharacterSkillTraitsMasteryAutoComplete({
     const label = `Выберите ${skillTraitsToChoose} значени${postfix}`;
 
     return <Autocomplete
-        disabled={skillTraitsToChoose >= selectedTraits.length}
+        disabled={isLoading}
         multiple
         id="character-skill-traits-mastery"
         options={filteredOptions}
         value={selectedTraits}
         onChange={handlePropertyChange}
         loading={isLoading}
+        getOptionLabel={(option) => labelMap[option as CharacterSkillType]}
         renderInput={(params) => (
             <TextField
                 {...params}
+                required
                 error={error != undefined && error.length > 0}
                 helperText={error}
                 variant="outlined"
@@ -60,10 +84,10 @@ export default function CharacterSkillTraitsMasteryAutoComplete({
             />
         )}
         renderTags={(value, getTagProps) => value.map((option, index) => (
-            <Chip variant="filled" label={option} {...getTagProps({ index })} sx={{
+            <Chip variant="filled" label={labelMap[option as CharacterSkillType]} {...getTagProps({ index })} sx={{
             background: theme.palette.secondary.main
             }}
-                title={option}
+                title={labelMap[option as CharacterSkillType]}
             />
         ))}
     />

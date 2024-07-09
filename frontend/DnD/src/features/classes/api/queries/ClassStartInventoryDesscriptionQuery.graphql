@@ -1,0 +1,5 @@
+query classStartInventoryDescription($id: ClassType!) {
+  classInfo(id: $id) {
+    startInventoryDescription
+  }
+}

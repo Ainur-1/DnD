@@ -1,24 +1,19 @@
-import { BASE_URL } from "@/shared/configuration/enviromentConstants";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RaceNamesInfoQueryResult, RaceNamesQueryResult } from "./variables";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { GetRaceQueryVariables, GetRacesQuery, GetRaceQuery } from "@/shared/api/gql/graphql";
+import GetRacesDocument from "./queries/GetRaces.graphql";
+import GetRaceDocument from "./queries/GetRace.graphql";
+import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+import { client } from "@/shared/api";
 
 export const raceApi = createApi({
     reducerPath: 'races/api',
-    baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    baseQuery: graphqlRequestBaseQuery({client: client}),
     endpoints: (build) => ({
-        strictRaces: build.query<RaceNamesQueryResult, void>({
-            query: (body) => ({
-                url: "geta ll races",
-                method: "POST",
-                body
-            }),
+        strictRaces: build.query<GetRacesQuery, void>({
+            query: (variables) => ({document: GetRacesDocument, variables}),
         }),
-        raceInfo: build.query<RaceNamesInfoQueryResult, string>({
-            query: (body) => ({
-                url: "get full race info",
-                method: "POST",
-                body
-            }),
+        raceInfo: build.query<GetRaceQuery, GetRaceQueryVariables>({
+            query: (variables) => ({document: GetRaceDocument, variables})
         }),
     })
 });

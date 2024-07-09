@@ -4,9 +4,10 @@ import { ClassIdType } from "@/entities/classes";
 
 interface ClassSelectorProps {
     onClassSelected: (classId: ClassIdType) => void;
+    value: string | undefined;
 }
 
-export default function ClassSelector({onClassSelected}: ClassSelectorProps) {
+export default function ClassSelector({value, onClassSelected}: ClassSelectorProps) {
     const { data: strictClasses } = useStrictClassesQuery();
 
     const onValueChange = (classId: ClassIdType) => {
@@ -16,7 +17,8 @@ export default function ClassSelector({onClassSelected}: ClassSelectorProps) {
     return <StringSelector 
         selectorLabel="Класс" 
         id="class" 
-        values={!strictClasses?.data ? [] : strictClasses!.data!.map(x => {
+        value={value ?? ''}
+        values={!strictClasses ? [] : strictClasses.classes!.map(x => {
             return {
                 label: x.name,
                 value: x.id

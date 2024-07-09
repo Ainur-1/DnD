@@ -1,31 +1,23 @@
-import { BASE_URL } from "@/shared/configuration/enviromentConstants";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ClassNamesInfoQueryResult, ClassNamesQueryResult } from "./variables";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { ClassInfoQuery, ClassInfoQueryVariables, ClassStartInventoryDescriptionQuery, ClassStartInventoryDescriptionQueryVariables, StrictClassesQuery } from "@/shared/api/gql/graphql";
+import ClassStartInventoryDescriptionDocument from "./queries/ClassStartInventoryDesscriptionQuery.graphql";
+import ClassInfoDocument from "./queries/ClassInfoQuery.graphql";
+import StrictClassesDocument from "./queries/StrictClassesQuery.graphql";
+import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+import { client } from "@/shared/api";
 
 export const classApi = createApi({
     reducerPath: 'classes/api',
-    baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    baseQuery: graphqlRequestBaseQuery({client}),
     endpoints: (build) => ({
-        strictClasses: build.query<ClassNamesQueryResult, void>({
-            query: (body) => ({
-                url: "geta ll classes",
-                method: "POST",
-                body
-            }),
+        strictClasses: build.query<StrictClassesQuery, void>({
+            query: (variables) => ({document: StrictClassesDocument, variables}),
         }),
-        classInfo: build.query<ClassNamesInfoQueryResult, string>({
-            query: (body) => ({
-                url: "geta ll classes",
-                method: "POST",
-                body
-            }),
+        classInfo: build.query<ClassInfoQuery, ClassInfoQueryVariables>({
+            query: (variables) => ({document: ClassInfoDocument, variables}),
         }),
-        classStartInventoryDescription: build.query<string, string>({
-            query: (body) => ({
-                url: "geta ll classes",
-                method: "POST",
-                body
-            }),
+        classStartInventoryDescription: build.query<ClassStartInventoryDescriptionQuery, ClassStartInventoryDescriptionQueryVariables>({
+            query: (variables) => ({document: ClassStartInventoryDescriptionDocument, variables}),
         }),
     })
 });

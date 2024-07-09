@@ -21,7 +21,10 @@ type Step1State = {
 };
 
 const setp1Init: Step1State = {
-    name: fullyUndefined,
+    name: {
+        value: "",
+        error: null,
+    },
     isPublic: {
         value: true,
         error: null
@@ -224,15 +227,9 @@ function isValidStep1(state: CreateCharacterFormState, dispatch: React.Dispatch<
     let error: boolean = false;
     const requireField = carryGetRequireFieldFunction(dispatch);
 
-    if(!state.name.value){
+    if(state.name.value == undefined){
         error = true;
         requireField("name", "");
-    } else {
-        const name = state.name.value!.trim();
-        if (name.length == 0){
-            error = true;
-            requireField("name", name);
-        }
     }
 
     return !error;
@@ -255,7 +252,6 @@ function validateAbility(dispatch: React.Dispatch<Action>, formField: "strength"
 
     return true;
 } 
-
 
 function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
     let error = false;
@@ -286,7 +282,7 @@ function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<
         }
     }
 
-    if(!state.classXp.value) {
+    if(state.classXp.value == undefined) {
         error = true;
         requireField("classXp");
     } else if (state.classXp.value < 0) {
@@ -299,12 +295,12 @@ function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<
     }
 
     return !error
-        && !validateAbility(dispatch, "strength", state.strength.value)
-        && !validateAbility(dispatch, "dexterity", state.dexterity.value)
-        && !validateAbility(dispatch, "constitution", state.constitution.value)
-        && !validateAbility(dispatch, "intelligence", state.intelligence.value)
-        && !validateAbility(dispatch, "wisdom", state.wisdom.value)
-        && !validateAbility(dispatch, "charisma", state.charisma.value)
+        && validateAbility(dispatch, "strength", state.strength.value)
+        && validateAbility(dispatch, "dexterity", state.dexterity.value)
+        && validateAbility(dispatch, "constitution", state.constitution.value)
+        && validateAbility(dispatch, "intelligence", state.intelligence.value)
+        && validateAbility(dispatch, "wisdom", state.wisdom.value)
+        && validateAbility(dispatch, "charisma", state.charisma.value)
 }
 
 function isValidStep3(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {

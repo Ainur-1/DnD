@@ -12,7 +12,6 @@ export default function CharacterNameField({ value, onChange, errorText }: Chara
         value={value} 
         onChange={(e) => onChange(e.target.value.trimStart())} 
         margin="normal" 
-        required 
         fullWidth  
         label="Имя персонажа"
         type="text" 
