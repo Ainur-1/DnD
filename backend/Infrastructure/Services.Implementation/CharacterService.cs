@@ -9,6 +9,9 @@ using Service.Abstractions;
 using DataAccess.Extensions;
 using Domain.Entities.User;
 using System.Security.Policy;
+using GameHub;
+using Microsoft.AspNetCore.SignalR;
+using GameHub.Dtos;
 
 namespace Services.Implementation;
 
@@ -18,17 +21,20 @@ public class CharacterService : ICharacterService
     private readonly IMongoCollection<CharacterAggregate> _characterCollection;
     private readonly IMongoClient _client;
     private readonly IMapper _mapper;
+    private readonly IHubContext<GameHub.GameHub, IHubEventActions> _hubContext;
 
     public CharacterService(IMongoCollection<Party> partyCollection,
         IMongoCollection<CharacterAggregate> characterCollection,
         IMongoClient client,
-        IMapper mapper
+        IMapper mapper,
+        IHubContext<GameHub.GameHub, IHubEventActions> hubContext
         )
     {
         _partyCollection = partyCollection;
         _characterCollection = characterCollection;
         _client = client;
         _mapper = mapper;
+        _hubContext = hubContext;
     }
 
     public async Task<GameCharacterDto> GetByIdAsync(Guid userId, Guid partyId)
@@ -49,7 +55,7 @@ public class CharacterService : ICharacterService
     }
 
     public async Task<(bool IsDead, int InitiativeModifier)?> GetCharacterFightOrderCalculationParametersAsync(Guid characterId)
-    {
+    {//
         var character = await _characterCollection
             .Find(c => c.Id == characterId)
             .SingleOrDefaultAsync() 
@@ -66,7 +72,7 @@ public class CharacterService : ICharacterService
             .Find(c => c.Id == characterId)
             .SingleOrDefaultAsync() 
             ?? throw new ObjectNotFoundException();
-
+        //
         var characterDto = new CharacterDto
         {
             Id = character.Id,
@@ -86,12 +92,12 @@ public class CharacterService : ICharacterService
 
     public Task<IEnumerable<CharacterDto>> GetUserCharactersAsync(Guid userId)
     {
+        //
         throw new NotImplementedException();
     }
 
-
     public async Task TakeDamageAsync(Guid characterId, int damage)
-    {
+    {//
         if (damage < 0)
         {
             throw new InvalidArgumentValueException(nameof(damage))
@@ -104,7 +110,7 @@ public class CharacterService : ICharacterService
         using var session = await _client.StartSessionAsync();
         session.StartTransaction();
         try
-        {//подумать
+        {//
             var notDeadCharacter = await _characterCollection
                 .Find(filter => filter.Id == characterId && !filter.Info.IsDead)
                 .SingleOrDefaultAsync();
@@ -131,28 +137,52 @@ public class CharacterService : ICharacterService
 
     public async Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats)
     {
+
         using var session = await _client.StartSessionAsync();
         session.StartTransaction();
         try
-        {     //подумать
+        {   
             var filter = Builders<CharacterAggregate>.Filter.Eq(c => c.Id, characterId);
 
-            var update = Builders<CharacterAggregate>.Update
-                .Set(c => c.InGameStats.HitPoints, updateStats.Hp)
-                .Set(c => c.InGameStats.TemporaryHitPoints, updateStats.TempHp)
-                .Set(c => c.InGameStats.InspirationBonus, updateStats.Inspiration)
-                .Set(c => c.InGameStats.ActualSpeed, updateStats.Speed)
-                .Set(c => c.InGameStats.HitDicesLeft, updateStats.HitDicesLeftCount)
-                .Set(c => c.InGameStats.IsDying, updateStats.IsDying)
-                .Set(c => c.InGameStats.DeathSavesSuccessCount, updateStats.DeathSaves.SuccessCount)
-                .Set(c => c.InGameStats.DeathSavesFailureCount, updateStats.DeathSaves.FailureCount);
+            //var update = Builders<CharacterAggregate>.Update
+            //    .Set(c => c.InGameStats.HitPoints, updateStats.Hp)
+            //    .Set(c => c.InGameStats.TemporaryHitPoints, updateStats.TempHp)
+            //    .Set(c => c.InGameStats.InspirationBonus, updateStats.Inspiration)
+            //    .Set(c => c.InGameStats.ActualSpeed, updateStats.Speed)
+            //    .Set(c => c.InGameStats.HitDicesLeft, updateStats.HitDicesLeftCount)
+            //    .Set(c => c.InGameStats.IsDying, updateStats.IsDying)
+            //    .Set(c => c.InGameStats.DeathSavesSuccessCount, updateStats.DeathSaves.SuccessCount)
+            //    .Set(c => c.InGameStats.DeathSavesFailureCount, updateStats.DeathSaves.FailureCount);
+
+            var update = Builders<DynamicStatsDto>.Update
+                .Set(c => c.Hp, updateStats.Hp)
+                .Set(c => c.TempHp, updateStats.TempHp)
+                .Set(c => c.Inspiration, updateStats.Inspiration)
+                .Set(c => c.Speed, updateStats.Speed)
+                .Set(c => c.HitDicesLeftCount, updateStats.HitDicesLeftCount)
+                .Set(c => c.IsDying, updateStats.IsDying)
+                .Set(c => c.IsDead, updateStats.IsDead)
+                .Set(c => c.DeathSaves.SuccessCount, updateStats.DeathSaves.SuccessCount)
+                .Set(c => c.DeathSaves.FailureCount, updateStats.DeathSaves.FailureCount);
 
             await _characterCollection.UpdateOneAsync(session, filter, update);
             await session.CommitTransactionAsync();
         }
+
         catch (Exception)
         {
             await session.AbortTransactionAsync();
         }
+        var characterUpdatedEvent = new CharacterUpdatedEvent
+        {
+            Id = characterId,
+            Stats = new DynamicStatsDto
+            {
+                
+            }
+        };
+        var partyId = _partyCollection.Find(x => x.InGameCharactersIds.Contains(characterId)); //
+        await _hubContext.Clients.Group(partyId.ToString()).OnCharacterUpdate(characterUpdatedEvent);
+
     }
 }

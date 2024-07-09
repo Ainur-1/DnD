@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Contracts;
+using GameHub.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +10,8 @@ namespace GameHub;
 
 public interface IHubEventActions
 {
-    public Task OnPartyJoin();
-    public Task OnPartyDisband();
-    public Task OnCharacterUpdate();
-    public Task OnFightUpdate();
-
+    public Task OnPartyJoin(Guid partyId, CharacterDto characterDto);
+    public Task OnPartyDisband(Guid partyId, string message);
+    public Task OnCharacterUpdate(CharacterUpdatedEvent @event);
+    public Task OnFightUpdate(FightUpdatedEvent @event);
 }

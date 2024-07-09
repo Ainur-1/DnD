@@ -5,7 +5,7 @@ public class CharacterStats
     protected CharacterStats() { }
 
     public int ProficiencyBonus { get; protected set; }
-
+    public int BaseSpeed { get; protected set; }
     public int InitiativeModifier { get; set; }
 
     #region Abilities
