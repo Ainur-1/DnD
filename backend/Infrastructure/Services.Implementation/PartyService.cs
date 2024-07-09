@@ -70,6 +70,7 @@ public class PartyService : IPartyService
         {
             await session.AbortTransactionAsync();
         }
+
     }
 
     public async Task<IEnumerable<GameCharacterDto>> GetCharactersInfoAsync(Guid partyId)
