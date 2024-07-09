@@ -5,6 +5,8 @@ using DataAccess.Extensions;
 using Domain.Entities.Character;
 using Domain.Entities.Parties;
 using Domain.Exceptions;
+using GameHub;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Service.Abstractions;
@@ -44,7 +46,7 @@ public class PartyService : IPartyService
             throw new InvalidArgumentValueException(nameof(xp))
             {
                 InvalidValue = xp,
-                ValidExample = "XP должен быть не отрицательный"
+                ValidExample = "XP должен быть не отрицательным"
             };
         }
 
@@ -208,5 +210,6 @@ public class PartyService : IPartyService
         }
         
         return UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name);
+
     }
 }

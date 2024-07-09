@@ -176,11 +176,11 @@ public class GameHub : Hub<IHubEventActions>
             room.SortedInitiativeScores = default;
         }
 
-        await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", new
-        {
-            isFight = room.IsFight,
-            orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
-        });
+        //await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", new
+        //{
+        //    isFight = room.IsFight,
+        //    orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
+        //});
     }
     public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
     {
