@@ -2,6 +2,7 @@
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Services.Abstractions;
+using System.Text.RegularExpressions;
 
 namespace Services.Implementation;
 
@@ -20,6 +21,9 @@ internal class UserManagementService : IUserService, IAuthorizationService
     {
 
         //todo: validate arguments
+        ValidateEmail(email);
+        ValidateUsername(username);
+        ValidatePassword(password);
 
         var user = new User
         {
@@ -119,5 +123,76 @@ internal class UserManagementService : IUserService, IAuthorizationService
             InvalidValue = value,
             ValidExample = maybeError.Description,
         };
+    }
+
+    private void ValidateEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+        {
+            throw new InvalidArgumentValueException("email")
+            {
+                InvalidValue = email,
+                ValidExample = "example@domain.com",
+            };
+        }
+    }
+
+    private void ValidateUsername(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username) || username.Length < 3 || username.Length > 20)
+        {
+            throw new InvalidArgumentValueException("username")
+            {
+                InvalidValue = username,
+                ValidExample = "username must be between 3 and 20 characters",
+            };
+        }
+    }
+
+    private void ValidatePassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+        {
+            throw new InvalidArgumentValueException("password")
+            {
+                InvalidValue = password,
+                ValidExample = "password must be at least 6 characters",
+            };
+        }
+        if (!Regex.IsMatch(password, @"[A-Z]"))
+        {
+            throw new InvalidArgumentValueException("password")
+            {
+                InvalidValue = password,
+                ValidExample = "password must contain at least one uppercase letter",
+            };
+        }
+
+        if (!Regex.IsMatch(password, @"[a-z]"))
+        {
+            throw new InvalidArgumentValueException("password")
+            {
+                InvalidValue = password,
+                ValidExample = "password must contain at least one lowercase letter",
+            };
+        }
+
+        if (!Regex.IsMatch(password, @"[0-9]"))
+        {
+            throw new InvalidArgumentValueException("password")
+            {
+                InvalidValue = password,
+                ValidExample = "password must contain at least one digit",
+            };
+        }
+
+        if (!Regex.IsMatch(password, @"[\W_]"))
+        {
+            throw new InvalidArgumentValueException("password")
+            {
+                InvalidValue = password,
+                ValidExample = "password must contain at least one special character",
+            };
+        }
     }
 }
