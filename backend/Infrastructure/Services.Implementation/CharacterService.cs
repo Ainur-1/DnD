@@ -1,4 +1,5 @@
 ﻿using Contracts;
+using Contracts.Character;
 using Contracts.Online;
 using Service.Abstractions;
 
@@ -6,6 +7,11 @@ namespace Services.Implementation;
 
 public class CharacterService : ICharacterService
 {
+    public Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto character)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<GameCharacterDto> GetByIdAsync(Guid id, Guid partyId)
     {
         throw new NotImplementedException();

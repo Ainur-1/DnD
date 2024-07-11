@@ -1,0 +1,10 @@
+mutation createCharacter(
+    $name: String!s
+
+) {
+    createCharacter(input: {
+        name: $name,
+    }) {
+        uuid
+    }
+}

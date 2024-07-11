@@ -27,7 +27,6 @@ export const characterApi = createApi({
             providesTags: ["MyCharactersList"]
         }),
 
-        /* mutations */
         myCharacters: build.query<CarouselCharacter[], void>({
             query: () => ({
                 url: "my characters list",
@@ -35,6 +34,8 @@ export const characterApi = createApi({
             }),
             providesTags: ["MyCharactersList"],
         }),
+
+        /* mutations */
         deleteMyCharacter: build.mutation<void, string>({
             query: (characterId) => ({
                 url: "deleteCharacter",

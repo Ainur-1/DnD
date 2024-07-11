@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
             .AddMutationType(x => x.Name("Mutation"))
                 .AddTypeExtension<AuthorizationMutation>()
                 .AddTypeExtension<PartyMutation>()
+                .AddTypeExtension<CharacterMutation>()
             .AddFiltering();
     }
 }

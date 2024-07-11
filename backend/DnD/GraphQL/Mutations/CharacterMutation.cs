@@ -1,15 +1,20 @@
-﻿using HotChocolate.Authorization;
+﻿using Contracts.Character;
+using DnD.GraphQL.Extensions;
+using HotChocolate.Authorization;
 using Service.Abstractions;
 
 namespace DnD.GraphQL.Mutations;
 
-[ExtendObjectType("Mutation")]
 [Authorize]
+[ExtendObjectType("Mutation")]
 public class CharacterMutation
 {
-
-    public Task<Guid> CreateCharacter([Service] ICharacterService characterService, [Service] IHttpContextAccessor contextAccessor)
+    public async Task<Guid> CreateCharacterAsync(
+        [Service] ICharacterService characterService, 
+        [Service] IHttpContextAccessor contextAccessor,
+        CreateCharacterDto character)
     {
-        throw new NotImplementedException();
+        var currentUserId = contextAccessor.GetUserIdOrThrowAccessDenied();
+        return await characterService.CreateCharacterAsync(currentUserId, character);
     }
 }
