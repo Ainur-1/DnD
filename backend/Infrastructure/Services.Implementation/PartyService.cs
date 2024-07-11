@@ -217,6 +217,10 @@ public class PartyService : IPartyService
             await session.AbortTransactionAsync();
         }
         //
+        var characterDto = new Contracts.CharacterDto
+        {
+
+        };
         await _hubContext.Clients.Group(variables.PartyId.ToString()).OnPartyJoin(variables.PartyId, characterDto);
         return UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name);
 

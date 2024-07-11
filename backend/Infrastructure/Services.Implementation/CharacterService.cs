@@ -144,26 +144,26 @@ public class CharacterService : ICharacterService
         {   
             var filter = Builders<CharacterAggregate>.Filter.Eq(c => c.Id, characterId);
 
-            //var update = Builders<CharacterAggregate>.Update
-            //    .Set(c => c.InGameStats.HitPoints, updateStats.Hp)
-            //    .Set(c => c.InGameStats.TemporaryHitPoints, updateStats.TempHp)
-            //    .Set(c => c.InGameStats.InspirationBonus, updateStats.Inspiration)
-            //    .Set(c => c.InGameStats.ActualSpeed, updateStats.Speed)
-            //    .Set(c => c.InGameStats.HitDicesLeft, updateStats.HitDicesLeftCount)
-            //    .Set(c => c.InGameStats.IsDying, updateStats.IsDying)
-            //    .Set(c => c.InGameStats.DeathSavesSuccessCount, updateStats.DeathSaves.SuccessCount)
-            //    .Set(c => c.InGameStats.DeathSavesFailureCount, updateStats.DeathSaves.FailureCount);
+            var update = Builders<CharacterAggregate>.Update
+                .Set(c => c.InGameStats.HitPoints, updateStats.Hp)
+                .Set(c => c.InGameStats.TemporaryHitPoints, updateStats.TempHp)
+                .Set(c => c.InGameStats.InspirationBonus, updateStats.Inspiration)
+                .Set(c => c.InGameStats.ActualSpeed, updateStats.Speed)
+                .Set(c => c.InGameStats.HitDicesLeft, updateStats.HitDicesLeftCount)
+                .Set(c => c.InGameStats.IsDying, updateStats.IsDying)
+                .Set(c => c.InGameStats.DeathSavesSuccessCount, updateStats.DeathSaves.SuccessCount)
+                .Set(c => c.InGameStats.DeathSavesFailureCount, updateStats.DeathSaves.FailureCount);
 
-            var update = Builders<DynamicStatsDto>.Update
-                .Set(c => c.Hp, updateStats.Hp)
-                .Set(c => c.TempHp, updateStats.TempHp)
-                .Set(c => c.Inspiration, updateStats.Inspiration)
-                .Set(c => c.Speed, updateStats.Speed)
-                .Set(c => c.HitDicesLeftCount, updateStats.HitDicesLeftCount)
-                .Set(c => c.IsDying, updateStats.IsDying)
-                .Set(c => c.IsDead, updateStats.IsDead)
-                .Set(c => c.DeathSaves.SuccessCount, updateStats.DeathSaves.SuccessCount)
-                .Set(c => c.DeathSaves.FailureCount, updateStats.DeathSaves.FailureCount);
+            //var update = Builders<DynamicStatsDto>.Update
+            //    .Set(c => c.Hp, updateStats.Hp)
+            //    .Set(c => c.TempHp, updateStats.TempHp)
+            //    .Set(c => c.Inspiration, updateStats.Inspiration)
+            //    .Set(c => c.Speed, updateStats.Speed)
+            //    .Set(c => c.HitDicesLeftCount, updateStats.HitDicesLeftCount)
+            //    .Set(c => c.IsDying, updateStats.IsDying)
+            //    .Set(c => c.IsDead, updateStats.IsDead)
+            //    .Set(c => c.DeathSaves.SuccessCount, updateStats.DeathSaves.SuccessCount)
+            //    .Set(c => c.DeathSaves.FailureCount, updateStats.DeathSaves.FailureCount);
 
             await _characterCollection.UpdateOneAsync(session, filter, update);
             await session.CommitTransactionAsync();
