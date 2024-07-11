@@ -1,6 +1,7 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { GameState, InitGameStateVariables } from "./types";
-import { DamageCharacterVariables, EndGameVariables,
+import { createAsyncThunk, createSlice, PayloadAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { DynamicStatsDto, GameCharacter, GameState, InitGameStateVariables } from "./types";
+import { CharacterUpdatedEvent, DamageCharacterVariables, EndGameVariables,
+         FightInfo,
          ItemFromInventory, RoomState, 
          SuggestItemVariables, UpdateCharacterVariables, 
          UpdateFightVariables } from "./signalRTypes";
@@ -10,6 +11,8 @@ import { RootState } from "@/app/appStore";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { HUB_URL } from "@/shared/configuration/enviromentConstants";
 import { mapDtoToGameCharacter } from "./mapDtoToGameCharter";
+import { GameCharacter as GameCharacterDto } from "./signalRTypes";
+import { WithId } from "@/shared/types/domainTypes";
 
 
 export const damageCharacter = createAsyncThunk<void, DamageCharacterVariables, {state: RootState}>(
@@ -152,9 +155,15 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
             .withAutomaticReconnect()
             .build();
         
-        try {
-            //todo: set up connection
+        connection.on("OnFightUpdate", (args: FightInfo) => dispatch(setFight(args)));
+        connection.on("OnPartyDisband", () => dispatch(setGameEnd(true)));
+        connection.on("OnPartyJoin", (args: GameCharacterDto) => dispatch(addGameChracter(mapDtoToGameCharacter(args))));
+        connection.on("OnCharacterUpdate", (args: CharacterUpdatedEvent) => dispatch(updateCharacterDynamicStats({
+            ...args.stats,
+            id: args.id,
+        })));
 
+        try {
             await connection.start();
 
             const roomState = await connection.invoke<RoomState | null>("JoinRoom", args.partyId);
@@ -167,6 +176,7 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
             const newGameState: GameState = {
                 connection: connection,
                 fatalErrorOccured: false,
+                isGameEnd: false,
                 gameInfo: {
                     isFighting: roomState.isFight,
                     partyCharacters: roomState.characters
@@ -211,9 +221,62 @@ const gameSlice = createSlice({
                 state.fatalErrorOccured = action.payload;
             }
         },
+        setFight(state, action: PayloadAction<FightInfo>) {
+            if (!state) {
+                return;
+            }
+
+            const game = state.state;
+            if (!game || game.fatalErrorOccured) {
+                return;
+            }
+
+            game.gameInfo.isFighting = action.payload.isFight;
+            game.gameInfo.characterStepOrder = action.payload.order ?? undefined;
+        },
+        setGameEnd(state, action: PayloadAction<boolean>) {
+            if (!state || !state.state) {
+                return;
+            }
+
+            state.state.isGameEnd = action.payload;
+        },
+        addGameChracter(state, action: PayloadAction<GameCharacter>) {
+            if (!state || !state.state) {
+                return;
+            }
+
+            const { gameInfo } = state.state;
+            if(!gameInfo.partyCharacters.find(x => x.id == action.payload.id)) {
+                gameInfo.partyCharacters.push(action.payload);
+            }
+        },
+        updateCharacterDynamicStats(state, action: PayloadAction<DynamicStatsDto & WithId<string>>) {
+            const { payload } = action;
+
+            if (!state || !state.state) {
+                return;
+            }
+
+            const { partyCharacters } = state.state.gameInfo;
+            const character = partyCharacters.find(x => x.id == payload.id);
+            if (!character) {
+                return;
+            }
+
+            const { mainStats } = character;
+            mainStats.armorClass = payload.armorClass;
+            mainStats.hitDicesLeftCount = payload.hitDicesLeftCount;
+            mainStats.hp = payload.hp;
+            mainStats.inspiration = payload.inspiration;
+            mainStats.isDying = payload.isDying;
+            mainStats.isDead = payload.isDead;
+            mainStats.speed = payload.speed;
+            mainStats.tempHp = payload.tempHp;
+        }
     },
 });
 
-export const { setState, reset, setFatalErrorOccured } = gameSlice.actions;
+export const { setState, reset, setFatalErrorOccured, setFight, setGameEnd, addGameChracter, updateCharacterDynamicStats } = gameSlice.actions;
 
 export default gameSlice.reducer;

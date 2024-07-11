@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Contracts;
 using Contracts.Online;
 using Contracts.Parties;
 using DataAccess.Extensions;
@@ -78,7 +79,7 @@ public class PartyService : IPartyService
             await session.AbortTransactionAsync();
         }
         //
-        await _hubContext.Clients.Group(partyId.ToString()).OnPartyDisband(partyId, "Отряд был расформирован");
+        await _hubContext.Clients.Group(partyId.ToString()).OnPartyDisband();
     }
 
     public async Task<IEnumerable<GameCharacterDto>> GetCharactersInfoAsync(Guid partyId)
@@ -217,8 +218,9 @@ public class PartyService : IPartyService
             await session.AbortTransactionAsync();
         }
         //
-        await _hubContext.Clients.Group(variables.PartyId.ToString()).OnPartyJoin(variables.PartyId, characterDto);
+        await _hubContext.Clients
+            .Group(variables.PartyId.ToString())
+            .OnPartyJoin(_mapper.Map<CharacterDto>(character));
         return UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name);
-
     }
 }
