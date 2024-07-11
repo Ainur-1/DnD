@@ -6,6 +6,8 @@ using Domain.Entities.User;
 using DnD.GraphQL;
 using Services.Implementation.Extensions;
 using System.Security.Claims;
+using Services.Abstractions;
+using Services.Implementation;
 
 namespace DnD;
 
@@ -61,6 +63,15 @@ public class Program
 
         services.AddSignalR();
         services.AddGraphQlApi();
+
+        services.AddTransient<IEmailService>(provider =>
+            new EmailService(
+                configuration["Smtp:Server"],
+                int.Parse(configuration["Smtp:Port"]),
+                configuration["Smtp:User"],
+                configuration["Smtp:Pass"]
+            ));
+        services.AddTransient<IUserService, UserManagementService>();
 
         services.RegisterDatabaseServices(mongoDbSettings);
         services.AddDomainServicesImplementations();
