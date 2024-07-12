@@ -13,5 +13,5 @@ public record CreateInventoryItemDto
     /// </summary>
     public bool IsItemProficiencyOn { get; init; }
 
-    public Item Item { get; init; }
+    //public Item Item { get; init; }
 }
