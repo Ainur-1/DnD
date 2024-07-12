@@ -8,6 +8,7 @@ using Services.Implementation.Extensions;
 using System.Security.Claims;
 using Services.Abstractions;
 using Services.Implementation;
+using MassTransit;
 
 namespace DnD;
 

@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services.Implementation", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mappings", "Infrastructure\Mappings\Mappings.csproj", "{73F79241-4172-43D1-AE18-950CFB3E8255}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSmtp", "ConsoleApp1\TestSmtp.csproj", "{BE2F23E7-007D-4CC9-9FF9-9C98ADF31171}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,10 +61,6 @@ Global
 		{73F79241-4172-43D1-AE18-950CFB3E8255}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73F79241-4172-43D1-AE18-950CFB3E8255}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73F79241-4172-43D1-AE18-950CFB3E8255}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE2F23E7-007D-4CC9-9FF9-9C98ADF31171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE2F23E7-007D-4CC9-9FF9-9C98ADF31171}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE2F23E7-007D-4CC9-9FF9-9C98ADF31171}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE2F23E7-007D-4CC9-9FF9-9C98ADF31171}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

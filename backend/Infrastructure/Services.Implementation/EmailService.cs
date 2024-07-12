@@ -24,7 +24,7 @@ namespace Services.Implementation
             _smtpPass = smtpPass;
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string message)
+        public async Task SendEmailAsync(string toEmail, string subject, string message, bool isMessageHtml = default)
         {
             using (var client = new SmtpClient(_smtpServer, _smtpPort)
             {
@@ -37,7 +37,7 @@ namespace Services.Implementation
                     From = new MailAddress(_smtpUser),
                     Subject = subject,
                     Body = message,
-                    IsBodyHtml = true
+                    IsBodyHtml = isMessageHtml
                 };
                 mailMessage.To.Add(toEmail);
                 await client.SendMailAsync(mailMessage);

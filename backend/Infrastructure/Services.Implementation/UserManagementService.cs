@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Services.Abstractions;
 using System.Text.RegularExpressions;
 using System.Web;
-
+using MassTransit;
+using Services.Implementation.Consumers.Email;
 namespace Services.Implementation;
 
 public class UserManagementService : IUserService, IAuthorizationService
@@ -12,15 +13,18 @@ public class UserManagementService : IUserService, IAuthorizationService
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IEmailService _emailService;
+    private readonly IBus _bus;
 
     public UserManagementService(
         UserManager<User> userManager, 
         SignInManager<User> signInManager, 
-        IEmailService emailService)
+        IEmailService emailService,
+        IBus bus)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _emailService = emailService;
+        _bus = bus;
     }
 
     public async Task CreateAsync(string email, string username, string password, string? name = null)
@@ -53,7 +57,12 @@ public class UserManagementService : IUserService, IAuthorizationService
             </body>
             </html>";
 
-            await _emailService.SendEmailAsync(email, subject, message);
+            await _bus.Send(new EmailSendCommand()
+            {
+                Email = email,
+                Subject = subject,
+                Message = message
+            });
             return;
         }
 
@@ -96,7 +105,12 @@ public class UserManagementService : IUserService, IAuthorizationService
         </body>
         </html>";
 
-        await _emailService.SendEmailAsync(email, subject, message);
+        await _bus.Send(new EmailSendCommand()
+        {
+            Email = email,
+            Subject = subject,
+            Message = message
+        });
     }
 
     public async Task ResetPasswordAsync(string email, string code, string newPassword)

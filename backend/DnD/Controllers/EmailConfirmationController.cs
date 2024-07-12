@@ -24,7 +24,7 @@ namespace DnD.Controllers
                 string frontendHost = _configuration["FrontendHost"];
                 return Redirect(frontendHost);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return NotFound();
             }

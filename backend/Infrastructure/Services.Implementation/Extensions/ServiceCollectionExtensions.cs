@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Service.Abstractions;
 using Services.Abstractions;
+using MassTransit;
+using Services.Implementation.Consumers.Email;
 
 namespace Services.Implementation.Extensions;
 
@@ -15,7 +17,11 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped<ICharacterService, CharacterService>();
 
         serviceCollection.AddEntitiesMapping();
-
+        serviceCollection.AddMassTransit(x =>
+        {
+            x.UsingInMemory();
+            x.AddConsumer<EmailSendCommandConsumer>();
+        });
 
         return serviceCollection;
     }
