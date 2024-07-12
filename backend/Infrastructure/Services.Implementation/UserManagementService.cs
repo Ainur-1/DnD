@@ -45,7 +45,19 @@ public class UserManagementService : IUserService, IAuthorizationService
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(token);
             var confirmationLink = $"https://yourapp.com/confirm-email?userId={user.Id}&token={encodedToken}";
-            await _emailService.SendEmailAsync(email, "Подтвердите почту", $"<a href='{confirmationLink}'>Подтвердить почту</a>");
+            var subject = "Подтверждение регистрации";
+            var message = $@"
+            <html>
+            <body>
+                <h2>Здравствуйте, {username}!</h2>
+                <p>Спасибо за регистрацию на нашем сайте.</p>
+                <p>Пожалуйста, подтвердите свой email, нажав на ссылку ниже:</p>
+                <a href='{confirmationLink}'>Подтвердить email</a>
+                <p>Если вы не регистрировались на нашем сайте, проигнорируйте это сообщение.</p>
+            </body>
+            </html>";
+
+            await _emailService.SendEmailAsync(email, subject, message);
             return;
         }
 
@@ -76,7 +88,19 @@ public class UserManagementService : IUserService, IAuthorizationService
 
         var code = await _userManager.GeneratePasswordResetTokenAsync(user);
         var encodedCode = HttpUtility.UrlEncode(code);
-        await _emailService.SendEmailAsync(email, "Password Reset Code", $"Код востановления  {encodedCode}");
+        var subject = "Сброс пароля";
+        var message = $@"
+        <html>
+        <body>
+            <h2>Здравствуйте, {user.UserName}!</h2>
+            <p>Вы запросили сброс пароля для вашей учетной записи.</p>
+            <p>Пожалуйста, используйте код ниже для сброса пароля:</p>
+            <p><strong>{encodedCode}</strong></p>
+            <p>Если вы не запрашивали сброс пароля, проигнорируйте это сообщение.</p>
+        </body>
+        </html>";
+
+        await _emailService.SendEmailAsync(email, subject, message);
     }
 
     public async Task ResetPasswordAsync(string email, string code, string newPassword)
