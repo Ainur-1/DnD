@@ -8,17 +8,28 @@ namespace DnD.Controllers
     public class EmailConfirmationController : Controller
     {
         private readonly IUserService _userService;
-
-        public EmailConfirmationController(IUserService userService)
+        private readonly IConfiguration _configuration;
+        public EmailConfirmationController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
+            _configuration = configuration;
         }
-
+        
         [HttpGet("confirm")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
-            await _userService.ConfirmEmailAsync(userId, token);
-            return Ok("Почта успешна");
+            try
+            {
+                await _userService.TryConfirmEmailAsync(userId, token);
+                string frontendHost = _configuration["FrontendHost"];
+                return Redirect(frontendHost);
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+
         }
+
     }
 }

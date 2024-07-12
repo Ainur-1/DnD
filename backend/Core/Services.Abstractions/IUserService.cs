@@ -6,7 +6,7 @@ public interface IUserService
     /// <exception cref="UsernameTakenException"></exception>
     /// <exception cref="InvalidArgumentValueException"
     Task CreateAsync(string email, string username, string password, string? name = default);
-    Task ConfirmEmailAsync(string userId, string token);
+    Task TryConfirmEmailAsync(string userId, string token);
     Task SendPasswordResetCodeAsync(string email);
     Task ResetPasswordAsync(string email, string code, string newPassword);
     Task ChangePasswordAsync(string userId, string newPassword);

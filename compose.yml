@@ -21,7 +21,7 @@ services:
       - MongoDbSettings__Host=host.docker.internal
       - MongoDbSettings__Port=27018
       - ASPNETCORE_ENVIRONMENT=Development
-      - CorsHost=["http://localhost:3000/"]
+      - FrontendHost ="http://localhost:3000/"
     depends_on:
       - mongo
 

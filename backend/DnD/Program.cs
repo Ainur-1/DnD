@@ -49,7 +49,7 @@ public class Program
         {
             services.AddCors(options =>
             {
-                var allowHosts = configuration.GetValue<string[]>("CorsHost") ?? ["http://localhost:3000"];
+                var allowHosts = configuration.GetValue<string>("CorsHost") ?? "http://localhost:3000";
                 options.AddPolicy("DevFrontEnds",
                     builder =>
                         builder.WithOrigins(allowHosts)

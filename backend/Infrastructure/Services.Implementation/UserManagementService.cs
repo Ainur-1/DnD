@@ -63,7 +63,7 @@ public class UserManagementService : IUserService, IAuthorizationService
 
         ThrowExceptionAccordingError(result.Errors!, email, username);
     }
-    public async Task ConfirmEmailAsync(string userId, string token)
+    public async Task TryConfirmEmailAsync(string userId, string token)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
