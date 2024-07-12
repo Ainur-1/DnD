@@ -98,6 +98,7 @@ export type CharacterPersonalityDto = {
   background: Scalars['String']['output'];
   base64Image?: Maybe<Scalars['String']['output']>;
   bonds: Array<Scalars['String']['output']>;
+  canLevelUp: Scalars['Boolean']['output'];
   class: ClassType;
   classFeatures: Array<ClassFeatureDto>;
   flaws: Array<Scalars['String']['output']>;
@@ -116,6 +117,7 @@ export type CharacterPersonalityDtoFilterInput = {
   background?: InputMaybe<StringOperationFilterInput>;
   base64Image?: InputMaybe<StringOperationFilterInput>;
   bonds?: InputMaybe<ListStringOperationFilterInput>;
+  canLevelUp?: InputMaybe<BooleanOperationFilterInput>;
   class?: InputMaybe<ClassTypeOperationFilterInput>;
   classFeatures?: InputMaybe<ListFilterInputTypeOfClassFeatureDtoFilterInput>;
   flaws?: InputMaybe<ListStringOperationFilterInput>;
@@ -204,6 +206,49 @@ export type ClassTypeOperationFilterInput = {
   in?: InputMaybe<Array<ClassType>>;
   neq?: InputMaybe<ClassType>;
   nin?: InputMaybe<Array<ClassType>>;
+};
+
+export type CreateCharacterDtoInput = {
+  age: Scalars['Int']['input'];
+  alignment: CharacterAlignmentType;
+  charisma: Scalars['Int']['input'];
+  class: ClassType;
+  coinsAffectOnWeight: Scalars['Boolean']['input'];
+  constitution: Scalars['Int']['input'];
+  dexterity: Scalars['Int']['input'];
+  intelligence: Scalars['Int']['input'];
+  isPublic: Scalars['Boolean']['input'];
+  maybeBackground?: InputMaybe<Scalars['String']['input']>;
+  maybeBase64Image?: InputMaybe<Scalars['String']['input']>;
+  maybeBonds?: InputMaybe<Array<Scalars['String']['input']>>;
+  maybeFlaws?: InputMaybe<Array<Scalars['String']['input']>>;
+  maybeLanguages?: InputMaybe<Array<Scalars['String']['input']>>;
+  maybeName?: InputMaybe<Scalars['String']['input']>;
+  maybeOtherTraits?: InputMaybe<Array<Scalars['String']['input']>>;
+  maybeStartInventory?: InputMaybe<Array<CreateInventoryItemDtoInput>>;
+  maybeSubrace?: InputMaybe<Scalars['String']['input']>;
+  race: RaceType;
+  raceTraitsAdjustments: Array<KeyValuePairOfStringAndInt32Input>;
+  speed: Scalars['Int']['input'];
+  startWealth: StartWealthDtoInput;
+  strength: Scalars['Int']['input'];
+  wisdom: Scalars['Int']['input'];
+  xp: Scalars['Int']['input'];
+};
+
+export type CreateCharacterInput = {
+  character: CreateCharacterDtoInput;
+};
+
+export type CreateCharacterPayload = {
+  __typename?: 'CreateCharacterPayload';
+  uuid?: Maybe<Scalars['UUID']['output']>;
+};
+
+export type CreateInventoryItemDtoInput = {
+  count: Scalars['Int']['input'];
+  inUse: Scalars['Boolean']['input'];
+  isItemProficiencyOn: Scalars['Boolean']['input'];
 };
 
 export type CreatePartyInput = {
@@ -308,6 +353,11 @@ export type JoinPartyPayload = {
   userPartyDto?: Maybe<UserPartyDto>;
 };
 
+export type KeyValuePairOfStringAndInt32Input = {
+  key: Scalars['String']['input'];
+  value: Scalars['Int']['input'];
+};
+
 export type ListFilterInputTypeOfClassFeatureDtoFilterInput = {
   all?: InputMaybe<ClassFeatureDtoFilterInput>;
   any?: InputMaybe<Scalars['Boolean']['input']>;
@@ -331,11 +381,17 @@ export type ListStringOperationFilterInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createCharacter: CreateCharacterPayload;
   createParty: CreatePartyPayload;
   joinParty: JoinPartyPayload;
   signIn: SignInPayload;
   signOut: SignOutPayload;
   signUp: SignUpPayload;
+};
+
+
+export type MutationCreateCharacterArgs = {
+  input: CreateCharacterInput;
 };
 
 
@@ -490,6 +546,14 @@ export enum Size {
   Small = 'SMALL'
 }
 
+export type StartWealthDtoInput = {
+  copperCoins: Scalars['Int']['input'];
+  electrumCoins: Scalars['Int']['input'];
+  goldCoins: Scalars['Int']['input'];
+  platinumCoins: Scalars['Int']['input'];
+  silverCoins: Scalars['Int']['input'];
+};
+
 export type StringOperationFilterInput = {
   and?: InputMaybe<Array<StringOperationFilterInput>>;
   contains?: InputMaybe<Scalars['String']['input']>;
@@ -561,12 +625,52 @@ export type SignUpMutationVariables = Exact<{
 
 export type SignUpMutation = { __typename?: 'Mutation', signUp: { __typename?: 'SignUpPayload', boolean?: boolean | null, errors?: Array<{ __typename?: 'FieldNameTakenError', message: string } | { __typename?: 'InvalidArgumentValueError', message: string }> | null } };
 
+export type CarouselCharactersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CarouselCharactersQuery = { __typename?: 'Query', myCharacters: Array<{ __typename?: 'CharacterDto', id: any, isInParty: boolean, personality: { __typename?: 'CharacterPersonalityDto', age: number, alignment: CharacterAlignmentType, background: string, base64Image?: string | null, bonds: Array<string>, class: ClassType, flaws: Array<string>, languages: Array<string>, level: number, name: string, otherTraits: Array<string>, race: string, canLevelUp: boolean }, dynamicStats: { __typename?: 'DynamicStatsDto', isDead: boolean } }> };
+
 export type CharacterDeathSavesQueryVariables = Exact<{
   characterId: Scalars['UUID']['input'];
 }>;
 
 
 export type CharacterDeathSavesQuery = { __typename?: 'Query', character: { __typename?: 'CharacterDto', dynamicStats: { __typename?: 'DynamicStatsDto', isDying: boolean, isDead: boolean, deathSaves?: { __typename?: 'DeathSavesDto', failureCount: number, successCount: number } | null } } };
+
+export type CreateCharacterMutationVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+  age: Scalars['Int']['input'];
+  xp: Scalars['Int']['input'];
+  speed: Scalars['Int']['input'];
+  alignment: CharacterAlignmentType;
+  background?: InputMaybe<Scalars['String']['input']>;
+  bonds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  flaws?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  classId: ClassType;
+  coinsAffectOnWeight: Scalars['Boolean']['input'];
+  languages?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  otherTraits?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  base64Image?: InputMaybe<Scalars['String']['input']>;
+  isPublic: Scalars['Boolean']['input'];
+  raceId: RaceType;
+  subraceName?: InputMaybe<Scalars['String']['input']>;
+  charisma: Scalars['Int']['input'];
+  constitution: Scalars['Int']['input'];
+  dexterity: Scalars['Int']['input'];
+  intelligence: Scalars['Int']['input'];
+  strength: Scalars['Int']['input'];
+  wisdom: Scalars['Int']['input'];
+  copper: Scalars['Int']['input'];
+  gold: Scalars['Int']['input'];
+  platinum: Scalars['Int']['input'];
+  electrum: Scalars['Int']['input'];
+  silver: Scalars['Int']['input'];
+  inventory?: InputMaybe<Array<CreateInventoryItemDtoInput> | CreateInventoryItemDtoInput>;
+  raceTraitsAdjustments: Array<KeyValuePairOfStringAndInt32Input> | KeyValuePairOfStringAndInt32Input;
+}>;
+
+
+export type CreateCharacterMutation = { __typename?: 'Mutation', createCharacter: { __typename?: 'CreateCharacterPayload', uuid?: any | null } };
 
 export type MyAliveCharactersQueryVariables = Exact<{ [key: string]: never; }>;
 

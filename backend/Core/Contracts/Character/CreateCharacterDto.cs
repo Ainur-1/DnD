@@ -1,4 +1,4 @@
-﻿using Contracts.Items;
+﻿using Contracts.Inventory;
 using Domain.Entities.Character;
 using Domain.Entities.Classes;
 using Domain.Entities.Races;
@@ -7,7 +7,7 @@ namespace Contracts.Character;
 
 public record CreateCharacterDto
 {
-    public string Name { get; init; } = "";
+    public string? MaybeName { get; init; }
     public bool CoinsAffectOnWeight { get; init; }
 
     public bool IsPublic { get; init; }
@@ -37,17 +37,17 @@ public record CreateCharacterDto
 
     public CharacterAlignmentType Alignment { get; init; } = CharacterAlignmentType.Unaligned;
 
-    public string Background { get; init; } = "";
+    public string? MaybeBackground { get; init; }
 
-    public string[] Languages { get; init; } = Array.Empty<string>();
+    public string[]? MaybeLanguages { get; init; }
     
-    public string[] Flaws { get; init; } = Array.Empty<string>();
+    public string[]? MaybeFlaws { get; init; }
     
-    public string[] Bonds { get; init; } = Array.Empty<string>();
+    public string[]? MaybeBonds { get; init; }
     
-    public string[] OtherTraits { get; init; } = Array.Empty<string>();
+    public string[]? MaybeOtherTraits { get; init; }
 
-    public CreateInventoryItemDto[] StartInventory { get; init; } = Array.Empty<CreateInventoryItemDto>();
+    public CreateInventoryItemDto[]? MaybeStartInventory { get; init; }
 
-    public CharacterCurrency StartWealth { get; init; } = new();
+    public StartWealthDto StartWealth { get; init; } = new();
 }
