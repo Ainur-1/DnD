@@ -1,0 +1,71 @@
+mutation createCharacter(
+    $name: String,
+    $age: Int!,
+    $xp: Int!,
+    $speed: Int!,
+    $alignment: CharacterAlignmentType!,
+    $background: String,
+    $bonds: [String!],
+    $flaws: [String!],
+    $classId: ClassType!,
+    $coinsAffectOnWeight: Boolean!,
+    $languages: [String!],
+    $otherTraits: [String!],
+    $base64Image: String,
+    $isPublic: Boolean!,
+    $raceId: RaceType!,
+    $subraceName: String,
+    $charisma: Int!,
+    $constitution: Int!,
+    $dexterity: Int!,
+    $intelligence: Int!,
+    $strength: Int!,
+    $wisdom: Int!,
+    $copper: Int!,
+    $gold: Int!,
+    $platinum: Int!,
+    $electrum: Int!,
+    $silver: Int!,
+    $inventory: [CreateInventoryItemDtoInput!],
+    $raceTraitsAdjustments: [KeyValuePairOfStringAndInt32Input!]!,
+    ){
+  createCharacter(
+    input: {
+      character: {
+        age: $age,
+        alignment: $alignment,
+        maybeBackground: $background,
+        maybeBonds: $bonds,
+        charisma: $charisma,
+        class: $classId,
+        coinsAffectOnWeight: $coinsAffectOnWeight,
+        constitution: $constitution,
+        dexterity: $dexterity,
+        maybeFlaws: $flaws,
+        intelligence: $intelligence,
+        isPublic: $isPublic,
+        maybeLanguages: $languages,
+        maybeBase64Image: $base64Image
+        maybeSubrace: $subraceName,
+        maybeName: $name,
+        maybeOtherTraits: $otherTraits,
+        race: $raceId,
+        raceTraitsAdjustments: $raceTraitsAdjustments,
+        speed: $speed,
+        maybeStartInventory: $inventory,
+        startWealth: {
+          copperCoins: $copper,
+          electrumCoins: $electrum,
+          goldCoins: $gold,
+          platinumCoins: $platinum,
+          silverCoins: $silver
+        }
+        strength: $strength,
+        wisdom: $wisdom,
+        xp: $xp
+      }
+    }
+  ) {
+    uuid
+  }
+} 

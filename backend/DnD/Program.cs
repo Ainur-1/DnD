@@ -44,7 +44,7 @@ public class Program
                 .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
                 .AddDefaultTokenProviders();
 
-        services.AddLogging();
+        services.AddLogging(x => x.AddConsole().AddDebug());
 
         if (builder.Environment.IsDevelopment())
         {

@@ -1,5 +1,6 @@
+﻿using Contracts;
+using Contracts.Character;
 ﻿using AutoMapper;
-using Contracts;
 using Contracts.Online;
 using Domain.Entities.Character;
 using Domain.Entities.Parties;
@@ -35,6 +36,11 @@ public class CharacterService : ICharacterService
         _client = client;
         _mapper = mapper;
         _hubContext = hubContext;
+    }
+    
+    public Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto character)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<GameCharacterDto> GetByIdAsync(Guid userId, Guid partyId)

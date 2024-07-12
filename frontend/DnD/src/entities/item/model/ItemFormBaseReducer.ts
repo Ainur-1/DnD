@@ -333,7 +333,7 @@ const validators: Validators = {
         }
 
         const value = field?.value;
-        if (!value) {
+        if (value == undefined) {
             return requiredError;
         }
 
@@ -516,7 +516,7 @@ function stateToItem(state: ItemFormBaseStateWithFormSelector): Item | null {
     }
 }
 
-function anyError(state: ItemFormBaseState): boolean {
+function anyError(state: ItemFormBaseStateWithFormSelector): boolean {
   const hasError = (field?: FormField<any>): boolean => field?.error !== null && field?.error !== undefined;
 
   // Check common props
@@ -532,7 +532,8 @@ function anyError(state: ItemFormBaseState): boolean {
   }
 
   // Check weapon specific props
-  if (
+  if (state.selectedForm === SelectedItemForm.weapon &&
+    (
     hasError(state.damageType) ||
     hasError(state.attackType) ||
     hasError(state.proficiencyType) ||
@@ -540,19 +541,19 @@ function anyError(state: ItemFormBaseState): boolean {
     hasError(state.criticalDistanceInFoots) ||
     hasError(state.properties) ||
     hasError(state.hitDice) ||
-    hasError(state.alternateHitDice)
+    hasError(state.alternateHitDice))
   ) {
     return true;
   }
 
   // Check armor specific props
-  if (
+  if ( state.selectedForm === SelectedItemForm.armor && (
     hasError(state.armorType) ||
     hasError(state.material) ||
     hasError(state.requiredStrength) ||
     hasError(state.hasStealthDisadvantage) ||
     hasError(state.maxPossibleDexterityModifier) ||
-    hasError(state.armorClass)
+    hasError(state.armorClass))
   ) {
     return true;
   }

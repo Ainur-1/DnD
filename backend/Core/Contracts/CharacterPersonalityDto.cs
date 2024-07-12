@@ -6,34 +6,36 @@ namespace Contracts;
 
 public class CharacterPersonalityDto
 {
-    public string Name { get; protected set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public string? Base64Image { get; protected set; }
+    public string? Base64Image { get; init; }
 
-    public int Age { get; protected set; }
+    public int Age { get; init; }
 
-    public string Race { get; protected set; }
+    public string Race { get; init; }
 
-    public ClassType Class { get; protected set; }
+    public ClassType Class { get; init; }
 
-    public CharacterAlignmentType Alignment { get; protected set; }
+    public CharacterAlignmentType Alignment { get; init; }
 
-    public string[] Bonds { get; protected set; } = Array.Empty<string>();
+    public string[] Bonds { get; init; } = Array.Empty<string>();
 
-    public string[] Flaws { get; protected set; } = Array.Empty<string>();
+    public string[] Flaws { get; init; } = Array.Empty<string>();
 
-    public string Background { get; protected set; } = string.Empty;
+    public string Background { get; init; } = string.Empty;
 
-    public ClassFeatureDto[] ClassFeatures { get; protected set; }
+    public ClassFeatureDto[] ClassFeatures { get; init; }
 
-    public RaceTrait[] RaceTraits { get; protected set; } = Array.Empty<RaceTrait>();
+    public RaceTrait[] RaceTraits { get; init; } = Array.Empty<RaceTrait>();
 
-    public string[] Languages { get; protected set; } = Array.Empty<string>();
+    public string[] Languages { get; init; } = Array.Empty<string>();
 
     /// <summary>
     /// Custom user defined traits.
     /// </summary>
-    public string[] OtherTraits { get; protected set; } = Array.Empty<string>();
+    public string[] OtherTraits { get; init; } = Array.Empty<string>();
 
-    public int Level { get; protected set; }
+    public int Level { get; init; }
+
+    public bool CanLevelUp { get; init; }
 }

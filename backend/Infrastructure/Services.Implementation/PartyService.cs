@@ -162,9 +162,11 @@ public class PartyService : IPartyService
 
     public async Task<bool> IsUserInPartyAsync(Guid userId, Guid partyId)
     {
-        return await _characterCollection
+        var someUserCharacterIsInParty = await _characterCollection
             .FindByOwnerAndParty(ownerId: userId, partyId: partyId)
             .AnyAsync();
+
+        return someUserCharacterIsInParty || await IsGameMasterAsync(userId, partyId);
     }
 
     public async Task<UserPartyDto> JoinPartyAsync(JoinPartyVariablesDto variables)
@@ -175,9 +177,9 @@ public class PartyService : IPartyService
         
         if (party == null) throw new ObjectNotFoundException();
 
-        if (variables.UserId == party.GameMasterId)
+        if (await IsUserInPartyAsync(variables.UserId, party.Id))
         {
-            throw new AccessDeniedException();
+            throw new InvalidArgumentValueException(nameof(variables.UserId), "Вы уже состоите в отряде.");
         }
 
         var character = await _characterCollection

@@ -1,10 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { CarouselCharacter } from "../model/types";
-import { CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables, MyAliveCharactersQuery } from "@/shared/api/gql/graphql";
+import { CarouselCharactersQuery, CarouselCharactersQueryVariables, CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables, CreateCharacterMutation, CreateCharacterMutationVariables, MyAliveCharactersQuery } from "@/shared/api/gql/graphql";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 import { client } from "@/shared/api";
 import MY_ALIVE_CHARACTERS from "./queries/MyAliveCharacters.graphql";
 import CHRACTER_DEATH_SAVES from "./queries/ChracterDeathSaves.graphql";
+import CreateCharacterMutationDocument from "./queries/CreateChracterMutation.graphql";
+import CarouselCharacterDocument from "./queries/CarouselCharactersQuery.graphql";
 
 export const characterApi = createApi({
     reducerPath: 'character/api',
@@ -27,14 +29,12 @@ export const characterApi = createApi({
             providesTags: ["MyCharactersList"]
         }),
 
-        /* mutations */
-        myCharacters: build.query<CarouselCharacter[], void>({
-            query: () => ({
-                url: "my characters list",
-                method: "POST",
-            }),
+        myCharacters: build.query<CarouselCharactersQuery, CarouselCharactersQueryVariables>({
+            query: (variables) => ({document: CarouselCharacterDocument, variables}),
             providesTags: ["MyCharactersList"],
         }),
+
+        /* mutations */
         deleteMyCharacter: build.mutation<void, string>({
             query: (characterId) => ({
                 url: "deleteCharacter",
@@ -43,12 +43,8 @@ export const characterApi = createApi({
             }),
             invalidatesTags: ["MyCharactersList"]
         }),
-        createCharacter: build.mutation<void, {}>({
-            query: (body) => ({
-                url: "createCharacter",
-                method: "POST",
-                body
-            }),
+        createCharacter: build.mutation<CreateCharacterMutation, CreateCharacterMutationVariables>({
+            query: (variables) => ({documents: CreateCharacterMutationDocument, variables}),
             invalidatesTags: ["MyCharactersList"]
         }),
     })

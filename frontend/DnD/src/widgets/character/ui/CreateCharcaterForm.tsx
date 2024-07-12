@@ -1,7 +1,7 @@
-import { Box, Button, CircularProgress, Container, FormControl, FormGroup, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, FormControl, FormGroup, Grid, List, ListItem, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material";
 import { CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterUploadImage, CharacterXpField, CoinsAffectWeightSwitch } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
 import { RaceSelector, useRaceInfoQuery } from "@/features/races";
 import { ClassSelector, useClassStartInventoryDescriptionQuery } from "@/features/classes";
@@ -18,6 +18,8 @@ import { Aligments, Currency } from "@/shared/types/domainTypes";
 import { useCreateCharacterMutation } from "@/features/character";
 import { useNavigate } from "react-router-dom";
 import { InventoryCurrencies } from "@/entities/inventory";
+import { ClassType, RaceType } from "@/shared/api/gql/graphql";
+import CircleIcon from '@mui/icons-material/Circle';
 
 interface StepProps {
     state: CreateCharacterFormState,
@@ -122,7 +124,7 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
     function getSelectedRaceTraitOption(traitName: string) {
         const raceTraitsAdjustments = state.raceTraitsAdjustments.value!;
 
-        if (traitName in raceTraitsAdjustments)
+        if (raceTraitsAdjustments != undefined && traitName in raceTraitsAdjustments)
             return raceTraitsAdjustments[traitName];
 
         return undefined;
@@ -130,7 +132,7 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
 
     return <Stack>
         <Grid container rowSpacing={1} spacing={2}>
-                <RaceSelector onRaceSelected={(race) => setField("race", race)} />
+                <RaceSelector value={state.race.value} onRaceSelected={(race) => setField("race", race)} />
                 {state.race.value && <Grid item xs={12}>
                     <RaceTraitAdjustment 
                         race={state.race.value} 
@@ -138,7 +140,7 @@ function Step2({ state, setStep, setField, isValid }: StepProps) {
                         getSelectedOption={getSelectedRaceTraitOption} />
                 </Grid>}
                 <Grid item xs={6} md={6}>
-                    <ClassSelector onClassSelected={(value) => setField("classId", value)} />
+                    <ClassSelector value={state.classId.value} onClassSelected={(value) => setField("classId", value)} />
                 </Grid>
                 <Grid item xs={6} md={6}>
                     <CharacterXpField 
@@ -173,7 +175,7 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
         throw new Error("Race required!");
     }
 
-    const { data } = useRaceInfoQuery(state.race.value.id);
+    const { data, isSuccess } = useRaceInfoQuery({raceId: state.race.value.id as RaceType});
 
     const [disableButtons, setDisableButtons] = useState(false);
 
@@ -193,21 +195,26 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
             setField("alignment", alignment);
     }
 
+    useEffect(() => {
+        if (isSuccess) {
+            const defaultLanguages = data.raceInfo.languages;
+            setField("languages", defaultLanguages);
+        }
+    }, [data]);
+
     return <Stack>
         <Grid container rowSpacing={1} spacing={2}>
             <Grid item xs={12} alignItems="center">
                 <CharacterUploadImage base64Image={state.base64Image.value} setImage={(base64Iamge) => setField("base64Image", base64Iamge)}/>
             </Grid>
             <Grid item xs={12}>
-                <Typography variant="body1" color="GrayText" marginTop={3} style={{ wordWrap: 'break-word', wordBreak: 'break-all' }}>
-                    {data?.data?.recommendedAlignmentDescription}
-                    dgdfgdgmdkjgndkfjgndfkjgndkfgndkfngdkjfngkdjfngkdjfngkjdfngkdngkdfngkjdfngkdjfngkdfjngkdfjngdkfjgnjfndkfjgndfkjgndfkjgndfkjgndfkgjndfkgjndfkgjndfkgjndfk
+                <Typography variant="body1" width="100%" color="GrayText" textAlign="justify" marginTop={3} marginBottom={1}>
+                    {data?.raceInfo?.recommendedAlignmentDescription}
                 </Typography>
             </Grid>
             <Grid item xs={12}>
                 <AlignmentSelector required={true} value={state.alignment.value} errorText={state.alignment.error ?? undefined} onValueChange={onAligmentChange}/>
             </Grid>
-            
             <Grid item xs={12}>
                 <CharacterBackgroundField
                     label="Лор"
@@ -263,7 +270,7 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
         //throw new Error("No class was set!");
     }
 
-    const { data, isFetching, isSuccess } = useClassStartInventoryDescriptionQuery(state.classId.value);
+    const { data, isFetching, isSuccess } = useClassStartInventoryDescriptionQuery({id: state.classId.value! as ClassType});
 
     const showForm = () => setShow(true);
     const closeForm = () => setShow(false);
@@ -341,7 +348,20 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
                 {isFetching && <Box display="flex" justifyContent="center">
                         <CircularProgress />
                     </Box>}
-                {isSuccess && <>{data}</>}
+                {isSuccess && <Stack>
+                    <Typography fontWeight="bold" variant="body1" textAlign="center">
+                        Вы можете выбрать начальные предметы:
+                    </Typography>
+                    <List>
+                        {data.classInfo.startInventoryDescription.split('\n').map(description => 
+                            <ListItem key={description}>
+                                <Typography variant="body2">
+                                    {description}
+                                </Typography>
+                            </ListItem>
+                        )}
+                    </List>
+                </Stack>}
             </Typography>
             <InventoryList
                 items={state.inventory.value!}

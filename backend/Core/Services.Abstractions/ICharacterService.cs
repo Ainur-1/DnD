@@ -1,4 +1,5 @@
 ﻿using Contracts;
+using Contracts.Character;
 using Contracts.Online;
 using Domain.Exceptions;
 
@@ -6,6 +7,9 @@ namespace Service.Abstractions;
 
 public interface ICharacterService
 {
+    Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto character);
+
+
     Task<GameCharacterDto> GetByIdAsync(Guid id, Guid partyId);
     Task<(bool IsDead, int InitiativeModifier)?> GetCharacterFightOrderCalculationParametersAsync(Guid characterId);
     Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats);

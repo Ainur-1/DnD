@@ -1,16 +1,18 @@
 import { Grid } from "@mui/material";
 import { useLazyRaceInfoQuery, useStrictRacesQuery } from "../api/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Race, RaceInfo } from "@/entities/races";
 import { StringSelector } from "@/shared/ui/GenericSelector";
+import { RaceType } from "@/shared/api/gql/graphql";
 
 interface RaceSelectorProps {
-    onRaceSelected: (race: Race) => void
+    onRaceSelected: (race: Race) => void;
+    value: Race | undefined;
 }
 
-export default function RaceSelector({onRaceSelected}: RaceSelectorProps) {
+export default function RaceSelector({value, onRaceSelected}: RaceSelectorProps) {
     const { data: strictRaces } = useStrictRacesQuery();
-    const [raceInfo] = useLazyRaceInfoQuery();
+    const [raceInfo, {data: raceInfoData, isFetching, isSuccess}] = useLazyRaceInfoQuery();
 
     const [tempRace, setTempRace] = useState<RaceInfo | undefined>();
     const [raceDisabled, setRaceDisabled] = useState(false);
@@ -18,27 +20,7 @@ export default function RaceSelector({onRaceSelected}: RaceSelectorProps) {
     const onRaceSelect = async (id: string) => {
         setRaceDisabled(true);
         setTempRace(undefined);
-        try {
-            const response = await raceInfo(id);
-            if (response.isSuccess && response.data.success) {
-                const info = response.data.data;
-                if (info?.subraces && info.subraces.length > 0) {
-                    setTempRace(info);
-                } else {
-                    const race = {
-                        id,
-                        name: info!.name,
-                    };
-                    onRaceSelected(race);
-                }
-            } else {
-                //todo: handle errors
-                console.log("Fatal error. No connection or whatever.");
-                setTempRace(undefined);
-            }
-        } finally {
-            setRaceDisabled(false);
-        }
+        await raceInfo({raceId: id as RaceType});
     };
     
     const onSubraceSelect = (subrace: string) => {
@@ -54,22 +36,63 @@ export default function RaceSelector({onRaceSelected}: RaceSelectorProps) {
         }
     };
 
+    useEffect(() => {
+        if (isFetching) {
+            return;
+        }
+
+        if (isSuccess) {
+            if (!raceInfoData) {
+                return;
+            }
+            const info = raceInfoData.raceInfo;
+
+            if (info?.subRacesAdjustments && info.subRacesAdjustments.length > 0) {
+                setTempRace({
+                    adultAge: info.adultAge,
+                    id: info.id,
+                    languages: info.languages,
+                    name: info.name,
+                    raceTraits: info.raceTraits,
+                    recommendedAlignmentDescription: info.recommendedAlignmentDescription,
+                    size: info.size as string,
+                    speed: info.speed,
+                    subraces: info.subRacesAdjustments.map(x => x.name),
+                });
+            } else {
+                const race = {
+                    id: info.id,
+                    name: info!.name,
+                };
+                onRaceSelected(race);
+            }
+        } else {
+            //todo: handle errors
+            console.log("Fatal error. No connection or whatever.");
+            setTempRace(undefined);
+        }
+
+        setRaceDisabled(false);
+    }, [raceInfoData, isFetching, isSuccess]);
+
     return <>
         <Grid item xs={6}>
             <StringSelector
                 disabled={raceDisabled} 
                 selectorLabel="Раса" 
                 id="race" 
-                values={!strictRaces?.data ? [] : strictRaces!.data!.map(x => {
+                values={!strictRaces?.races ? [] : strictRaces!.races!.map(x => {
                     return {
                         label: x.name,
-                        value: x.id
+                        value: x.id as string
                     };
                 })} 
+                value={value?.id ?? ''}
                 onValueChange={onRaceSelect} />
         </Grid>
         <Grid item xs={6}>
             { tempRace && <StringSelector 
+                    value={value?.subrace ?? ''}
                     selectorLabel="Подраса" 
                     id="subrace" 
                     values={tempRace.subraces.map(x => {

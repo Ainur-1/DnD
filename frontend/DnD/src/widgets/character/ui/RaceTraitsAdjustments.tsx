@@ -1,5 +1,6 @@
 import { Race } from "@/entities/races";
 import { RaceTraitAdjustmentForm, useRaceInfoQuery } from "@/features/races";
+import { RaceType } from "@/shared/api/gql/graphql";
 import { Container, List, ListItem, Stack, Typography } from "@mui/material";
 
 interface RaceTraitAdjustmentProps {
@@ -9,13 +10,13 @@ interface RaceTraitAdjustmentProps {
 }
 
 export default function RaceTraitAdjustment({race, setSelectedOption, getSelectedOption}: RaceTraitAdjustmentProps) {
-    const { data, isSuccess } = useRaceInfoQuery(race?.id ?? "", {
+    const { data, isSuccess } = useRaceInfoQuery({raceId: race?.id as RaceType}, {
         skip: race?.id == undefined
     });
 
     const setSelectedOptionInternal = (traitName: string, selectedOption: string | undefined) => {
         const optionValue = selectedOption 
-            ? data?.data?.raceTraits
+            ? data?.raceInfo.raceTraits
                 .find(x => x.name === traitName)?.options?.findIndex(x => x === selectedOption) 
             : undefined;
         setSelectedOption(traitName, optionValue);
@@ -26,17 +27,17 @@ export default function RaceTraitAdjustment({race, setSelectedOption, getSelecte
         if (index == undefined)
             return;
 
-        return data?.data?.raceTraits.find(x => x.name == traitName)?.options?.[index];
+        return data?.raceInfo?.raceTraits.find(x => x.name == traitName)?.options?.[index];
     }
 
-    return <>{isSuccess && data.data?.raceTraits.every(x => x.options == undefined || x.options.length == 0) 
+    return <>{isSuccess && !data.raceInfo?.raceTraits.every(x => x.options == undefined || x.options == null || x.options.length == 0) 
         && <Stack>
             <Typography component="div" variant="body2" textAlign="start">
                 Вашей расе доступны некоторые вариации. Уточните их или нажмите "Далее".
             </Typography>
             <Container>
-                {data?.data && <List>
-                    {data.data.raceTraits
+                {data && <List>
+                    {data.raceInfo.raceTraits
                             .filter(x => x.options != undefined && x.options.length > 0)
                             .map((trait, index) => {
                                 const { name } = trait;

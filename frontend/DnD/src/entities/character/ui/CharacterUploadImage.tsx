@@ -1,8 +1,9 @@
 import { CharacterImage } from "./CharacterImage";
 import { useRef, useState } from "react";
 import { convertFileToBase64 } from "@/shared/utils/fileConverter";
-import { Box, CardActionArea, IconButton } from "@mui/material";
+import { Box, CardActionArea, IconButton, useTheme } from "@mui/material";
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
+import AddIcon from '@mui/icons-material/Add';
 
 interface DeleteImageOverlayProps {
     deleteImage: () => void
@@ -76,10 +77,12 @@ interface CharacterUploadImageProps {
 }
 
 export default function CharacterUploadImage({base64Image, setImage} : CharacterUploadImageProps) {
+    const theme = useTheme();
 
     return <CharacterImage
         height="25vh"
         base64Image={base64Image}
+        noImageIconOverride={<AddIcon style={{color: theme.palette.grey.A100}}/>}
         imageOverlayChildren={
             base64Image ? <DeleteImageOverlay deleteImage={() => setImage(undefined)} /> 
             : <AddImageOverlay addImage={(image) => setImage(image)}/>

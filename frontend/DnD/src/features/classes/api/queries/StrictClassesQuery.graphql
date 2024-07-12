@@ -1,0 +1,6 @@
+query strictClasses{
+  classes {
+    id
+    name
+  }
+}
