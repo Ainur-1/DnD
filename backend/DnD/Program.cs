@@ -6,6 +6,9 @@ using Domain.Entities.User;
 using DnD.GraphQL;
 using Services.Implementation.Extensions;
 using System.Security.Claims;
+using Services.Abstractions;
+using Services.Implementation;
+using MassTransit;
 
 namespace DnD;
 
@@ -47,7 +50,7 @@ public class Program
         {
             services.AddCors(options =>
             {
-                var allowHosts = configuration.GetValue<string[]>("CorsHost") ?? ["http://localhost:3000"];
+                var allowHosts = configuration.GetValue<string>("CorsHost") ?? "http://localhost:3000";
                 options.AddPolicy("DevFrontEnds",
                     builder =>
                         builder.WithOrigins(allowHosts)
@@ -61,6 +64,15 @@ public class Program
 
         services.AddSignalR();
         services.AddGraphQlApi();
+
+        services.AddTransient<IEmailService>(provider =>
+            new EmailService(
+                configuration["Smtp:Server"],
+                int.Parse(configuration["Smtp:Port"]),
+                configuration["Smtp:User"],
+                configuration["Smtp:Pass"]
+            ));
+        services.AddTransient<IUserService, UserManagementService>();
 
         services.RegisterDatabaseServices(mongoDbSettings);
         services.AddDomainServicesImplementations();

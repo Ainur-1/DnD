@@ -1,10 +1,12 @@
 ﻿using Amazon.Runtime.Internal.Util;
+using Contracts;
 using Contracts.Online;
 using GameHub.Dtos;
 using GameHub.Models;
 using GameHub.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Service.Abstractions;
 using System.Collections.Concurrent;
@@ -176,11 +178,28 @@ public class GameHub : Hub<IHubEventActions>
             room.SortedInitiativeScores = default;
         }
 
-        await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", new
+        //
+        var fightUpdatedEvent = new FightUpdatedEvent
         {
-            isFight = room.IsFight,
-            orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
-        });
+            Status = new FightStatusDto
+            {
+                IsFight = room.IsFight,
+                ScoreValues = room.SortedInitiativeScores?.Select(x => new CharacterInitciativeScoreDto
+                {
+                    CharacterId = x.Item1,
+                    Score = x.Item2
+                }).ToArray()
+            }
+        };
+
+
+        await Clients.Group(partyId.ToString()).OnFightUpdate(fightUpdatedEvent);
+        //
+        //await Clients.Group(partyId.ToString()).OnFightUpdate(new
+        //{
+        //    isFight = room.IsFight,
+        //    orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
+        //});
     }
     public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
     {

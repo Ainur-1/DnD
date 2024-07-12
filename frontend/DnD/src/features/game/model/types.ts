@@ -1,8 +1,9 @@
-import { BaseCharacterStats, DeathSaves, DynamicStats, FullAbility, FullPersonality, SkillModifiers } from "@/entities/character/model/types";
+import {  DeathSaves, DynamicStats, FullAbility, FullPersonality, SkillModifiers } from "@/entities/character/model/types";
 import { WithId } from "@/shared/types/domainTypes";
 import { HubConnection } from "@microsoft/signalr"
 
 export type GameState = {
+    isGameEnd:boolean,
     partyId: string,
     isUserGameMaster: boolean,
     gameInfo: GameInfo,
@@ -30,4 +31,16 @@ export interface InitGameStateVariables {
     isUserGameMaster: boolean;
     deathSaves?: DeathSaves;
     userCharacterId: string | null;
+}
+
+export interface DynamicStatsDto {
+    hp: number;
+    tempHp: number;
+    armorClass: number;
+    inspiration: number; 
+    speed: number;
+    hitDicesLeftCount:number;
+    isDead: boolean; 
+    isDying: boolean;
+    deathSaves: DeathSaves | null;
 }

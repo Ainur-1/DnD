@@ -1,6 +1,7 @@
 import { Item } from "@/entities/item/model/types";
 import { BaseHp, DeathSaves, FullAbility, SkillModifiers } from "@/entities/character/";
 import { Aligments, NamePlusDescription, WithId } from "@/shared/types/domainTypes";
+import { DynamicStatsDto } from "./types";
 
 export type GameCharacter = {
     personality: {
@@ -20,26 +21,17 @@ export type GameCharacter = {
         level: number;
     },
     characterStats: SkillModifiers & FullAbility & BaseHp,
-    dynamicStats: {
-        hp: number;
-        tempHp: number;
-        armorClass: number;
-        proficiency: number;
-        initiative: number;
-        inspiration: number;
-        speed: number;
-        hitDicesLeftCount: number;
-        isDead: boolean;
-        isDying: boolean;
-        deathSaves: DeathSaves | null;
-    }
+    dynamicStats: DynamicStatsDto;
 } & WithId<string>;
+
+export type FightInfo = {
+    isFight: boolean,
+    order: string[] | null
+};
 
 export type RoomState = {
     characters: GameCharacter[] 
-    isFight: boolean,
-    order: string[] | null,
-};
+} & FightInfo;
 
 export interface DamageCharacterVariables {
     characterId: string,
@@ -80,4 +72,9 @@ export interface UpdateCharacterVariables {
     },
     isDead?: boolean,
     isDying?: boolean,
+}
+
+export interface CharacterUpdatedEvent {
+    id: string;
+    stats: DynamicStatsDto;
 }

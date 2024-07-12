@@ -2,23 +2,33 @@
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Services.Abstractions;
-
+using System.Text.RegularExpressions;
+using System.Web;
+using MassTransit;
+using Services.Implementation.Consumers.Email;
 namespace Services.Implementation;
 
-internal class UserManagementService : IUserService, IAuthorizationService
+public class UserManagementService : IUserService, IAuthorizationService
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
+    private readonly IEmailService _emailService;
+    private readonly IBus _bus;
 
-    public UserManagementService(UserManager<User> userManager, SignInManager<User> signInManager)
+    public UserManagementService(
+        UserManager<User> userManager, 
+        SignInManager<User> signInManager, 
+        IEmailService emailService,
+        IBus bus)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _emailService = emailService;
+        _bus = bus;
     }
 
     public async Task CreateAsync(string email, string username, string password, string? name = null)
     {
-
         //todo: validate arguments
 
         var user = new User
@@ -32,11 +42,113 @@ internal class UserManagementService : IUserService, IAuthorizationService
 
         if (result.Succeeded)
         {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = HttpUtility.UrlEncode(token);
+            var confirmationLink = $"https://yourapp.com/confirm-email?userId={user.Id}&token={encodedToken}";
+            var subject = "Подтверждение регистрации";
+            var message = $@"
+            <html>
+            <body>
+                <h2>Здравствуйте, {username}!</h2>
+                <p>Спасибо за регистрацию на нашем сайте.</p>
+                <p>Пожалуйста, подтвердите свой email, нажав на ссылку ниже:</p>
+                <a href='{confirmationLink}'>Подтвердить email</a>
+                <p>Если вы не регистрировались на нашем сайте, проигнорируйте это сообщение.</p>
+            </body>
+            </html>";
+
+            await _bus.Send(new EmailSendCommand()
+            {
+                Email = email,
+                Subject = subject,
+                Message = message
+            });
             return;
         }
 
         ThrowExceptionAccordingError(result.Errors!, email, username);
     }
+    public async Task TryConfirmEmailAsync(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Ошибка подтверждения почты");
+        }
+    }
+
+    public async Task SendPasswordResetCodeAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedCode = HttpUtility.UrlEncode(code);
+        var subject = "Сброс пароля";
+        var message = $@"
+        <html>
+        <body>
+            <h2>Здравствуйте, {user.UserName}!</h2>
+            <p>Вы запросили сброс пароля для вашей учетной записи.</p>
+            <p>Пожалуйста, используйте код ниже для сброса пароля:</p>
+            <p><strong>{encodedCode}</strong></p>
+            <p>Если вы не запрашивали сброс пароля, проигнорируйте это сообщение.</p>
+        </body>
+        </html>";
+
+        await _bus.Send(new EmailSendCommand()
+        {
+            Email = email,
+            Subject = subject,
+            Message = message
+        });
+    }
+
+    public async Task ResetPasswordAsync(string email, string code, string newPassword)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, code, newPassword);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Ошибка сброса пароля");
+        }
+    }
+
+    public async Task ChangePasswordAsync(string userId, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var result = await _userManager.RemovePasswordAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Failed to remove old password");
+        }
+
+        result = await _userManager.AddPasswordAsync(user, newPassword);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Failed to set new password");
+        }
+    }
+
 
     public async Task<Guid?> SignInAsync(string usernameOrEmail, string password, bool persist)
     {

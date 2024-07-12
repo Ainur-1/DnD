@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
+using Contracts;
 using Contracts.Online;
 using Contracts.Parties;
 using DataAccess.Extensions;
 using Domain.Entities.Character;
 using Domain.Entities.Parties;
 using Domain.Exceptions;
+using GameHub;
+using GameHub.Dtos;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Service.Abstractions;
@@ -18,17 +22,20 @@ public class PartyService : IPartyService
     private readonly IMongoCollection<CharacterAggregate> _characterCollection;
     private readonly IMongoClient _client;
     private readonly IMapper _mapper;
+    private readonly IHubContext<GameHub.GameHub, IHubEventActions> _hubContext;
 
     public PartyService(IMongoCollection<Party> partyCollection, 
         IMongoCollection<CharacterAggregate> characterCollection, 
         IMongoClient client, 
-        IMapper mapper
+        IMapper mapper,
+        IHubContext<GameHub.GameHub, IHubEventActions> hubContext
         )
     {
         _partyCollection = partyCollection;
         _characterCollection = characterCollection;
         _client = client;
         _mapper = mapper;
+        _hubContext = hubContext;
     }
 
     public async Task<Guid> CreatePartyAsync(Guid gameMasterId, string accessCode)
@@ -44,7 +51,7 @@ public class PartyService : IPartyService
             throw new InvalidArgumentValueException(nameof(xp))
             {
                 InvalidValue = xp,
-                ValidExample = "XP должен быть не отрицательный"
+                ValidExample = "XP должен быть не отрицательным"
             };
         }
 
@@ -60,6 +67,7 @@ public class PartyService : IPartyService
             var filter = Builders<CharacterAggregate>.Filter.Eq(filter => filter.Info.JoinedPartyId, partyId);
             var update = Builders<CharacterAggregate>.Update
                 .Set(update => update.Info.JoinedPartyId, null)
+                .Set(update => update.InGameStats, null)
                 .Inc(xp => xp.Personality.Xp, gainedXp);
 
             await _characterCollection.UpdateManyAsync(session, filter, update);
@@ -70,7 +78,8 @@ public class PartyService : IPartyService
         {
             await session.AbortTransactionAsync();
         }
-
+        //
+        await _hubContext.Clients.Group(partyId.ToString()).OnPartyDisband();
     }
 
     public async Task<IEnumerable<GameCharacterDto>> GetCharactersInfoAsync(Guid partyId)
@@ -114,7 +123,6 @@ public class PartyService : IPartyService
             .Exclude(x => x.Personality)
             .Include(x => x.Id)
             .Include(x => x.Personality.Name);
-
 
         var fetchTask = _characterCollection
             .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId != null)
@@ -188,14 +196,17 @@ public class PartyService : IPartyService
         }
 
         party.AddCharacter(character.Id);
+        character.InitializeInGameStats();
 
         using var session = await _client.StartSessionAsync();
         session.StartTransaction();
         try
         {
+
             var characterFilter = Builders<CharacterAggregate>.Filter.Eq(filter => filter.Id, variables.CharacterId);
             var characterUpdate = Builders<CharacterAggregate>.Update
-                .Set(update => update.Info.JoinedPartyId, variables.PartyId);
+                .Set(update => update.Info.JoinedPartyId, variables.PartyId)
+                .Set(update => update.InGameStats, character.InGameStats);
 
             var partyFilter = Builders<Party>.Filter.Eq(filter => filter.Id, variables.CharacterId);
             var partyUpdate = Builders<Party>.Update.Push(update => update.InGameCharactersIds, variables.CharacterId);
@@ -208,7 +219,10 @@ public class PartyService : IPartyService
         {
             await session.AbortTransactionAsync();
         }
-        
+        //
+        await _hubContext.Clients
+            .Group(variables.PartyId.ToString())
+            .OnPartyJoin(_mapper.Map<CharacterDto>(character));
         return UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name);
     }
 }
