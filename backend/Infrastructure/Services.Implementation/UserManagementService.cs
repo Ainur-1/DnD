@@ -3,18 +3,24 @@ using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Services.Abstractions;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace Services.Implementation;
 
-internal class UserManagementService : IUserService, IAuthorizationService
+public class UserManagementService : IUserService, IAuthorizationService
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
+    private readonly IEmailService _emailService;
 
-    public UserManagementService(UserManager<User> userManager, SignInManager<User> signInManager)
+    public UserManagementService(
+        UserManager<User> userManager, 
+        SignInManager<User> signInManager, 
+        IEmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _emailService = emailService;
     }
 
     public async Task CreateAsync(string email, string username, string password, string? name = null)
@@ -36,11 +42,79 @@ internal class UserManagementService : IUserService, IAuthorizationService
 
         if (result.Succeeded)
         {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = HttpUtility.UrlEncode(token);
+            var confirmationLink = $"https://yourapp.com/confirm-email?userId={user.Id}&token={encodedToken}";
+            await _emailService.SendEmailAsync(email, "Подтвердите почту", $"<a href='{confirmationLink}'>Подтвердить почту</a>");
             return;
         }
 
         ThrowExceptionAccordingError(result.Errors!, email, username);
     }
+    public async Task ConfirmEmailAsync(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Ошибка подтверждения почты");
+        }
+    }
+
+    public async Task SendPasswordResetCodeAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedCode = HttpUtility.UrlEncode(code);
+        await _emailService.SendEmailAsync(email, "Password Reset Code", $"Код востановления  {encodedCode}");
+    }
+
+    public async Task ResetPasswordAsync(string email, string code, string newPassword)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, code, newPassword);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Ошибка сброса пароля");
+        }
+    }
+
+    public async Task ChangePasswordAsync(string userId, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Пользователь не найден");
+        }
+
+        var result = await _userManager.RemovePasswordAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Failed to remove old password");
+        }
+
+        result = await _userManager.AddPasswordAsync(user, newPassword);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Failed to set new password");
+        }
+    }
+
 
     public async Task<Guid?> SignInAsync(string usernameOrEmail, string password, bool persist)
     {
