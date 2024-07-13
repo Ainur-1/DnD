@@ -48,7 +48,7 @@ public class CharacterService : ICharacterService
     
     public async Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto characterCreate)
     {
-        //todo(не делать): add dto validation in CreateChracterWithDatabaseDataAsync or before
+        //todo(не делать): add dto validation in CreateCharacterWithDatabaseDataAsync or before
         var character = await CreateChracterWithDatabaseDataAsync(issuer, characterCreate);
 
         await _characterCollection.InsertOneAsync(character);
@@ -189,7 +189,6 @@ public class CharacterService : ICharacterService
 
         var @class = await _classCollection.Find(x => x.Id == characterCreate.Class)
             .SingleOrDefaultAsync() ?? throw new ObjectNotFoundException();
-
  
         var raceName = GetCorrectRaceName(race.SubRacesAdjustments, characterCreate.Race, characterCreate.MaybeSubrace);
         var personality = new CharacterPersonality(
@@ -197,7 +196,7 @@ public class CharacterService : ICharacterService
             image: !string.IsNullOrEmpty(characterCreate.MaybeBase64Image) ? Convert.FromBase64String(characterCreate.MaybeBase64Image) : null,
             age: characterCreate.Age,
             raceName: raceName,
-            startRaceTraits: new List<RaceTrait>() /*todo вынести получение начальных трейтов в отдельный метод*/,
+            startRaceTraits: GetCompleteRaceTraitsList(race, raceName, characterCreate.RaceTraitsAdjustments),
             characterCreate.Class,
             startClassFeatures: @class.ClassFeatures.Where(x => x.MinCharacterRequiredLevel == 1).ToList(),
             startXp: characterCreate.Xp,
@@ -217,8 +216,8 @@ public class CharacterService : ICharacterService
             wisdom: characterCreate.Wisdom,
             charisma: characterCreate.Charisma,
             baseSpeed: characterCreate.Speed,
-            skillTraits: /*todo: get from database and input*/,
-            savingThrowsTraits: /*todo: get from database and input*/,
+            skillTraits: @class.SkillTraitsMastery,
+            savingThrowsTraits: @class.SavingThrowsTraitsMastery,
             hpDice: @class.HitDice
         );
 
@@ -247,7 +246,6 @@ public class CharacterService : ICharacterService
                         
         );
 
-
         return new CharacterAggregate(
             setUpPersonality: personality,
             setUpStats: stats,
@@ -258,13 +256,14 @@ public class CharacterService : ICharacterService
 
     private static RaceName GetCorrectRaceName(SubRaceInfo[]? subRacesAdjustments, RaceType requestedRaceId, string? maybeRace) 
     {
-        // перемудрил в методе
         var raceHasSubraces = subRacesAdjustments != null;
 
         if (raceHasSubraces)
         {
             if (string.IsNullOrEmpty(maybeRace))
+            {
                 maybeRace = subRacesAdjustments!.FirstOrDefault()?.Name;
+            }
             else
             {
                 var index = Array.IndexOf(subRacesAdjustments
@@ -282,4 +281,44 @@ public class CharacterService : ICharacterService
         return new RaceName(requestedRaceId, maybeRace);
     }
 
+    private static List<RaceTrait> GetCompleteRaceTraitsList(Race raceFullInfo, RaceName raceName, Dictionary<string, int> selectedRaceTraitsOptions)
+    {
+        var raceTraits = raceFullInfo
+            .RaceTraits
+            .Select(x => ProcessSingleRaceTrait(x, selectedRaceTraitsOptions));
+
+        if (raceFullInfo.HasSubraces)
+        {
+
+            var subraceAdjustments = raceFullInfo
+                .SubRacesAdjustments
+                !.First(x => x.Name == raceName.SubRaceName)
+                .RaceTraits
+                .Select(x => ProcessSingleRaceTrait(x, selectedRaceTraitsOptions));
+
+            raceTraits = raceTraits.Concat(subraceAdjustments);
+        }
+
+        return raceTraits.ToList();
+    }
+
+    private static RaceTrait ProcessSingleRaceTrait(RaceTraitWithOptions raceTraitDescriptor, Dictionary<string, int> selectedRaceTraitsOptions)
+    {
+        var maybeOptions = raceTraitDescriptor.Options;
+        var hasOptions = maybeOptions != null && maybeOptions.Length > 0;
+        var description = raceTraitDescriptor.Description;
+
+        if (hasOptions)
+        {
+            var defentlyOptions = maybeOptions!;
+            var optionIsRepresented = selectedRaceTraitsOptions.TryGetValue(raceTraitDescriptor.Name, out var selectedOptionIndex)
+                && selectedOptionIndex < maybeOptions!.Length && selectedOptionIndex >= 0;
+
+            var option = optionIsRepresented ? defentlyOptions[selectedOptionIndex] : defentlyOptions.First();
+
+            description = $"{raceTraitDescriptor.Description} {option}";
+        }
+
+        return new RaceTrait(raceTraitDescriptor.Name, description);
+    }
 }
