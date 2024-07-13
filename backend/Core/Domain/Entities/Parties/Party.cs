@@ -1,4 +1,5 @@
-﻿using Domain.Exceptions;
+﻿using Domain.Entities.Character;
+using Domain.Exceptions;
 using System.Text.RegularExpressions;
 
 namespace Domain.Entities.Parties;
@@ -7,12 +8,9 @@ public class Party
 {
     public Guid Id { get; protected set; }
     public Guid GameMasterId { get; protected set; }
-    public List<Guid> InGameCharactersIds { get; protected set; }
+    public List<Guid> InGameCharactersIds { get; protected set; } = new();
     public string AccessCode { get; protected set; }
-    public void AddCharacter(Guid characterId)
-    {
-        InGameCharactersIds?.Add(characterId);
-    }
+
     public Party(Guid gameMasterId, string accessCode)
     {
         var regex = new Regex("^[a-zA-Z0-9]+$");
@@ -33,7 +31,13 @@ public class Party
         InGameCharactersIds = new List<Guid>();
         AccessCode = accessCode;
     }
+
     protected Party() { }
 
+    public void AddCharacter(CharacterAggregate character)
+    {   
+        InGameCharactersIds.Add(character.Id);
+        character.JoinParty(Id);
+    }
 }
 

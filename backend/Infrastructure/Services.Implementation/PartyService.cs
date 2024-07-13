@@ -195,8 +195,7 @@ public class PartyService : IPartyService
             throw new AccessDeniedException();
         }
 
-        party.AddCharacter(character.Id);
-        character.InitializeInGameStats();
+        party.AddCharacter(character);
 
         using var session = await _client.StartSessionAsync();
         session.StartTransaction();

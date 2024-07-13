@@ -4,6 +4,7 @@ using Service.Abstractions;
 using Services.Abstractions;
 using MassTransit;
 using Services.Implementation.Consumers.Email;
+using Services.Implementation.Consumers.Character;
 
 namespace Services.Implementation.Extensions;
 
@@ -21,6 +22,7 @@ public static class ServiceCollectionExtensions
         {
             x.UsingInMemory();
             x.AddConsumer<EmailSendCommandConsumer>();
+            x.AddConsumer<CharacterUpdatedEventConsumer>();
         });
 
         return serviceCollection;

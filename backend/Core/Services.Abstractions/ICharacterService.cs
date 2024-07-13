@@ -9,10 +9,13 @@ public interface ICharacterService
 {
     Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto character);
 
-
+    /// <exception cref="ObjectNotFoundException">if party or chracter does not exist</exception>
     Task<GameCharacterDto> GetByIdAsync(Guid id, Guid partyId);
     Task<(bool IsDead, int InitiativeModifier)?> GetCharacterFightOrderCalculationParametersAsync(Guid characterId);
     Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats);
+    
+    /// <exception cref="InvalidArgumentValueException">if damage is invalid</exception>
+    /// <exception cref="ObjectNotFoundException">if character is not found</exception>
     Task TakeDamageAsync(Guid characterId, int damage);
 
     /// <summary>

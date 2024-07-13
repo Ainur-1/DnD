@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Game.Items;
+using Domain.Extensions;
 
 namespace Domain.Entities.Items.Weapons;
 
@@ -24,5 +25,5 @@ public class Weapon : Item
     /// </summary>
     public Dice? AlternateHitDice { get; protected set; }
 
-    public override string ItemType => nameof(Weapon);
+    public override string ItemType => ItemExtensons.WeaponType;
 }

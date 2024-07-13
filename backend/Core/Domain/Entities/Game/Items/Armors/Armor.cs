@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Game.Items;
+using Domain.Extensions;
 
 namespace Domain.Entities.Items.Armors;
 
@@ -16,7 +17,7 @@ public class Armor : Item
 
     public int? MaxPossibleDexterityModifier { get; protected set; }
 
-    public override string ItemType => nameof(Armor);
+    public override string ItemType => ItemExtensons.ArmorType;
 
     protected Armor() { }
 

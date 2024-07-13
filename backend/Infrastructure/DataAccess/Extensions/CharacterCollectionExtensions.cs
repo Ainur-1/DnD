@@ -11,6 +11,9 @@ public static class CharacterCollectionExtensions
     public static IFindFluent<CharacterAggregate, CharacterAggregate> WhereIdIsIn(this IMongoCollection<CharacterAggregate> collection, IEnumerable<Guid> filterIds)
         => collection.Find(Builders<CharacterAggregate>.Filter.In(c => c.Id, filterIds));
 
+    public static IFindFluent<CharacterAggregate, CharacterAggregate> FindById(this IMongoCollection<CharacterAggregate> collection, Guid characterId)
+    => collection.Find(x => x.Id == characterId);
+
     public static IFindFluent<CharacterAggregate, OnlyIdAndPersonalityProjection> ProjectOnlyIdAndPersonalityAndInfo(this IFindFluent<CharacterAggregate, CharacterAggregate> collection)
     => collection.Project<OnlyIdAndPersonalityProjection>(Builders<CharacterAggregate>.Projection
        .Exclude(x => x.Inventory)

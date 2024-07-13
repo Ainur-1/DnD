@@ -2,11 +2,56 @@
 
 public class CharacterStats
 {
+    public CharacterStats(
+        int strength,
+        int dexterity,
+        int constitution,
+        int intelligence,
+        int wisdom,
+        int charisma,
+        int baseSpeed,
+        CharacterSkillType[] skillTraits,
+        CharacterAbilityType[] savingThrowsTraits,
+        Dice hpDice
+    ) 
+    {
+        // always +2 for 1st level characters
+        // if we use public constructor, thats means that character is new
+        // else use static factories
+        ProficiencyBonus = 2;
+        // 1st level has onee hit dice
+        HitPointsDiceMaximumCount = 1;
+        // 1st level has maxp hp == max value of dice
+        HitPointsMaximum = hpDice.GetMaximumValue();
+
+        ThrowIfAbilityNotInRange(strength, nameof(strength));
+        ThrowIfAbilityNotInRange(dexterity, nameof(dexterity));
+        ThrowIfAbilityNotInRange(constitution, nameof(constitution));
+        ThrowIfAbilityNotInRange(intelligence, nameof(intelligence));
+        ThrowIfAbilityNotInRange(wisdom, nameof(wisdom));
+        ThrowIfAbilityNotInRange(charisma, nameof(charisma));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(baseSpeed, nameof(baseSpeed));
+
+        ArgumentNullException.ThrowIfNull(skillTraits, nameof(skillTraits));
+        ArgumentNullException.ThrowIfNull(savingThrowsTraits, nameof(savingThrowsTraits));
+
+        BaseSpeed = baseSpeed;
+        StrengthAbility = strength;
+        DexterityAbility = dexterity;
+        ConstitutionAbility = constitution;
+        IntelligenceAbility = intelligence;
+        WisdomAbility = wisdom;
+        CharismaAbility = charisma;
+        SkillTraits = skillTraits;
+        SavingThrowsTraits = savingThrowsTraits;
+        HitPointDice = hpDice;
+    }
+
     protected CharacterStats() { }
 
     public int ProficiencyBonus { get; protected set; }
     public int BaseSpeed { get; protected set; }
-    public int InitiativeModifier { get; set; }
+    public int InitiativeModifier => DexterityModifier;
 
     #region Abilities
     public int StrengthAbility { get; protected set; }
@@ -124,4 +169,10 @@ public class CharacterStats
 
     private static int CalculateAbilityModifier(int abilityValue)
             => (int)Math.Round((abilityValue - 10) / 2d, MidpointRounding.ToNegativeInfinity);
+    
+    private static void ThrowIfAbilityNotInRange(int actual, string paramName) 
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(3, actual, paramName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(18, actual, paramName);
+    }
 }

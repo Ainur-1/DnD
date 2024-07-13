@@ -22,5 +22,7 @@ public class Race : RaceBase
     /// </summary>
     public SubRaceInfo[]? SubRacesAdjustments { get; set; }
 
+    public bool HasSubraces => SubRacesAdjustments != null;
+
     protected Race() { }
 }

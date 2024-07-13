@@ -26,9 +26,9 @@ public class CharacterPersonality
 
     public string Background { get; protected set; } = string.Empty;
 
-    public ClassFeature[] ClassFeatures { get; protected set; } = Array.Empty<ClassFeature>();
+    public List<ClassFeature> ClassFeatures { get; protected set; } =  new();
 
-    public RaceTrait[] RaceTraits { get; protected set; } = Array.Empty<RaceTrait>();
+    public List<RaceTrait> RaceTraits { get; protected set; } = new();
 
     public string[] Languages { get; protected set; } = Array.Empty<string>();
 
@@ -38,4 +38,71 @@ public class CharacterPersonality
     public string[] OtherTraits { get; protected set; } = Array.Empty<string>();
 
     public int Level { get; protected set; }
+
+    // so bad
+    public CharacterPersonality(
+        string name,
+        byte[]? image,
+        int age, 
+        RaceName raceName,
+        List<RaceTrait> startRaceTraits,
+        ClassType @class,
+        List<ClassFeature> startClassFeatures,
+        int startXp, 
+        CharacterAlignmentType alignment,
+        string background,
+        string[] bonds,
+        string[] flaws,
+        string[] languages,
+        string[] otherTraits
+    ) 
+    {
+        // 1st level by default, 
+        // since we must provide choosable updates
+        // Level != ActualLevel
+        Level = 1;
+
+        ArgumentNullException.ThrowIfNull(name, nameof(name));
+        ArgumentNullException.ThrowIfNull(startRaceTraits, nameof(startRaceTraits));
+        ArgumentNullException.ThrowIfNull(startClassFeatures, nameof(startClassFeatures));
+        ArgumentNullException.ThrowIfNull(bonds, nameof(bonds));
+        ArgumentNullException.ThrowIfNull(flaws, nameof(flaws));
+        ArgumentNullException.ThrowIfNull(languages, nameof(languages));
+        ArgumentNullException.ThrowIfNull(otherTraits, nameof(otherTraits));
+        ArgumentNullException.ThrowIfNull(background, nameof(background));
+
+        ArgumentOutOfRangeException.ThrowIfNegative(startXp, nameof(startXp));
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(age, 0, nameof(age));
+
+        if (alignment == CharacterAlignmentType.Any) 
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(alignment), 
+                alignment, 
+                $"Selecet character alignment. {CharacterAlignmentType.Any} is readonly."
+            );
+        }
+
+        if (image != null && image.Length > 1024 * 3)
+        {
+            throw new ArgumentException(nameof(image), "Image must be less than 3 mb");
+        }
+
+        Name = name;
+        Image = image;
+        Age = age;
+        Race = raceName;
+        Class = @class;
+        Xp = startXp;
+        Alignment = alignment;
+        Bonds = bonds;
+        Flaws = flaws;
+        Background = background;
+        ClassFeatures = startClassFeatures;
+        RaceTraits = startRaceTraits;
+        Languages = languages;
+        OtherTraits = otherTraits;
+    }
+
+    protected CharacterPersonality() {}
 }
