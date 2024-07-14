@@ -25,4 +25,7 @@ public class Race : RaceBase
     public bool HasSubraces => SubRacesAdjustments != null;
 
     protected Race() { }
+
+    public SubRaceInfo? GetSubRaceInfo(string subRaceName) =>
+                SubRacesAdjustments!.FirstOrDefault(x => x.Name.ToUpper() == subRaceName?.ToUpper());
 }
