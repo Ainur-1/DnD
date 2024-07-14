@@ -1,4 +1,5 @@
 import { BaseHp, DeathSaves, FullAbility, SkillModifiers } from "./model/types";
+import AgeField from "./ui/AgeField";
 import CharacterAbilities from "./ui/CharacterAbilities";
 import CharacterCard, { CharacterCardSkeletone } from "./ui/characterCard";
 import { CarouselCardOverlay, InGameLiveOverlay, LoadImageOverlay } from "./ui/characterCardTopOverlays";
@@ -8,6 +9,7 @@ import CharacterUploadImage from "./ui/CharacterUploadImage";
 import CharacterXpField from "./ui/CharacterXpField";
 import CharacterNameField from "./ui/ChracterName";
 import CoinsAffectWeightSwitch from "./ui/CoinsAffectWeightSwitch";
+import SpeedField from "./ui/SpeedField";
 
 
 export {
@@ -26,6 +28,8 @@ export { CharacterCard,
     CharacterImageSkeleton,
     CharacterImage,
     CharacterUploadImage,
+    AgeField,
+    SpeedField
  };
 
 

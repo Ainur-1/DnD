@@ -12,7 +12,7 @@ interface RaceSelectorProps {
 
 export default function RaceSelector({value, onRaceSelected}: RaceSelectorProps) {
     const { data: strictRaces } = useStrictRacesQuery();
-    const [raceInfo, {data: raceInfoData, isFetching, isSuccess}] = useLazyRaceInfoQuery();
+    const [raceInfo, {data: raceInfoData, isFetching, isSuccess, isError, error}] = useLazyRaceInfoQuery();
 
     const [tempRace, setTempRace] = useState<RaceInfo | undefined>();
     const [raceDisabled, setRaceDisabled] = useState(false);
@@ -37,10 +37,12 @@ export default function RaceSelector({value, onRaceSelected}: RaceSelectorProps)
     };
 
     useEffect(() => {
-        if (isFetching) {
-            return;
+        if(!isFetching) {
+            setRaceDisabled(false);
         }
+    }, [isFetching])
 
+    useEffect(() => {
         if (isSuccess) {
             if (!raceInfoData) {
                 return;
@@ -66,14 +68,15 @@ export default function RaceSelector({value, onRaceSelected}: RaceSelectorProps)
                 };
                 onRaceSelected(race);
             }
-        } else {
-            //todo: handle errors
-            console.log("Fatal error. No connection or whatever.");
-            setTempRace(undefined);
-        }
+        } 
+    }, [raceInfoData, isSuccess]);
 
-        setRaceDisabled(false);
-    }, [raceInfoData, isFetching, isSuccess]);
+    useEffect(() => {
+        if (isError) {
+            setTempRace(undefined);
+            console.log(error);
+        }
+    }, [isError]);
 
     return <>
         <Grid item xs={6}>

@@ -3,7 +3,7 @@ using Domain.Entities.Game.Races.Base;
 
 namespace Domain.Entities.Races;
 
-public class Race : RaceBase
+public class Race : RaceBase, IEntity<RaceType>
 {
     public RaceType Id { get; set; }
 
@@ -20,7 +20,7 @@ public class Race : RaceBase
     /// <summary>
     /// Sub races adjustments
     /// </summary>
-    public SubRaceInfo[]? SubRacesAdjustments { get; set; }
+    public SubRaceInfo[] SubRacesAdjustments { get; set; } = Array.Empty<SubRaceInfo>();
 
     public bool HasSubraces => SubRacesAdjustments != null;
 

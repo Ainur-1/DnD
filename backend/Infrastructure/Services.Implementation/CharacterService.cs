@@ -49,7 +49,7 @@ public class CharacterService : ICharacterService
     public async Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto characterCreate)
     {
         //todo(не делать): add dto validation in CreateCharacterWithDatabaseDataAsync or before
-        var character = await CreateChracterWithDatabaseDataAsync(issuer, characterCreate);
+        var character = await CreateCharacterWithDatabaseDataAsync(issuer, characterCreate);
 
         await _characterCollection.InsertOneAsync(character);
 
@@ -182,7 +182,7 @@ public class CharacterService : ICharacterService
     private Task SendCharacterUpdatedEventAsync(Guid characterId)
     => _eventBus.Send(new CharacterUpdatedEvent {Id = characterId});
 
-    private async Task<CharacterAggregate> CreateChracterWithDatabaseDataAsync(Guid issuer, CreateCharacterDto characterCreate) 
+    private async Task<CharacterAggregate> CreateCharacterWithDatabaseDataAsync(Guid issuer, CreateCharacterDto characterCreate) 
     {
         var race = await _raceCollection.Find(x => x.Id == characterCreate.Race)
             .SingleOrDefaultAsync() ?? throw new ObjectNotFoundException();
@@ -190,7 +190,7 @@ public class CharacterService : ICharacterService
         var @class = await _classCollection.Find(x => x.Id == characterCreate.Class)
             .SingleOrDefaultAsync() ?? throw new ObjectNotFoundException();
  
-        var raceName = GetCorrectRaceName(race.SubRacesAdjustments, characterCreate.Race, characterCreate.MaybeSubrace);
+        var raceName = GetCorrectRaceName(race.SubRacesAdjustments, characterCreate.Race, characterCreate.MaybeSubrace)!;
         var personality = new CharacterPersonality(
             name: characterCreate.MaybeName ?? "",
             image: !string.IsNullOrEmpty(characterCreate.MaybeBase64Image) ? Convert.FromBase64String(characterCreate.MaybeBase64Image) : null,
@@ -207,7 +207,6 @@ public class CharacterService : ICharacterService
             languages: characterCreate.MaybeLanguages??[],
             otherTraits: characterCreate.MaybeOtherTraits??[]
         );
-
         var stats = GetSetUpCharacterStats(characterCreate, @class, race, raceName.SubRaceName);
 
         var management = new CharacterManagement(
@@ -228,10 +227,10 @@ public class CharacterService : ICharacterService
         var inventory = new CharacterInventoryAggregate(
             setCurrencyWeightEmulationOn: characterCreate.CoinsAffectOnWeight,
             initialWallet: initialWallet,
-            initialItems: characterCreate.MaybeStartInventory
+            initialItems: characterCreate?.MaybeStartInventory
                                           ?.Where(x => x.IsValidItemDescriptor())
                                           .Where(x => x.Count > 0)
-                                          .Select(x => new InventoryItem(x.InUse, x.IsItemProficiencyOn, x.Count, x.GetItem()))
+                                          .Select(x => new InventoryItem(x.InUse, x.IsItemProficiencyOn, x.Count, x.GetItem())) ?? []
                         
         );
 
@@ -257,18 +256,21 @@ public class CharacterService : ICharacterService
         var charisma = characterCreate.Charisma + GetBuffValue(abilityBuffs, CharacterAbilityType.Charisma) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Charisma);
         
         return new CharacterStats(
-            strength: strength,
-            dexterity: dexterity,
-            constitution: constitution,
-            intelligence: intelligence,
-            wisdom: wisdom,
-            charisma: charisma,
+            strength: GetAbilityValueOr20(strength),
+            dexterity: GetAbilityValueOr20(dexterity),
+            constitution: GetAbilityValueOr20(constitution),
+            intelligence: GetAbilityValueOr20(intelligence),
+            wisdom: GetAbilityValueOr20(wisdom),
+            charisma: GetAbilityValueOr20(charisma),
             baseSpeed: characterCreate.Speed,
             skillTraits: @class.SkillTraitsMastery,
             savingThrowsTraits: @class.SavingThrowsTraitsMastery,
             hpDice: @class.HitDice
         );
     }
+
+    private static int GetAbilityValueOr20(int abilityValue) => Math.Min(abilityValue, 20);
+
     private int GetBuffValue(AbilityBuff[] abilityBuffs, CharacterAbilityType abilityType)
     {
         return abilityBuffs
@@ -322,7 +324,7 @@ public class CharacterService : ICharacterService
         return raceTraits.ToList();
     }
 
-    private static RaceTrait ProcessSingleRaceTrait(RaceTraitWithOptions raceTraitDescriptor, Dictionary<string, int> selectedRaceTraitsOptions)
+    private static RaceTrait ProcessSingleRaceTrait(RaceTraitDescriptor raceTraitDescriptor, Dictionary<string, int> selectedRaceTraitsOptions)
     {
         var maybeOptions = raceTraitDescriptor.Options;
         var hasOptions = maybeOptions != null && maybeOptions.Length > 0;

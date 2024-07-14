@@ -4,7 +4,6 @@ query getRace($raceId: RaceType!) {
     id
     languages
     name
-    raceSkillTraitsMastery
     recommendedAlignmentDescription
     size
     speed
@@ -15,7 +14,6 @@ query getRace($raceId: RaceType!) {
     }
     subRacesAdjustments {
       name
-      raceSkillTraitsMastery
       abilities {
         abilityType
         buffValue

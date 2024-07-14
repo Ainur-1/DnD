@@ -16,7 +16,7 @@ public class CharacterStats
     ) 
     {
         // always +2 for 1st level characters
-        // if we use public constructor, thats means that character is new
+        // if we use public constructor, that means that character is new
         // else use static factories
         ProficiencyBonus = 2;
         // 1st level has onee hit dice
@@ -172,7 +172,7 @@ public class CharacterStats
     
     private static void ThrowIfAbilityNotInRange(int actual, string paramName) 
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(3, actual, paramName);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(18, actual, paramName);
+        ArgumentOutOfRangeException.ThrowIfLessThan(actual, 3, paramName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(actual, 18, paramName);
     }
 }

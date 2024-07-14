@@ -118,7 +118,7 @@ public static class ServiceCollectionExtensions
                 .SetIsRequired(true);
         });
 
-        BsonClassMap.RegisterClassMap<RaceTraitWithOptions>(cm =>
+        BsonClassMap.RegisterClassMap<RaceTraitDescriptor>(cm =>
         {
             cm.AutoMap();
             cm.MapProperty(x => x.Options)

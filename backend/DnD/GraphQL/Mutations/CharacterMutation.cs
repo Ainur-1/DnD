@@ -14,7 +14,15 @@ public class CharacterMutation
         [Service] IHttpContextAccessor contextAccessor,
         CreateCharacterDto character)
     {
-        var currentUserId = contextAccessor.GetUserIdOrThrowAccessDenied();
-        return await characterService.CreateCharacterAsync(currentUserId, character);
+        try
+        {
+
+            var currentUserId = contextAccessor.GetUserIdOrThrowAccessDenied();
+            return await characterService.CreateCharacterAsync(currentUserId, character);
+        }
+        catch(Exception ex)
+        {
+            throw ex;
+        }
     }
 }

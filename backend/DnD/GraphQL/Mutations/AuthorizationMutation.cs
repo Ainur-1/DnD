@@ -13,7 +13,15 @@ public class AuthorizationMutation
     [AllowAnonymous]
     public async Task<bool> SignUpAsync([Service] IUserService userService, string email, string username, string password, string? name = default)
     {
-        await userService.CreateAsync(email, username, password, name);
+        try
+        {
+            await userService.CreateAsync(email, username, password, name);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
 
         return true;
     }

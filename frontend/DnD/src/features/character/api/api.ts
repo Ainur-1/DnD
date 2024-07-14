@@ -1,12 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { CarouselCharacter } from "../model/types";
 import { CarouselCharactersQuery, CarouselCharactersQueryVariables, CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables, CreateCharacterMutation, CreateCharacterMutationVariables, MyAliveCharactersQuery } from "@/shared/api/gql/graphql";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 import { client } from "@/shared/api";
 import MY_ALIVE_CHARACTERS from "./queries/MyAliveCharacters.graphql";
 import CHRACTER_DEATH_SAVES from "./queries/ChracterDeathSaves.graphql";
-import CreateCharacterMutationDocument from "./queries/CreateChracterMutation.graphql";
 import CarouselCharacterDocument from "./queries/CarouselCharactersQuery.graphql";
+import CreateCharacterDocument from "./queries/CreateCharacterMutation.graphql";
 
 export const characterApi = createApi({
     reducerPath: 'character/api',
@@ -44,7 +43,7 @@ export const characterApi = createApi({
             invalidatesTags: ["MyCharactersList"]
         }),
         createCharacter: build.mutation<CreateCharacterMutation, CreateCharacterMutationVariables>({
-            query: (variables) => ({documents: CreateCharacterMutationDocument, variables}),
+            query: (variables) => ({document: CreateCharacterDocument, variables}),
             invalidatesTags: ["MyCharactersList"]
         }),
     })

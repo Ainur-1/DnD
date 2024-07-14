@@ -100,8 +100,14 @@ type Step3State = {
 
 const step3Init: Step3State = {
     base64Image: fullyUndefined,
-    age: fullyUndefined,
-    speed: fullyUndefined,
+    age: {
+        value: 1,
+        error: null
+    },
+    speed: {
+        value: 15,
+        error: null
+    },
     alignment: {
         value: Aligments.any,
         error: null
@@ -317,6 +323,16 @@ function isValidStep3(state: CreateCharacterFormState, dispatch: React.Dispatch<
         return false;
     }
 
+    if(!state.age.value) {
+        setField("age", 1, "Укажите возраст.");
+        return false;
+    }
+
+    if(!state.speed.value) {
+        setField("speed", 1, "Укажите скорость.");
+        return false;
+    }
+
     return true;
 }
 
@@ -338,23 +354,23 @@ function isValidStep4(state: CreateCharacterFormState, dispatch: React.Dispatch<
             gold?: number,
             platinum?: number,
         } = {};
-        if (!wallet.copper || wallet.copper < 0) {
+        if (wallet.copper == undefined || wallet.copper < 0) {
             correctCurrency = false;
             fixedCurrency.copper = 0;
         }
-        if (!wallet.silver || wallet.silver < 0) {
+        if (wallet.silver == undefined || wallet.silver < 0) {
             correctCurrency = false;
             fixedCurrency.silver = 0;
         }
-        if (!wallet.electrum || wallet.electrum < 0) {
+        if (wallet.electrum == undefined || wallet.electrum < 0) {
             correctCurrency = false;
             fixedCurrency.electrum = 0;
         }
-        if (!wallet.gold || wallet.gold < 0) {
+        if (wallet.gold == undefined || wallet.gold < 0) {
             correctCurrency = false;
             fixedCurrency.gold = 0;
         }
-        if (!wallet.platinum || wallet.platinum < 0) {
+        if (wallet.platinum == undefined || wallet.platinum < 0) {
             correctCurrency = false;
             fixedCurrency.platinum = 0;
         }
@@ -369,7 +385,6 @@ function isValidStep4(state: CreateCharacterFormState, dispatch: React.Dispatch<
 
     return correctItemCount && correctCurrency;
 }
-
 
 export function useCreateCharacterReducer() {
     const [state, dispatch] = useReducer(reducer, initialState);

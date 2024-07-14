@@ -1,6 +1,5 @@
 ﻿using DnD.GraphQL.Mutations;
 using DnD.GraphQL.Queries;
-using DnD.GraphQL.Types;
 
 namespace DnD.GraphQL;
 

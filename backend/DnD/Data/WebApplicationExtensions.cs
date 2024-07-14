@@ -83,7 +83,8 @@ public static class WebApplicationExtensions
 
         var jsonSettings = new JsonSerializerSettings()
         {
-            TypeNameHandling = TypeNameHandling.All
+            TypeNameHandling = TypeNameHandling.Auto,
+            MaxDepth = 1024
         };
 
         var dataSeed = JsonConvert.DeserializeObject<DataSeed>(json, jsonSettings);

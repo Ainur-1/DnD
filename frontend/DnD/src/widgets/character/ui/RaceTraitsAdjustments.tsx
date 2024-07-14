@@ -14,22 +14,6 @@ export default function RaceTraitAdjustment({race, setSelectedOption, getSelecte
         skip: race?.id == undefined
     });
 
-    const setSelectedOptionInternal = (traitName: string, selectedOption: string | undefined) => {
-        const optionValue = selectedOption 
-            ? data?.raceInfo.raceTraits
-                .find(x => x.name === traitName)?.options?.findIndex(x => x === selectedOption) 
-            : undefined;
-        setSelectedOption(traitName, optionValue);
-    }
-
-    const getSelectedOptionIntenal = (traitName: string) => {
-        const index = getSelectedOption(traitName);
-        if (index == undefined)
-            return;
-
-        return data?.raceInfo?.raceTraits.find(x => x.name == traitName)?.options?.[index];
-    }
-
     return <>{isSuccess && !data.raceInfo?.raceTraits.every(x => x.options == undefined || x.options == null || x.options.length == 0) 
         && <Stack>
             <Typography component="div" variant="body2" textAlign="start">
@@ -43,9 +27,9 @@ export default function RaceTraitAdjustment({race, setSelectedOption, getSelecte
                                 const { name } = trait;
                                 return <ListItem key={index}>
                                 <RaceTraitAdjustmentForm 
+                                    selectedOption={getSelectedOption(name)}
                                     raceTrait={trait} 
-                                    selectedOption={getSelectedOptionIntenal(name)} 
-                                    onOptionChange={(option: string | undefined) => setSelectedOptionInternal(name, option)} />
+                                    onOptionIndexChange={(index: number | undefined) => setSelectedOption(name, index)} />
                             </ListItem>
                         } )
                     }

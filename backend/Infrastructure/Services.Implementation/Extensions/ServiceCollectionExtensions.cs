@@ -20,7 +20,10 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddEntitiesMapping();
         serviceCollection.AddMassTransit(x =>
         {
-            x.UsingInMemory();
+            x.UsingInMemory((ctx, cfg) => 
+            {
+                cfg.ConfigureEndpoints(ctx);
+            });
             x.AddConsumer<EmailSendCommandConsumer>();
             x.AddConsumer<CharacterUpdatedEventConsumer>();
         });

@@ -1,5 +1,5 @@
-import { Box, Button, CircularProgress, FormControl, FormGroup, Grid, List, ListItem, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material";
-import { CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterUploadImage, CharacterXpField, CoinsAffectWeightSwitch } from "@/entities/character";
+import { Box, Button, CircularProgress, FormControl, FormGroup, Grid, List, ListItem, Stack, Typography } from "@mui/material";
+import { AgeField, CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterUploadImage, CharacterXpField, CoinsAffectWeightSwitch, SpeedField } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
 import { useEffect, useRef, useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
@@ -19,7 +19,7 @@ import { useCreateCharacterMutation } from "@/features/character";
 import { useNavigate } from "react-router-dom";
 import { InventoryCurrencies } from "@/entities/inventory";
 import { ClassType, RaceType } from "@/shared/api/gql/graphql";
-import CircleIcon from '@mui/icons-material/Circle';
+import { stateToVariables } from "../model/utils";
 
 interface StepProps {
     state: CreateCharacterFormState,
@@ -175,7 +175,7 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
         throw new Error("Race required!");
     }
 
-    const { data, isSuccess } = useRaceInfoQuery({raceId: state.race.value.id as RaceType});
+    const { data, isSuccess, isFetching } = useRaceInfoQuery({raceId: state.race.value.id as RaceType});
 
     const [disableButtons, setDisableButtons] = useState(false);
 
@@ -193,22 +193,43 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
     const onAligmentChange = (alignment: Aligments) => {
         if (alignment != Aligments.any)
             setField("alignment", alignment);
-    }
+    };
 
     useEffect(() => {
         if (isSuccess) {
-            const defaultLanguages = data.raceInfo.languages;
+            const raceInfo = data.raceInfo;
+            const defaultLanguages = raceInfo.languages;
+            const defaultAge = raceInfo.adultAge;
+            const defaultSpeed = raceInfo.speed;
             setField("languages", defaultLanguages);
+            setField("age", defaultAge);
+            setField("speed", defaultSpeed);
         }
-    }, [data]);
+    }, [data, isSuccess]);
 
     return <Stack>
         <Grid container rowSpacing={1} spacing={2}>
             <Grid item xs={12} alignItems="center">
                 <CharacterUploadImage base64Image={state.base64Image.value} setImage={(base64Iamge) => setField("base64Image", base64Iamge)}/>
             </Grid>
+            <Grid item xs={6} marginTop={3}>
+                <AgeField 
+                    value={state.age.value}
+                    onChange={(value) => setField("age", value)}
+                    disabled={isFetching}
+                    errorText={state.age.error}
+                />
+            </Grid>
+            <Grid item xs={6} marginTop={3}>
+                <SpeedField 
+                    value={state.speed.value}
+                    onChange={(value) => setField("speed", value)}
+                    disabled={isFetching}
+                    errorText={state.speed.error}
+                />
+            </Grid>
             <Grid item xs={12}>
-                <Typography variant="body1" width="100%" color="GrayText" textAlign="justify" marginTop={3} marginBottom={1}>
+                <Typography variant="body1" width="100%" color="GrayText" textAlign="justify" marginBottom={1}>
                     {data?.raceInfo?.recommendedAlignmentDescription}
                 </Typography>
             </Grid>
@@ -267,7 +288,7 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
 
     const [disableButtons] = useState(false);
     if (!state.classId.value) {
-        //throw new Error("No class was set!");
+        throw new Error("No class was set!");
     }
 
     const { data, isFetching, isSuccess } = useClassStartInventoryDescriptionQuery({id: state.classId.value! as ClassType});
@@ -373,7 +394,7 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
                 weightInPounds={state.inventory.value!
                     .map(x => x.item.weightInPounds)
                     .reduce((sum, current) => sum + current, 0)
-                    + ((state.currency.value == undefined) ? 0 
+                    + ((!state.coinsAffectWeight.value || state.currency.value == undefined) ? 0 
                         : ((state.currency.value?.copper ?? 0) + (state.currency.value?.silver ?? 0) + (state.currency.value?.gold ?? 0) + (state.currency.value?.electrum ?? 0) + (state.currency.value?.platinum ?? 0)) / 50.0)
                 }
             />
@@ -406,13 +427,10 @@ export default function CreateCharcaterForm() {
         isValidStep4
      } = useCreateCharacterReducer();
 
-    const [createCharacter, {isLoading, isSuccess, isError, error}] = useCreateCharacterMutation();
+    const [createCharacter, {data, isLoading, isSuccess, isError}] = useCreateCharacterMutation();
     const navigate = useNavigate();
-    const formRef = useRef<HTMLFormElement>(null);
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
+    async function onSubmit() {
         if (isLoading) {
             setFormError("Запрос уже отправлен.");
             return;
@@ -422,27 +440,28 @@ export default function CreateCharcaterForm() {
         }
 
         setFormError();
-        try{
-            //todo: get character from form state
-            await createCharacter({});
-        } catch {
-            setFormError(isError ? "Ошибка сети." : error);
-        }
-
-        if (isSuccess) {
-            navigate("/my-characters");
-        }
+        await createCharacter(stateToVariables(state));
     }
 
-    const raiseSubmitEvent = () => formRef.current?.submit();
+    useEffect(() => {
+        if (isSuccess) {
+            navigate(`/my-characters/${data.createCharacter.uuid}`);
+        }
+    }, [isSuccess, data]);
+
+    useEffect(() => {
+        if (isError) {
+            //todo: handle create errors
+        }
+    }, [isError, data]);
 
     return <>
-        <Box component="form" noValidate onSubmit={handleSubmit} padding={2} ref={formRef}>
+        <Box component="form" noValidate padding={2}>
             {state.step === 1 && <Step1 state={state} isValid={isValidStep1} setField={setField} setStep={setStep} />}
             {state.step === 2 && <Step2 state={state} isValid={isValidStep2} setField={setField} setStep={setStep} />}
             {state.step === 3 && <Step3 state={state} isValid={isValidStep3} setField={setField} setStep={setStep} />}
             {state.step === 4 && <Step4 state={state} isValid={isValidStep4} setField={setField} setStep={setStep} 
-                                        disable={isLoading} submit={raiseSubmitEvent}/>}
+                                        disable={isLoading} submit={onSubmit}/>}
         </Box>
     </>
 }
