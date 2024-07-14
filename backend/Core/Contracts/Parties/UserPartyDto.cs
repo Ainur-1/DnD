@@ -22,6 +22,7 @@ public record UserPartyDto
             AccessCode = party.AccessCode,
             GameMasterId = party.GameMasterId,
             Id = party.Id,
+            InGameCharactersIds = party.InGameCharactersIds.ToList(),
             InGameCharacter = new PartyCharacterDto
             {
                 Id = characterId,
@@ -30,4 +31,14 @@ public record UserPartyDto
         };
     }
 
+    public static UserPartyDto FromParty(Party party)
+    {
+        return new UserPartyDto()
+        {
+            AccessCode = party.AccessCode,
+            GameMasterId = party.GameMasterId,
+            InGameCharactersIds = party.InGameCharactersIds.ToList(),
+            Id = party.Id,
+        };
+    }
 }

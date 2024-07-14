@@ -1,6 +1,7 @@
 ﻿using Contracts.Online;
 using Contracts.Parties;
 using Domain.Entities.Parties;
+using Domain.Exceptions;
 
 namespace Service.Abstractions;
 
@@ -18,6 +19,7 @@ public interface IPartyService
 
     Task<IEnumerable<UserPartyDto>> GetUserPartiesAsync(Guid userId);
 
+    /// <exception cref="AccessDeniedException">On unauthorized request</exception>
     Task<Guid> CreatePartyAsync(Guid gameMasterId, string accessCode);
 
     Task<UserPartyDto> JoinPartyAsync(JoinPartyVariablesDto variables);

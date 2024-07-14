@@ -19,10 +19,10 @@ public class Party
             || accessCode.Length > 8 
             || accessCode.Length < 1)
         {
-            throw new InvalidArgumentValueException(nameof(accessCode))
+            throw new InvalidArgumentValueException(nameof(accessCode), "Строка, содержащая только цифры и английские буквы длиной от 1 до 8.")
             {
                 InvalidValue = accessCode,
-                ValidExample = "Строка, содержащая только цифры и английские буквы длиной от 1 до 8."
+                ValidExample = "V1234"
             };
         }
 

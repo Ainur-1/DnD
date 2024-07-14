@@ -1,6 +1,5 @@
 ﻿using Contracts.Character;
 using DnD.GraphQL.Extensions;
-using Domain.Exceptions;
 using HotChocolate.Authorization;
 using Service.Abstractions;
 

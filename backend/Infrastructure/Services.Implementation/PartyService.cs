@@ -7,7 +7,6 @@ using Domain.Entities.Character;
 using Domain.Entities.Parties;
 using Domain.Exceptions;
 using GameHub;
-using GameHub.Dtos;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
@@ -145,6 +144,9 @@ public class PartyService : IPartyService
         var party = await GetPartyByIdAsync(partyId);
         if (party == null)
             throw new ObjectNotFoundException();
+        
+        if (party.GameMasterId == userId)
+            return UserPartyDto.FromParty(party);
         
         var userCharacter = (await _characterCollection
             .FindByOwnerAndParty(ownerId: userId, partyId: partyId)
