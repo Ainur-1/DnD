@@ -250,11 +250,11 @@ public class CharacterService : ICharacterService
         var subRaceAbilities = race.GetSubRaceInfo(subRace)?.Abilities??[];
 
         var strength = characterCreate.Strength + GetBuffValue(abilityBuffs, CharacterAbilityType.Strength) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Strength);
-        var dexterity = characterCreate.Dexterity + GetBuffValue(abilityBuffs, CharacterAbilityType.Dexterity) + +GetBuffValue(subRaceAbilities, CharacterAbilityType.Dexterity);
+        var dexterity = characterCreate.Dexterity + GetBuffValue(abilityBuffs, CharacterAbilityType.Dexterity) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Dexterity);
         var constitution = characterCreate.Constitution + GetBuffValue(abilityBuffs, CharacterAbilityType.Constitution) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Constitution);
-        var intelligence = characterCreate.Intelligence + GetBuffValue(abilityBuffs, CharacterAbilityType.Intelligence) + +GetBuffValue(subRaceAbilities, CharacterAbilityType.Intelligence);
+        var intelligence = characterCreate.Intelligence + GetBuffValue(abilityBuffs, CharacterAbilityType.Intelligence) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Intelligence);
         var wisdom = characterCreate.Wisdom + GetBuffValue(abilityBuffs, CharacterAbilityType.Wisdom) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Wisdom);
-        var charisma = characterCreate.Charisma + GetBuffValue(abilityBuffs, CharacterAbilityType.Charisma) + +GetBuffValue(subRaceAbilities, CharacterAbilityType.Charisma);
+        var charisma = characterCreate.Charisma + GetBuffValue(abilityBuffs, CharacterAbilityType.Charisma) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Charisma);
         
         return new CharacterStats(
             strength: strength,
