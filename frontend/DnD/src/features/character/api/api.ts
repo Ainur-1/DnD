@@ -28,7 +28,7 @@ export const characterApi = createApi({
             providesTags: ["MyCharactersList"]
         }),
 
-        myCharacters: build.query<CarouselCharactersQuery, CarouselCharactersQueryVariables>({
+        myCharacters: build.query<CarouselCharactersQuery, void>({
             query: (variables) => ({document: CarouselCharacterDocument, variables}),
             providesTags: ["MyCharactersList"],
         }),

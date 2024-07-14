@@ -6,7 +6,10 @@ public record CharacterDto
 
     public CharacterPersonalityDto Personality { get; init; }
 
-    public DynamicStatsDto DynamicStats { get; init; }
+    public DynamicStatsDto? DynamicStats { get; init; }
+
+    public bool IsDead { get; set; }
+
 
     public bool IsInParty { get; init; }
 }

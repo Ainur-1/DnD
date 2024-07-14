@@ -3,22 +3,13 @@ query carouselCharacters{
     id
     isInParty
     personality {
-      age
-      alignment
-      background
-      base64Image
-      bonds
-      class
-      flaws
-      languages
-      level
       name
-      otherTraits
       race
+      class
+      level
+      base64Image
       canLevelUp
     }
-    dynamicStats {
-      isDead
-    }
+    isDead
   }
 }

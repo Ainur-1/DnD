@@ -102,8 +102,9 @@ export type CharacterAlignmentTypeOperationFilterInput = {
 
 export type CharacterDto = {
   __typename?: 'CharacterDto';
-  dynamicStats: DynamicStatsDto;
+  dynamicStats?: Maybe<DynamicStatsDto>;
   id: Scalars['UUID']['output'];
+  isDead: Scalars['Boolean']['output'];
   isInParty: Scalars['Boolean']['output'];
   personality: CharacterPersonalityDto;
 };
@@ -112,6 +113,7 @@ export type CharacterDtoFilterInput = {
   and?: InputMaybe<Array<CharacterDtoFilterInput>>;
   dynamicStats?: InputMaybe<DynamicStatsDtoFilterInput>;
   id?: InputMaybe<UuidOperationFilterInput>;
+  isDead?: InputMaybe<BooleanOperationFilterInput>;
   isInParty?: InputMaybe<BooleanOperationFilterInput>;
   or?: InputMaybe<Array<CharacterDtoFilterInput>>;
   personality?: InputMaybe<CharacterPersonalityDtoFilterInput>;
@@ -757,14 +759,14 @@ export type SignUpMutation = { __typename?: 'Mutation', signUp: { __typename?: '
 export type CarouselCharactersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CarouselCharactersQuery = { __typename?: 'Query', myCharacters: Array<{ __typename?: 'CharacterDto', id: any, isInParty: boolean, personality: { __typename?: 'CharacterPersonalityDto', age: number, alignment: CharacterAlignmentType, background: string, base64Image?: string | null, bonds: Array<string>, class: ClassType, flaws: Array<string>, languages: Array<string>, level: number, name: string, otherTraits: Array<string>, race: string, canLevelUp: boolean }, dynamicStats: { __typename?: 'DynamicStatsDto', isDead: boolean } }> };
+export type CarouselCharactersQuery = { __typename?: 'Query', myCharacters: Array<{ __typename?: 'CharacterDto', id: any, isInParty: boolean, isDead: boolean, personality: { __typename?: 'CharacterPersonalityDto', name: string, race: string, class: ClassType, level: number, base64Image?: string | null, canLevelUp: boolean } }> };
 
 export type CharacterDeathSavesQueryVariables = Exact<{
   characterId: Scalars['UUID']['input'];
 }>;
 
 
-export type CharacterDeathSavesQuery = { __typename?: 'Query', character: { __typename?: 'CharacterDto', dynamicStats: { __typename?: 'DynamicStatsDto', isDying: boolean, isDead: boolean, deathSaves?: { __typename?: 'DeathSavesDto', failureCount: number, successCount: number } | null } } };
+export type CharacterDeathSavesQuery = { __typename?: 'Query', character: { __typename?: 'CharacterDto', dynamicStats?: { __typename?: 'DynamicStatsDto', isDying: boolean, isDead: boolean, deathSaves?: { __typename?: 'DeathSavesDto', failureCount: number, successCount: number } | null } | null } };
 
 export type CreateCharacterMutationVariables = Exact<{
   age: Scalars['Int']['input'];
