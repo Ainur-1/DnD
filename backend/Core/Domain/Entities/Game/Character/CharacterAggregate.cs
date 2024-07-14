@@ -70,7 +70,7 @@ public class CharacterAggregate
 
         var armorOnCharacter = Inventory
             .Items
-            .Where(x => x.InUse && x.Item.IsArmor())
+            .Where(x => x.InUse && x.Item is Armor)
             .Select(x => x.Item)
             .Cast<Armor>()
             .ToArray();

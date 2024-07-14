@@ -9,6 +9,7 @@ using System.Security.Claims;
 using Services.Abstractions;
 using Services.Implementation;
 using MassTransit;
+using static DnD.Data.WebApplicationExtensions;
 
 namespace DnD;
 

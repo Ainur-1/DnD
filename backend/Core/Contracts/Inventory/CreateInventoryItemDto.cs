@@ -16,25 +16,25 @@ public record CreateInventoryItemDto
     /// </summary>
     public bool IsItemProficiencyOn { get; init; }
 
-    public Weapon? Weapon { get; init; }
+    public Weapon? MaybeWeapon { get; init; }
 
-    public Armor? Armor { get; init; }
+    public Armor? MaybeArmor { get; init; }
 
-    public Stuff? Stuff { get; init; }
+    public Item? MaybeStuff { get; init; }
 
     public bool IsValidItemDescriptor() 
-        => Weapon is not null && Armor is null && Stuff is null
-        || Armor is not null && Weapon is null && Stuff is null
-        || Stuff is not null && Weapon is null && Armor is null;
+        => MaybeWeapon is not null && MaybeArmor is null && MaybeStuff is null
+        || MaybeArmor is not null && MaybeWeapon is null && MaybeStuff is null
+        || MaybeStuff is not null && MaybeWeapon is null && MaybeArmor is null;
 
     public Item GetItem()
     {
-        if (Weapon is not null)
-            return Weapon;
-        else if (Armor is not null)
-            return Armor;
-        else if (Stuff is not null)
-            return Stuff;
+        if (MaybeWeapon is not null)
+            return MaybeWeapon;
+        else if (MaybeArmor is not null)
+            return MaybeArmor;
+        else if (MaybeStuff is not null)
+            return MaybeStuff;
         
         throw new ArgumentOutOfRangeException();
     }

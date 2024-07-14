@@ -1,26 +1,20 @@
 ﻿using Domain.Entities.Game.Items;
-using Domain.Extensions;
 
 namespace Domain.Entities.Items.Armors;
 
-public class Armor : Item
+public record Armor : Item
 {
-    public int BaseArmorClass { get; protected set; }
+    public int BaseArmorClass { get; init; }
 
-    public ArmorType ArmorType { get; protected set; }
+    public ArmorType ArmorType { get; init; }
 
-    public string Material { get; protected set; }
+    public string Material { get; init; }
 
-    public int? RequiredStrength { get; protected set; }
+    public int? RequiredStrength { get; init; }
 
-    public bool HasStealthDisadvantage { get; protected set; }
+    public bool HasStealthDisadvantage { get; init; }
 
-    public int? MaxPossibleDexterityModifier { get; protected set; }
-
-    public override string ItemType => ItemExtensons.ArmorType;
-
-    protected Armor() { }
-
+    public int? MaxPossibleDexterityModifier { get; init; }
 
     public int CalculateArmorClass(int characterDexterityModifier)
     {
