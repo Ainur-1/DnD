@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { CarouselCharactersQuery, CarouselCharactersQueryVariables, CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables, CreateCharacterMutation, CreateCharacterMutationVariables, MyAliveCharactersQuery } from "@/shared/api/gql/graphql";
+import { CarouselCharactersQuery, CharacterDeathSavesQuery, CharacterDeathSavesQueryVariables, CreateCharacterMutation, CreateCharacterMutationVariables, MyAliveCharactersQuery } from "@/shared/api/gql/graphql";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 import { client } from "@/shared/api";
 import MY_ALIVE_CHARACTERS from "./queries/MyAliveCharacters.graphql";

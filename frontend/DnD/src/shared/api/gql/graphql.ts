@@ -850,7 +850,7 @@ export type UserPartyInfoQueryVariables = Exact<{
 }>;
 
 
-export type UserPartyInfoQuery = { __typename?: 'Query', party: { __typename?: 'UserPartyDto', accessCode: string, gameMasterId: any, inGameCharactersIds: Array<any>, inGameCharacter?: { __typename?: 'PartyCharacterDto', characterName: string, id: any } | null } };
+export type UserPartyInfoQuery = { __typename?: 'Query', party: { __typename?: 'UserPartyDto', accessCode: string, gameMasterId: any, id: any, inGameCharactersIds: Array<any>, inGameCharacter?: { __typename?: 'PartyCharacterDto', characterName: string, id: any } | null } };
 
 export type GetRaceQueryVariables = Exact<{
   raceId: RaceType;

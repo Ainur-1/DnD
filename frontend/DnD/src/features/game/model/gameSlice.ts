@@ -164,9 +164,8 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
         })));
 
         try {
-            await connection.start();
-
-            const roomState = await connection.invoke<RoomState | null>("JoinRoom", args.partyId);
+            const roomState = await connection.start()
+                .then(() => connection.invoke<RoomState | null>("JoinRoom", args.partyId));
 
             if (roomState == null) {
                 dispatch(setState(undefined));
