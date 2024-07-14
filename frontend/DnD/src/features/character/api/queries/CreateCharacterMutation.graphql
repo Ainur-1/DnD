@@ -23,7 +23,8 @@ mutation createCharacter(
   $wallet: StartWealthDtoInput!,
   $strength: Int!,
   $wisdom: Int!,
-  $xp: Int!
+  $xp: Int!,
+  $selectedSkillTraits: [CharacterSkillType!]!
 ) {
   createCharacter(
     input: {
@@ -53,6 +54,7 @@ mutation createCharacter(
         strength: $strength,
         wisdom: $wisdom,
         xp: $xp,
+        skillTraits: $selectedSkillTraits
       }
     }
   ) {

@@ -1,7 +1,6 @@
-import { CharacterAlignmentType, ClassType, CreateCharacterMutationVariables, KeyValuePairOfStringAndInt32Input, RaceType } from "@/shared/api/gql/graphql";
+import { CharacterAlignmentType, CharacterSkillType, ClassType, CreateCharacterMutationVariables, KeyValuePairOfStringAndInt32Input, RaceType } from "@/shared/api/gql/graphql";
 import { Aligments } from "@/shared/types/domainTypes";
 import { CreateCharacterFormState } from "./createCharacterFormReducer";
-import { RaceIdType } from "@/entities/races";
 
 const map: Map<Aligments, CharacterAlignmentType>
 = new Map([
@@ -64,5 +63,6 @@ export function stateToVariables(state: CreateCharacterFormState): CreateCharact
         languages: state.languages.value,
         otherTraits: state.otherTraits.value,
         subrace: state.race.value?.subrace,
+        selectedSkillTraits: state.skillTraitsMastery.value!.map(x => x as CharacterSkillType)
     };
 }

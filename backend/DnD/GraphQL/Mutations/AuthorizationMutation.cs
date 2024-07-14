@@ -38,8 +38,6 @@ public class AuthorizationMutation
     }
 
 
-
-
     [AllowAnonymous]
     public async Task<bool> RequestPasswordResetAsync([Service] IUserService userService, string email)
     {

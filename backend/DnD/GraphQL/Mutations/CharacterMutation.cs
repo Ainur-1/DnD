@@ -11,7 +11,7 @@ namespace DnD.GraphQL.Mutations;
 public class CharacterMutation
 {
 
-    [Error(typeof(InvalidArgumentValueException))]
+    //[Error(typeof(InvalidArgumentValueException))]
     public async Task<Guid> CreateCharacterAsync(
         [Service] ICharacterService characterService, 
         [Service] IHttpContextAccessor contextAccessor,
@@ -19,7 +19,6 @@ public class CharacterMutation
     {
         try
         {
-
             var currentUserId = contextAccessor.GetUserIdOrThrowAccessDenied();
             return await characterService.CreateCharacterAsync(currentUserId, character);
         }

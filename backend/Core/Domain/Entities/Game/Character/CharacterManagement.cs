@@ -24,7 +24,7 @@ public class CharacterManagement
         {
             throw new ArgumentException("Provide character owner.", nameof(ownerId));
         }
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(startXp, nameof(startXp));
+        ArgumentOutOfRangeException.ThrowIfNegative(startXp, nameof(startXp));
 
         IsDead = false;
         AccessType = accessType;

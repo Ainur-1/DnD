@@ -79,11 +79,11 @@ public class CharacterPersonality
             throw new ArgumentOutOfRangeException(
                 nameof(alignment), 
                 alignment, 
-                $"Selecet character alignment. {CharacterAlignmentType.Any} is readonly."
+                $"Select character alignment. {CharacterAlignmentType.Any} is readonly."
             );
         }
 
-        if (image != null && image.Length > 1024 * 3)
+        if (image != null && image.Length > 1024 * 1024 * 3)
         {
             throw new ArgumentException(nameof(image), "Image must be less than 3 mb");
         }

@@ -26,6 +26,7 @@ export type CreateCharacterMutationVariables = Types.Exact<{
   strength: Types.Scalars['Int']['input'];
   wisdom: Types.Scalars['Int']['input'];
   xp: Types.Scalars['Int']['input'];
+  selectedSkillTraits: Array<Types.CharacterSkillType> | Types.CharacterSkillType;
 }>;
 
 

@@ -255,6 +255,7 @@ export type CreateCharacterDtoInput = {
   maybeSubrace?: InputMaybe<Scalars['String']['input']>;
   race: RaceType;
   raceTraitsAdjustments: Array<KeyValuePairOfStringAndInt32Input>;
+  skillTraits: Array<CharacterSkillType>;
   speed: Scalars['Int']['input'];
   startWealth: StartWealthDtoInput;
   strength: Scalars['Int']['input'];
@@ -791,6 +792,7 @@ export type CreateCharacterMutationVariables = Exact<{
   strength: Scalars['Int']['input'];
   wisdom: Scalars['Int']['input'];
   xp: Scalars['Int']['input'];
+  selectedSkillTraits: Array<CharacterSkillType> | CharacterSkillType;
 }>;
 
 
