@@ -1,5 +1,6 @@
 ﻿using Contracts.Character;
 using DnD.GraphQL.Extensions;
+using Domain.Exceptions;
 using HotChocolate.Authorization;
 using Service.Abstractions;
 
@@ -9,6 +10,8 @@ namespace DnD.GraphQL.Mutations;
 [ExtendObjectType("Mutation")]
 public class CharacterMutation
 {
+
+    [Error(typeof(InvalidArgumentValueException))]
     public async Task<Guid> CreateCharacterAsync(
         [Service] ICharacterService characterService, 
         [Service] IHttpContextAccessor contextAccessor,

@@ -190,7 +190,7 @@ public class CharacterService : ICharacterService
         var @class = await _classCollection.Find(x => x.Id == characterCreate.Class)
             .SingleOrDefaultAsync() ?? throw new ObjectNotFoundException();
  
-        var raceName = GetCorrectRaceName(race.SubRacesAdjustments, characterCreate.Race, characterCreate.MaybeSubrace)!;
+        var raceName = CreateCorrectRaceName(race.SubRacesAdjustments, characterCreate.Race, characterCreate.MaybeSubrace)!;
         var personality = new CharacterPersonality(
             name: characterCreate.MaybeName ?? "",
             image: !string.IsNullOrEmpty(characterCreate.MaybeBase64Image) ? Convert.FromBase64String(characterCreate.MaybeBase64Image) : null,
@@ -207,7 +207,6 @@ public class CharacterService : ICharacterService
             languages: characterCreate.MaybeLanguages??[],
             otherTraits: characterCreate.MaybeOtherTraits??[]
         );
-        var stats = GetSetUpCharacterStats(characterCreate, @class, race, raceName.SubRaceName);
 
         var management = new CharacterManagement(
             characterCreate.IsPublic ? AccessType.Public : AccessType.Private, 
@@ -236,48 +235,64 @@ public class CharacterService : ICharacterService
 
         return new CharacterAggregate(
             setUpPersonality: personality,
-            setUpStats: stats,
+            setUpStats: CreateCharacterStats(characterCreate!, race, @class, raceName),
             setUpInfo: management,
             startInventory: inventory
         );
     }
 
-    private CharacterStats GetSetUpCharacterStats(CreateCharacterDto characterCreate, Class @class, Race race, string? subRace)
+    private static CharacterStats CreateCharacterStats(CreateCharacterDto characterCreate, Race race, Class @class, RaceName raceName)
+    {
+        (var strength, var dexterity, var constitution, var intelligence, var wisdom, var charisma) 
+            = GetAdjustedAbilities(characterCreate, race, raceName.SubRaceName);
+
+        return new CharacterStats(
+            strength,
+            dexterity,
+            constitution,
+            intelligence,
+            wisdom,
+            charisma,
+            characterCreate.Speed,
+            characterCreate.SkillTraits,
+            @class.SavingThrowsTraitsMastery,
+            @class.HitDice
+            );
+    }
+
+    private static (int Strength, int Dexterity, int Constitution, int Intelligence, int Wisdom, int Charisma) 
+        GetAdjustedAbilities(CreateCharacterDto characterCreate, Race race, string? subRace)
     {
         var abilityBuffs = race.Abilities;
 
-        var subRaceAbilities = race.GetSubRaceInfo(subRace)?.Abilities??[];
+        AbilityBuff[] subRaceAbilities;
+        if (string.IsNullOrEmpty(subRace))
+        {
+            subRaceAbilities = Array.Empty<AbilityBuff>();
+        }
+        else
+        {
+            subRaceAbilities = race.GetSubRaceInfo(subRace!)?.Abilities ?? Array.Empty<AbilityBuff>();
+        }
 
-        var strength = characterCreate.Strength + GetBuffValue(abilityBuffs, CharacterAbilityType.Strength) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Strength);
-        var dexterity = characterCreate.Dexterity + GetBuffValue(abilityBuffs, CharacterAbilityType.Dexterity) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Dexterity);
-        var constitution = characterCreate.Constitution + GetBuffValue(abilityBuffs, CharacterAbilityType.Constitution) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Constitution);
-        var intelligence = characterCreate.Intelligence + GetBuffValue(abilityBuffs, CharacterAbilityType.Intelligence) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Intelligence);
-        var wisdom = characterCreate.Wisdom + GetBuffValue(abilityBuffs, CharacterAbilityType.Wisdom) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Wisdom);
-        var charisma = characterCreate.Charisma + GetBuffValue(abilityBuffs, CharacterAbilityType.Charisma) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Charisma);
-        
-        return new CharacterStats(
-            strength: GetAbilityValueOr20(strength),
-            dexterity: GetAbilityValueOr20(dexterity),
-            constitution: GetAbilityValueOr20(constitution),
-            intelligence: GetAbilityValueOr20(intelligence),
-            wisdom: GetAbilityValueOr20(wisdom),
-            charisma: GetAbilityValueOr20(charisma),
-            baseSpeed: characterCreate.Speed,
-            skillTraits: @class.SkillTraitsMastery,
-            savingThrowsTraits: @class.SavingThrowsTraitsMastery,
-            hpDice: @class.HitDice
-        );
+        return (Strength: characterCreate.Strength + GetBuffValue(abilityBuffs, CharacterAbilityType.Strength) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Strength),
+            Dexterity: characterCreate.Dexterity + GetBuffValue(abilityBuffs, CharacterAbilityType.Dexterity) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Dexterity),
+            Constitution: characterCreate.Constitution + GetBuffValue(abilityBuffs, CharacterAbilityType.Constitution) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Constitution),
+            Intelligence: characterCreate.Intelligence + GetBuffValue(abilityBuffs, CharacterAbilityType.Intelligence) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Intelligence),
+            Wisdom: characterCreate.Wisdom + GetBuffValue(abilityBuffs, CharacterAbilityType.Wisdom) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Wisdom),
+            Charisma: characterCreate.Charisma + GetBuffValue(abilityBuffs, CharacterAbilityType.Charisma) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Charisma)
+            );
     }
 
     private static int GetAbilityValueOr20(int abilityValue) => Math.Min(abilityValue, 20);
 
-    private int GetBuffValue(AbilityBuff[] abilityBuffs, CharacterAbilityType abilityType)
+    private static int GetBuffValue(AbilityBuff[] abilityBuffs, CharacterAbilityType abilityType)
     {
         return abilityBuffs
             .Where(buff => buff.AbilityType == abilityType)
             .Sum(buff => buff.BuffValue);
     }
-    private static RaceName GetCorrectRaceName(SubRaceInfo[]? subRacesAdjustments, RaceType requestedRaceId, string? maybeRace) 
+    private static RaceName CreateCorrectRaceName(SubRaceInfo[]? subRacesAdjustments, RaceType requestedRaceId, string? maybeRace) 
     {
         var raceHasSubraces = subRacesAdjustments != null;
 
@@ -312,7 +327,6 @@ public class CharacterService : ICharacterService
 
         if (raceFullInfo.HasSubraces)
         {
-
             var subraceAdjustments = raceFullInfo
                 .GetSubRaceInfo(raceName.SubRaceName!)!
                 .RaceTraits
@@ -338,7 +352,7 @@ public class CharacterService : ICharacterService
 
             var option = optionIsRepresented ? defentlyOptions[selectedOptionIndex] : defentlyOptions.First();
 
-            description = $"{raceTraitDescriptor.Description} {option}";
+            description = $"{char.ToUpper(option[0])}{option.Substring(1)}";
         }
 
         return new RaceTrait(raceTraitDescriptor.Name, description);

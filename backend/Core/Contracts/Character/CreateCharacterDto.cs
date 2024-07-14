@@ -50,4 +50,6 @@ public record CreateCharacterDto
     public CreateInventoryItemDto[]? MaybeStartInventory { get; init; }
 
     public StartWealthDto StartWealth { get; init; } = new();
+
+    public CharacterSkillType[] SkillTraits { get; init; } = Array.Empty<CharacterSkillType>();
 }

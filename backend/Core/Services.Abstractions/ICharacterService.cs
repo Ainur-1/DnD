@@ -7,9 +7,10 @@ namespace Service.Abstractions;
 
 public interface ICharacterService
 {
+    /// <exception cref="InvalidArgumentValueException"></exception>
     Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto character);
 
-    /// <exception cref="ObjectNotFoundException">if party or chracter does not exist</exception>
+    /// <exception cref="ObjectNotFoundException">if party or character does not exist</exception>
     Task<GameCharacterDto> GetByIdAsync(Guid id, Guid partyId);
     Task<(bool IsDead, int InitiativeModifier)?> GetCharacterFightOrderCalculationParametersAsync(Guid characterId);
     Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats);
