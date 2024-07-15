@@ -49,6 +49,9 @@ public class UserManagementService : IUserService, IAuthorizationService
             var message = $@"
                 <html>
                 <head>
+                    <meta charset=""UTF-8"">
+                    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                    <title>{subject}</title>
                     <style>
                         body {{
                             font-family: Arial, sans-serif;
@@ -143,9 +146,8 @@ public class UserManagementService : IUserService, IAuthorizationService
             <head>
                 <meta charset=""UTF-8"">
                 <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-                <title>Сброс пароля</title>
+                <title>{subject}</title>
                 <style>
-                    /* Вставить содержимое styles.css сюда */
                     body {{
                         font-family: Arial, sans-serif;
                         background-color: #f4f4f4;
@@ -175,11 +177,11 @@ public class UserManagementService : IUserService, IAuthorizationService
                 </style>
             </head>
             <body>
-                <div class=""container"">
-                    <h2>Здравствуйте, {email}!</h2>
+                <div class='container'>
+                    <h2>Здравствуйте, {user.UserName}!</h2>
                     <p>Вы запросили сброс пароля для вашей учетной записи.</p>
                     <p>Пожалуйста, используйте код ниже для сброса пароля:</p>
-                    <p class=""code""><strong>{encodedCode}</strong></p>
+                    <p class='code'><strong>{encodedCode}</strong></p>
                     <p>Если вы не запрашивали сброс пароля, проигнорируйте это сообщение.</p>
                 </div>
             </body>
