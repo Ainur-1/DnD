@@ -9,8 +9,5 @@ namespace GameHub.Dtos
     public class FightUpdatedEvent
     {
         public FightStatusDto Status { get; set; }
-
-        //public bool IsFight {  get; set; }
-        //public ? ScoreValues { get; set; }
     }
 }

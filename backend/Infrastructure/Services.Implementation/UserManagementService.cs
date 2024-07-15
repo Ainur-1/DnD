@@ -2,7 +2,6 @@
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Services.Abstractions;
-using System.Text.RegularExpressions;
 using System.Web;
 using MassTransit;
 using Services.Implementation.Consumers.Email;
