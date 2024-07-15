@@ -1,15 +1,14 @@
 ﻿using MassTransit;
 using Services.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Implementation.Consumers.Email
 {
-    internal class EmailSendCommandConsumer(IEmailService _emailService) : IConsumer<EmailSendCommand>
+    internal class EmailSendCommandConsumer : IConsumer<EmailSendCommand>
     {
+        private readonly IEmailService _emailService;
+
+        public EmailSendCommandConsumer(IEmailService emailService) => _emailService = emailService;
+
 
         public Task Consume(ConsumeContext<EmailSendCommand> context)
         {

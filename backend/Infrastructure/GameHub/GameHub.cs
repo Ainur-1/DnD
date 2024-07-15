@@ -1,12 +1,10 @@
 ﻿using Amazon.Runtime.Internal.Util;
-using Contracts;
 using Contracts.Online;
 using GameHub.Dtos;
 using GameHub.Models;
 using GameHub.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Service.Abstractions;
 using System.Collections.Concurrent;

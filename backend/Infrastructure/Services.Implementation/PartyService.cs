@@ -23,9 +23,9 @@ public class PartyService : IPartyService
     private readonly IMapper _mapper;
     private readonly IHubContext<GameHub.GameHub, IHubEventActions> _hubContext;
 
-    public PartyService(IMongoCollection<Party> partyCollection, 
-        IMongoCollection<Character> characterCollection, 
-        IMongoClient client, 
+    public PartyService(IMongoCollection<Party> partyCollection,
+        IMongoCollection<Character> characterCollection,
+        IMongoClient client,
         IMapper mapper,
         IHubContext<GameHub.GameHub, IHubEventActions> hubContext
         )
@@ -83,16 +83,10 @@ public class PartyService : IPartyService
 
     public async Task<IEnumerable<GameCharacterDto>> GetCharactersInfoAsync(Guid partyId)
     {
-        var characterIdsOnlyProjection = Builders<Party>.Projection
-            .Exclude(x => x.Id)
-            .Exclude(x => x.GameMasterId)
-            .Exclude(x => x.AccessCode)
-            .Include(x => x.InGameCharactersIds);
-
         var charactersIds = (await _partyCollection
             .FindById(partyId)
-            .Project(x => x.InGameCharactersIds)
-            .SingleOrDefaultAsync()) ?? throw new ObjectNotFoundException();
+            .SingleOrDefaultAsync())
+            ?.InGameCharactersIds ?? throw new ObjectNotFoundException();
 
         var characters = await _characterCollection
             .WhereIdIsIn(charactersIds)
@@ -136,7 +130,7 @@ public class PartyService : IPartyService
 
             return result;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
             throw;
@@ -148,10 +142,10 @@ public class PartyService : IPartyService
         var party = await GetPartyByIdAsync(partyId);
         if (party == null)
             throw new ObjectNotFoundException();
-        
+
         if (party.GameMasterId == userId)
             return UserPartyDto.FromParty(party);
-        
+
         var userCharacter = (await _characterCollection
             .FindByOwnerAndParty(ownerId: userId, partyId: partyId)
             .FirstOrDefaultAsync()) ?? throw new ObjectNotFoundException();
@@ -178,9 +172,9 @@ public class PartyService : IPartyService
     public async Task<UserPartyDto> JoinPartyAsync(JoinPartyVariablesDto variables)
     {
         var party = await _partyCollection
-            .FindById(variables.PartyId)
+            .Find(x => x.Id == variables.PartyId && x.AccessCode == variables.AccessCode)
             .SingleOrDefaultAsync();
-        
+
         if (party == null) throw new ObjectNotFoundException();
 
         if (await IsUserInPartyAsync(variables.UserId, party.Id))
@@ -203,27 +197,16 @@ public class PartyService : IPartyService
 
         party.AddCharacter(character);
 
-        using var session = await _client.StartSessionAsync();
-        session.StartTransaction();
-        try
-        {
+        var characterFilter = Builders<Character>.Filter.Eq(filter => filter.Id, variables.CharacterId);
+        var characterUpdate = Builders<Character>.Update
+            .Set(update => update.Info.JoinedPartyId, variables.PartyId)
+            .Set(update => update.InGameStats, character.InGameStats);
 
-            var characterFilter = Builders<Character>.Filter.Eq(filter => filter.Id, variables.CharacterId);
-            var characterUpdate = Builders<Character>.Update
-                .Set(update => update.Info.JoinedPartyId, variables.PartyId)
-                .Set(update => update.InGameStats, character.InGameStats);
+        var partyFilter = Builders<Party>.Filter.Eq(filter => filter.Id, variables.PartyId);
+        var partyUpdate = Builders<Party>.Update.Push(update => update.InGameCharactersIds, variables.CharacterId);
 
-            var partyFilter = Builders<Party>.Filter.Eq(filter => filter.Id, variables.CharacterId);
-            var partyUpdate = Builders<Party>.Update.Push(update => update.InGameCharactersIds, variables.CharacterId);
-
-            await _characterCollection.UpdateManyAsync(session, characterFilter, characterUpdate);
-            await _partyCollection.UpdateManyAsync(session, partyFilter, partyUpdate);
-            await session.CommitTransactionAsync();  
-        }
-        catch (Exception)
-        {
-            await session.AbortTransactionAsync();
-        }
+        await _characterCollection.UpdateOneAsync(characterFilter, characterUpdate);
+        await _partyCollection.UpdateOneAsync(partyFilter, partyUpdate);
         //
         await _hubContext.Clients
             .Group(variables.PartyId.ToString())

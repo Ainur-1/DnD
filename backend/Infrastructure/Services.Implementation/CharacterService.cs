@@ -148,7 +148,7 @@ public class CharacterService : ICharacterService
             .Set(dbCharacter => dbCharacter.Info.IsDead, character.Info.IsDead);
         await _characterCollection.UpdateOneAsync(selector, updateHealthAndLiveStatus);
 
-        await SendCharacterUpdatedEventAsync(characterId);
+        await PublishCharacterUpdatedEventAsync(characterId);
     }
 
     public async Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats)
@@ -176,11 +176,11 @@ public class CharacterService : ICharacterService
             .Set(c => c.Info.IsDead, updateStats.IsDead);
         await _characterCollection.UpdateOneAsync(selector, update);
 
-        await SendCharacterUpdatedEventAsync(characterId);
+        await PublishCharacterUpdatedEventAsync(characterId);
     }
 
-    private Task SendCharacterUpdatedEventAsync(Guid characterId)
-    => _eventBus.Send(new CharacterUpdatedEvent {Id = characterId});
+    private Task PublishCharacterUpdatedEventAsync(Guid characterId)
+    => _eventBus.Publish(new CharacterUpdatedEvent {Id = characterId});
 
     private async Task<Character> CreateCharacterWithDatabaseDataAsync(Guid issuer, CreateCharacterDto characterCreate) 
     {

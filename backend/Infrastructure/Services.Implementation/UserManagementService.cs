@@ -57,7 +57,7 @@ public class UserManagementService : IUserService, IAuthorizationService
             </body>
             </html>";
 
-            await _bus.Send(new EmailSendCommand()
+            await _bus.Publish(new EmailSendCommand()
             {
                 Email = email,
                 Subject = subject,
@@ -105,7 +105,7 @@ public class UserManagementService : IUserService, IAuthorizationService
         </body>
         </html>";
 
-        await _bus.Send(new EmailSendCommand()
+        await _bus.Publish(new EmailSendCommand()
         {
             Email = email,
             Subject = subject,

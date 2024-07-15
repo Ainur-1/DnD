@@ -10,6 +10,7 @@ using Services.Abstractions;
 using Services.Implementation;
 using MassTransit;
 using static DnD.Data.WebApplicationExtensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DnD;
 
