@@ -49,6 +49,8 @@ public class Program
 
         services.AddLogging(x => x.AddConsole().AddDebug());
 
+        services.AddLogging();
+
         if (builder.Environment.IsDevelopment())
         {
             services.AddCors(options =>

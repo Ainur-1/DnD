@@ -26,10 +26,6 @@ public class GameHub : Hub<IHubEventActions>
         _partyService = partyService;
     }
 
-    public override async Task OnConnectedAsync()
-    {
-        _logger?.LogInformation("Игрок с ID {ID} ConId '{ConId}' подключен.", Context.UserIdentifier, Context.ConnectionId);
-    }
 
     public async Task<GameRoomDto?> JoinRoom(Guid partyId)
     {
