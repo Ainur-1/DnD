@@ -1,5 +1,4 @@
-﻿
-namespace Contracts.Inventory;
+﻿namespace Contracts.Inventory;
 
 public record class StartWealthDto
 {
