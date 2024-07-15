@@ -1,0 +1,32 @@
+query getRace($raceId: RaceType!) {
+  raceInfo(id: $raceId) {
+    adultAge
+    id
+    languages
+    name
+    recommendedAlignmentDescription
+    size
+    speed
+    raceTraits {
+      description
+      name
+      options
+    }
+    subRacesAdjustments {
+      name
+      abilities {
+        abilityType
+        buffValue
+      }
+      raceTraits {
+        description
+        name
+        options
+      }
+    }
+    abilities {
+      abilityType
+      buffValue
+    }
+  }
+}

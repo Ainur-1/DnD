@@ -5,6 +5,7 @@ import { GameCharacter } from "@/features/game/model/types";
 import { CharacterCard } from "@/entities/character";
 import { InGameLiveOverlay } from "@/entities/character/ui/characterCardTopOverlays";
 import CharacterControlBar from "./characterControl";
+import { Box, Stack } from "@mui/material";
 
 export default function GameController() {
 
@@ -20,7 +21,7 @@ export default function GameController() {
 
     };
 
-    const showCharacterInfo = (charcterId: string) => {
+    const showCharacterInfo = (_: string) => {
         
     } 
 
@@ -30,10 +31,9 @@ export default function GameController() {
             hp,
             tempHp, 
             armorClass, 
-            initiativeModifier, 
-            proficiencyBonus, 
             speed
         } = character.mainStats;
+        const { proficiencyBonus, initiativeModifier} = character.otherStats;
 
         const Overlay = () => <InGameLiveOverlay 
             hp={hp} 
@@ -53,11 +53,13 @@ export default function GameController() {
             />
     }
 
-    return <>
-        <Carousel items={items} constructNode={constructCharacterCard}>
-        </Carousel>
-        <BottomControlBar 
-            findMyCharacter={navigateCarouselToMyCharacter} 
-        />
-    </>
+    return <Box position="relative" width="100%" height="100%">
+        <Stack>
+            <Carousel items={items} constructNode={constructCharacterCard}/>
+        </Stack>
+        
+        <Box sx={{transform: "translateY(35%)"}}>
+            <BottomControlBar findMyCharacter={navigateCarouselToMyCharacter} />
+        </Box>
+    </Box>
 }

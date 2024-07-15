@@ -1,5 +1,4 @@
 import useGameReducer from "@/features/game";
-import { damageCharacter, updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
 import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
@@ -30,6 +29,7 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
     const [formError, setFormError] = useState("");
     const { state, setFatalErrorOccured } = useGameReducer();
     const [requestSent, setRequestSent] = useState(false);
+    const { updateCharacter } = useGameReducer();
 
     if (state == undefined) {
         return <></>
@@ -118,6 +118,7 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
             maxWidth="xs"
             fullWidth={true}
             scroll="body"
+            onClose={closeDialog}
         >
             <DialogTitle>
                 Лечить персонажа
@@ -163,6 +164,7 @@ export function DamageFormDialog({showForm, characterId, closeDialog}: HealFormD
     const [formError, setFormError] = useState("");
     const { state, setFatalErrorOccured } = useGameReducer();
     const [requestSent, setRequestSent] = useState(false);
+    const { damageCharacter } = useGameReducer();
 
     if (state == undefined) {
         return <></>
@@ -205,10 +207,10 @@ export function DamageFormDialog({showForm, characterId, closeDialog}: HealFormD
         setFormError("");
         setRequestSent(true);
         try {
-            await damageCharacter({
+            await damageCharacter(
                 characterId,
-                damage: damage as number,
-            });
+                damage as number,
+            );
         } catch {
             setFatalErrorOccured(true);
         } finally {
@@ -219,6 +221,7 @@ export function DamageFormDialog({showForm, characterId, closeDialog}: HealFormD
 
     return (
         <Dialog 
+            onClose={closeDialog}
             open={showForm}
             maxWidth="xs"
             fullWidth={true}
@@ -262,6 +265,7 @@ export function SuggestFormDialog({showForm, characterId, closeDialog}: HealForm
     return (
         <Dialog 
             open={showForm}
+            onClose={closeDialog}
             maxWidth="xs"
             fullWidth={true}
             scroll="body"
@@ -277,7 +281,7 @@ export function SuggestFormDialog({showForm, characterId, closeDialog}: HealForm
 }
 
 export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
-    const { state, setFatalErrorOccured } = useGameReducer();
+    const { state, setFatalErrorOccured, updateFight } = useGameReducer();
     if (state == undefined || !state?.gameInfo) {
         return <></>
     }
@@ -367,6 +371,7 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
             maxWidth="xs"
             fullWidth={true}
             scroll="body"
+            onClose={closeDialog}
         >
             <DialogTitle>
                 Начать режим боя
@@ -411,17 +416,18 @@ interface ShowInventoryDialogProps extends DialogProps {
     characterId: string
 }
 
-export function ShowInventoryDialog({characterId, showForm}: ShowInventoryDialogProps) {
+export function ShowInventoryDialog({characterId, showForm, closeDialog}: ShowInventoryDialogProps) {
     const { data, isLoading, isSuccess } = useInventoryItemsQuery({
         characterId
     });
 
     return (
         <Dialog 
-            open={showForm}
+            open={showForm} 
             maxWidth="xs"
             fullWidth={true}
             scroll="paper"
+            onClose={closeDialog}
         >
             <DialogTitle>
                 Инвентарь

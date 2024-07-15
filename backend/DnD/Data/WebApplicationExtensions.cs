@@ -76,28 +76,28 @@ public static class WebApplicationExtensions
         }
     }
 
-    private static async Task<DataSeedDto> GetDataSeedDtoAsync()
+    private static async Task<DataSeed> GetDataSeedDtoAsync()
     {
         var pathToDataSeed = Path.Combine(Directory.GetCurrentDirectory(), "Data", DATASEED_FILE).ToString();
         var json = await File.ReadAllTextAsync(pathToDataSeed);
 
         var jsonSettings = new JsonSerializerSettings()
         {
-            ContractResolver = new ProtectedSetContractResolver()
+            TypeNameHandling = TypeNameHandling.Auto,
+            MaxDepth = 1024
         };
-        jsonSettings.Converters.Add(new ItemJsonConverter());
 
-        var dataSeed = JsonConvert.DeserializeObject<DataSeedDto>(json, jsonSettings);
+        var dataSeed = JsonConvert.DeserializeObject<DataSeed>(json, jsonSettings);
 
         return dataSeed ?? throw new InvalidOperationException("Could not find correct data seed.");
     }
 
-    private class DataSeedDto
+    public class DataSeed
     {
         public IEnumerable<Class> Classes { get; set; } = Array.Empty<Class>();
 
         public IEnumerable<Race> Races { get; set; } = Array.Empty<Race>();
 
-        public IEnumerable<Item> Items { get; set; } = Array.Empty<Item>();
+        public Item[] Items { get; set; } = Array.Empty<Item>();
     }
 }

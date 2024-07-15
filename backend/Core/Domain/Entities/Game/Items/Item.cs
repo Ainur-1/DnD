@@ -1,20 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿namespace Domain.Entities.Game.Items;
 
-namespace Domain.Entities.Game.Items;
-
-public abstract class Item
+public record Item
 {
-    public string Name { get; protected set; }
+    public string Name { get; init; }
 
-    public abstract string ItemType { get; }
+    public string? IconUrl { get; init; }
 
-    public string? IconUrl { get; protected set; }
+    public float WeightInPounds { get; init; }
 
-    public float WeightInPounds { get; protected set; }
+    public string? Description { get; init; }
 
-    public string? Description { get; protected set; }
+    public decimal CostInGold { get; init; }
 
-    public decimal CostInGold { get; protected set; }
-
-    public string[] Tags { get; protected set; } = Array.Empty<string>();
+    public string[] Tags { get; init; } = Array.Empty<string>();
 }

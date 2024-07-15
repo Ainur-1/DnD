@@ -6,6 +6,16 @@ import { useLazyPartyQuery } from "@/features/party";
 import { Box, CircularProgress, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 
+enum Progress {
+    startLoad = 7,
+    partyInfoLoaded = 35,
+    partyParsed = 45,
+    deathSavesFetchStart = 50,
+    deathSavesLoaded = 60,
+    startInit = 75,
+    completed = 100
+}
+
 interface GameLoaderProps {
     partyId: string | undefined,
     onLoaded: () => void,
@@ -15,90 +25,141 @@ interface GameLoaderProps {
 export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderProps) {
 
     const [progress, setProggress] = useState(0);
+    const [inGameCharacter, setInGameCharacter] = useState<{
+        __typename?: "PartyCharacterDto";
+        characterName: string;
+        id: any;
+    } | null | undefined>(undefined);
+    const [isUserGameMaster, setIsUserGameMaster] = useState<boolean | null | undefined>(undefined);
+    const [deathSaves, setDeathSaves] = useState<DeathSaves | null | undefined>(undefined);
+
+
     const { initGameState, reset } = useGameReducer();
     const { state:authState } = useAuthReducer();
 
-    const [party] = useLazyPartyQuery();
-    const [deathSaves] = useLazyDeathSavesQuery();
+    const [fetchParty, {data:partyData, isFetching:isPartyFetching, isError: isPartyError, isSuccess:isPartySuccess}] = useLazyPartyQuery();
+    const [fetchDeathSaves, {data:deathSavesData, isFetching:isDeathSavesFetching, isError: isDeathSavesError, isSuccess:isDeathSavesSuccess, error:deathSavesError}] = useLazyDeathSavesQuery();
 
     const notifyProgress = (progress: number) => setProggress(progress);
 
-    const fetchParty = (partyId: string) => party({partyId})
-        .unwrap()
-        .then(x => x)
-        .catch(() => null);
-    
-    const fetchDeathSaves = (characterId: string) => deathSaves({characterId})
-        .unwrap()
-        .then(x => x)
-        .catch(() => null);
+    useEffect(() => {
+        if(isPartyFetching) {
+            return;
+        }
 
-    async function load() {
-        try{
-            if (partyId === undefined) {
-                onFailure("Отряд не найден.");
+        if (isPartyError) {
+            onFailure("Не удалось загрузить отряд.");
+            return;
+        }
+
+        if (isPartySuccess) {
+            notifyProgress(Progress.partyInfoLoaded);
+            const { gameMasterId } = partyData.party;
+            const character = partyData.party.inGameCharacter;
+            setIsUserGameMaster(authState.currentUserId === gameMasterId);
+            setInGameCharacter(character ?? null);
+            notifyProgress(Progress.partyParsed);
+
+            return;
+        }
+
+    }, [isPartyFetching, isPartyError, isPartySuccess, partyData]);
+
+    useEffect(() => {
+        if (isUserGameMaster == undefined || inGameCharacter === undefined)
+            return;
+
+        notifyProgress(Progress.deathSavesFetchStart);
+        if (!isUserGameMaster) {
+            if (!inGameCharacter) {
+                onFailure();
                 return;
             }
-            notifyProgress(7);
-    
-            const response = await fetchParty(partyId!);
-            if (response === null) {
-                onFailure("Отряд не найден.");
+            
+            fetchDeathSaves({ characterId: inGameCharacter.id });
+        } else {
+            setDeathSaves(null);
+        }
+    }, [isUserGameMaster, inGameCharacter]);
+
+    useEffect(() => {
+        if (progress != Progress.deathSavesFetchStart)
+            return;
+
+        if (isUserGameMaster) {
+            setDeathSaves(null);
+            notifyProgress(Progress.deathSavesLoaded);
+            return;
+        } 
+
+        if (isDeathSavesFetching)
+            return;
+
+        if (isDeathSavesError) {
+            onFailure();
+            return;
+        }
+
+        if (isDeathSavesSuccess) {
+            const stats = deathSavesData.character.dynamicStats;
+            if (!stats) {
+                onFailure();
                 return;
             }
-            notifyProgress(25);
-    
-            const { gameMasterId, inGameCharacter } = response.party;
-            const isUserGameMaster = authState.currentUserId === gameMasterId;
-        
-            notifyProgress(45);
-    
-            let deathSaves: DeathSaves | undefined;
-            if (!isUserGameMaster) {
-                if (!inGameCharacter) {
-                    onFailure();
-                    return;
-                }
-    
-                const response = await fetchDeathSaves(inGameCharacter.id);
-                notifyProgress(55);
-                if (response == null) {
-                    onFailure();
-                    return;
-                }
+            const { isDead, isDying, deathSaves:dS } = stats!;
 
-                const { isDead, isDying, deathSaves:dS } = response.character.dynamicStats;
-    
-                deathSaves = !isDead && isDying && dS != null ? {
-                    successCount: dS.successCount,
-                    failureCount: dS.failureCount
-                } : undefined;
-            }
-            notifyProgress(75);
-    
+            const deathSaves = !isDead && isDying && dS != null ? {
+                successCount: dS.successCount,
+                failureCount: dS.failureCount
+            } : null;
+
+            setDeathSaves(deathSaves);
+            notifyProgress(Progress.deathSavesLoaded);
+        }
+
+    }, [deathSavesData, isDeathSavesFetching, isDeathSavesError, isDeathSavesSuccess, progress]);
+
+    useEffect(() => {
+        if (progress == Progress.completed) 
+            onLoaded();
+    }, [progress]);
+
+    useEffect(() => {
+        if (deathSaves === undefined || partyId == undefined)
+            return;
+
+        notifyProgress(Progress.startInit);
+        (async () => {
             const initResult = await initGameState({
-                isUserGameMaster: isUserGameMaster,
+                isUserGameMaster: isUserGameMaster!,
                 partyId: partyId,
-                userCharacterId: inGameCharacter!.id as string,
-                deathSaves: deathSaves,
+                userCharacterId: inGameCharacter?.id,
+                deathSaves: deathSaves ?? undefined,
             });
 
             if (!initResult) {
                 onFailure();
                 return;
             } else {
-                notifyProgress(100);
+                notifyProgress(Progress.completed);
             }
-        } catch {
-            onFailure();
+        })();
+
+    }, [deathSaves]);
+
+    function startLoad() {
+        if (partyId === undefined) {
+            onFailure("Отряд не найден.");
             return;
         }
-        onLoaded();
+        notifyProgress(Progress.startLoad);
+    
+        fetchParty({partyId});
     }
 
     useEffect(() => {
         reset();
-        load();
+        startLoad();
     }, []);
 
     return <Box sx={{ position: 'relative', display: 'inline-flex' }}>

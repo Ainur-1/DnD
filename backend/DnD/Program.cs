@@ -4,10 +4,13 @@ using DnD.Data;
 using Microsoft.AspNetCore.Identity;
 using Domain.Entities.User;
 using DnD.GraphQL;
-using DnD.GraphQL.Services;
 using Services.Implementation.Extensions;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Services.Abstractions;
+using Services.Implementation;
+using MassTransit;
+using static DnD.Data.WebApplicationExtensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DnD;
 
@@ -19,13 +22,14 @@ public class Program
         var configuration = builder.Configuration;
         var services = builder.Services;
 
-        var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings))?.Get<MongoDbSettings>() ?? throw new ArgumentNullException($"Provide {nameof(MongoDbSettings)}.");
+        var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings))?.Get<MongoDbSettings>() 
+            ?? throw new ArgumentNullException($"Provide {nameof(MongoDbSettings)}.");
 
         services
                 .AddIdentity<User, UserRole>(options =>
                 {
-                    options.SignIn.RequireConfirmedEmail = false;
-                    options.SignIn.RequireConfirmedAccount = false;
+                    options.SignIn.RequireConfirmedEmail = true;
+                    options.SignIn.RequireConfirmedAccount = true;
                     options.User.RequireUniqueEmail = true;
                     options.User.AllowedUserNameCharacters = new string(Enumerable.Range(65, 25)
                         .Select(upperEnglishLetterCode => (char)upperEnglishLetterCode)
@@ -43,9 +47,7 @@ public class Program
                 .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
                 .AddDefaultTokenProviders();
 
-        services.AddSignalR();
-        services.RegisterDatabaseServices(mongoDbSettings);
-        services.AddMongoCollections();
+        services.AddLogging(x => x.AddConsole().AddDebug());
 
         services.AddLogging();
 
@@ -53,7 +55,7 @@ public class Program
         {
             services.AddCors(options =>
             {
-                var allowHosts = configuration.GetValue<string[]>("CorsHost") ?? ["http://localhost:3000"];
+                var allowHosts = configuration.GetValue<string>("CorsHost") ?? "http://localhost:3000";
                 options.AddPolicy("DevFrontEnds",
                     builder =>
                         builder.WithOrigins(allowHosts)
@@ -65,7 +67,19 @@ public class Program
             });
         }
 
+        services.AddSignalR();
         services.AddGraphQlApi();
+
+        services.AddTransient<IEmailService>(provider =>
+            new EmailService(
+                configuration["Smtp:Server"],
+                int.Parse(configuration["Smtp:Port"]),
+                configuration["Smtp:User"],
+                configuration["Smtp:Pass"]
+            ));
+        services.AddTransient<IUserService, UserManagementService>();
+
+        services.RegisterDatabaseServices(mongoDbSettings);
         services.AddDomainServicesImplementations();
 
         var app = builder.Build();

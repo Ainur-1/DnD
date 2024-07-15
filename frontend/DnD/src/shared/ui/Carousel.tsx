@@ -6,7 +6,7 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 
 interface CarouselProps<T> {
     items: T[],
-    constructNode: (item:T, itemIndex: number) => ReactNode
+    constructNode: (item:T, itemIndex: number) => ReactNode;
 }
 
 export default function Carousel<T>({items, constructNode}: CarouselProps<T>) {
@@ -20,7 +20,7 @@ export default function Carousel<T>({items, constructNode}: CarouselProps<T>) {
         <CommunityCarousel
             sx={{
                 paddingTop: 1,
-                paddingBottom:1
+                paddingBottom:1,
             }}
             index={activeStep}
             navButtonsProps={{

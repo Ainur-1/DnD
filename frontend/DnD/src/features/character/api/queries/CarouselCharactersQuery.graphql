@@ -1,0 +1,15 @@
+query carouselCharacters{
+  myCharacters {
+    id
+    isInParty
+    personality {
+      name
+      race
+      class
+      level
+      base64Image
+      canLevelUp
+    }
+    isDead
+  }
+}

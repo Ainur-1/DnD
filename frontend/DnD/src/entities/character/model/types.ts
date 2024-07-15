@@ -1,4 +1,5 @@
-import { ClassFeature, Dice, RaceTrait } from "@/shared/types/domainTypes"
+import { Dice } from "@/shared/api/gql/graphql";
+import { ClassFeature, RaceTrait } from "@/shared/types/domainTypes"
 
 
 export type Personality = {

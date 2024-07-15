@@ -59,8 +59,20 @@ export function MyCharactersCarousel() {
 
     return <Stack>
             {isSuccess && <>
-                {data && data.length > 0 && <Carousel items={data!} constructNode={getCarouselCard} />}
-                {!data || data.length == 0 && <AbsoluteCenterContent>
+                {data && data.myCharacters.length > 0 && <Carousel items={data.myCharacters.map(x => {
+                    return {
+                        characterName: x.personality.name, 
+                        characterRace: x.personality.race, 
+                        characterClass: x.personality.class, 
+                        characterLevel: x.personality.level, 
+                        characterImageBase64: x.personality.base64Image,
+                        id: x.id,
+                        canBeUpdated: x.personality.canLevelUp,
+                        isDead: x.isDead,
+                        isInParty: x.isInParty
+                    };
+                })} constructNode={getCarouselCard} />}
+                {!data || data.myCharacters.length == 0 && <AbsoluteCenterContent>
                         У вас нет персонажей
                     </AbsoluteCenterContent>}
             </>}

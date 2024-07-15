@@ -1,33 +1,29 @@
 import { useJoinPartyMutation } from "@/features/party";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SelectCharacterDialog from "./SelectCharacterDialog";
 
 export default function JoinPartyForm() {
     const navigate = useNavigate();
     const [partyId, setPartyId] = useState<string | undefined>();
-    const [characterId, setCharacterId] = useState<string | undefined>();
     const [partyError, setPartyError] = useState<string>();
     const [accessCode, setAccessCode] = useState<string | undefined>();
     const [accessCodeError, setAccessCodeError] = useState<string>();
     const [requestError, setRequestError] = useState<string>();
 
     const [showChracterList, setShowCharacterList] = useState(false);
-    const ref = useRef<HTMLFormElement>(null);
 
     const [joinParty, { isLoading, isSuccess, data, isError, error }] = useJoinPartyMutation();
 
     const onCloseCharacterList = (characterId: string | undefined) => {
-        setCharacterId(characterId);
         setShowCharacterList(false);
         if (characterId) {
-            ref.current?.submit();
+            joinWithCharacter(characterId);
         }
     };
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
+    async function joinWithCharacter(characterId: string) {
         const empty = "";
 
         if (isLoading) {
@@ -71,7 +67,7 @@ export default function JoinPartyForm() {
 
     }, [isSuccess, error, isLoading, data]);
 
-    return  <Box ref={ref} component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+    return  <Box component="form" noValidate sx={{ mt: 1 }}>
         <TextField
             value={partyId}
             onChange={(e) => setPartyId(e.target.value.trim())}
@@ -92,13 +88,13 @@ export default function JoinPartyForm() {
             fullWidth
             label="Код доступа"
         />
-        <Stack alignItems="center" marginTop={!requestError ? 3 : 0}>
+        <Stack  marginTop={!requestError ? 3 : 0}>
             { requestError && 
                 <Typography component="span" color="error" marginBottom={3}>
                     {requestError}
                 </Typography>
             }
-            <Button variant="contained" onClick={() => setShowCharacterList(true)}  size="large" fullWidth disabled={isLoading}>
+            <Button variant="contained"  onClick={() => setShowCharacterList(true)}  size="large" fullWidth disabled={isLoading}>
                 Присоединиться
             </Button>
         </Stack>

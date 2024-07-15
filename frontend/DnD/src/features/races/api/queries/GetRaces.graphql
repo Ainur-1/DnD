@@ -1,0 +1,9 @@
+query getRaces {
+  races {
+    id
+    name
+    subRacesAdjustments {
+      name
+    }
+  }
+}

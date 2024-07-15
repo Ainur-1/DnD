@@ -21,5 +21,5 @@ export type Race = {
 } & SimpleRace
 
 export type RaceTrait = {
-    options?: string[]
+    options?: string[] | null
 } & NamePlusDescription;

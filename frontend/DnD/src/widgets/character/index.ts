@@ -1,4 +1,4 @@
-import CreateCharcaterForm from "./ui/CreateCharcaterForm";
+import CreateCharacterForm from "./ui/CreateCharacterForm";
 import { MyCharactersCarousel } from "./ui/MyCharactersCarousel";
 
-export { MyCharactersCarousel, CreateCharcaterForm };
+export { MyCharactersCarousel, CreateCharacterForm };

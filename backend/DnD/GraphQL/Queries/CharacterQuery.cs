@@ -21,10 +21,6 @@ public class CharacterQuery
         {
             return await characterService.GetCharacterForUserAsync(currentUserId, characterId) ?? throw new ObjectNotFoundException();
         }
-        catch(ObjectNotFoundException)
-        {
-            throw;
-        }
         catch(AccessDeniedException)
         {
             throw new ObjectNotFoundException();

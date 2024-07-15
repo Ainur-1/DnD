@@ -2,7 +2,7 @@ import { ClassIdType } from "@/entities/classes";
 import { InventroryWallet } from "@/entities/inventory";
 import { Race } from "@/entities/races";
 import { ExpandedInventoryItem } from "@/features/inventory";
-import { Aligments } from "@/shared/types/domainTypes";
+import { CharacterAlignmentType } from "@/shared/api/gql/graphql";
 import { FormField } from "@/shared/types/IFormField";
 import { isDecimal } from "@/shared/utils/isDecimal";
 import { useReducer } from "react";
@@ -21,7 +21,10 @@ type Step1State = {
 };
 
 const setp1Init: Step1State = {
-    name: fullyUndefined,
+    name: {
+        value: "",
+        error: null,
+    },
     isPublic: {
         value: true,
         error: null
@@ -87,7 +90,7 @@ type Step3State = {
     base64Image: FormField<string>,
     age: FormField<number>,
     speed: FormField<number>,
-    alignment: FormField<Aligments>,
+    alignment: FormField<CharacterAlignmentType>,
     background: FormField<string>,
     languages: FormField<string[]>,
     flaws: FormField<string[]>,
@@ -97,10 +100,16 @@ type Step3State = {
 
 const step3Init: Step3State = {
     base64Image: fullyUndefined,
-    age: fullyUndefined,
-    speed: fullyUndefined,
+    age: {
+        value: 1,
+        error: null
+    },
+    speed: {
+        value: 15,
+        error: null
+    },
     alignment: {
-        value: Aligments.any,
+        value: CharacterAlignmentType.Any,
         error: null
     },
     background: fullyUndefined,
@@ -224,15 +233,9 @@ function isValidStep1(state: CreateCharacterFormState, dispatch: React.Dispatch<
     let error: boolean = false;
     const requireField = carryGetRequireFieldFunction(dispatch);
 
-    if(!state.name.value){
+    if(state.name.value == undefined){
         error = true;
         requireField("name", "");
-    } else {
-        const name = state.name.value!.trim();
-        if (name.length == 0){
-            error = true;
-            requireField("name", name);
-        }
     }
 
     return !error;
@@ -247,7 +250,7 @@ function validateAbility(dispatch: React.Dispatch<Action>, formField: "strength"
     }
 
     if (value < 3 || value > 18 || isDecimal(value)) {
-        setField(formField, 3, "Не валидное значение.");
+        setField(formField, 3, "Целое число от 3 до 18.");
         return false;
     }
 
@@ -255,7 +258,6 @@ function validateAbility(dispatch: React.Dispatch<Action>, formField: "strength"
 
     return true;
 } 
-
 
 function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
     let error = false;
@@ -286,7 +288,7 @@ function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<
         }
     }
 
-    if(!state.classXp.value) {
+    if(state.classXp.value == undefined) {
         error = true;
         requireField("classXp");
     } else if (state.classXp.value < 0) {
@@ -299,12 +301,12 @@ function isValidStep2(state: CreateCharacterFormState, dispatch: React.Dispatch<
     }
 
     return !error
-        && !validateAbility(dispatch, "strength", state.strength.value)
-        && !validateAbility(dispatch, "dexterity", state.dexterity.value)
-        && !validateAbility(dispatch, "constitution", state.constitution.value)
-        && !validateAbility(dispatch, "intelligence", state.intelligence.value)
-        && !validateAbility(dispatch, "wisdom", state.wisdom.value)
-        && !validateAbility(dispatch, "charisma", state.charisma.value)
+        && validateAbility(dispatch, "strength", state.strength.value)
+        && validateAbility(dispatch, "dexterity", state.dexterity.value)
+        && validateAbility(dispatch, "constitution", state.constitution.value)
+        && validateAbility(dispatch, "intelligence", state.intelligence.value)
+        && validateAbility(dispatch, "wisdom", state.wisdom.value)
+        && validateAbility(dispatch, "charisma", state.charisma.value)
 }
 
 function isValidStep3(state: CreateCharacterFormState, dispatch: React.Dispatch<Action>) {
@@ -316,8 +318,18 @@ function isValidStep3(state: CreateCharacterFormState, dispatch: React.Dispatch<
     setField("languages", state.languages.value?.map(x => x.trim()));
     setField("otherTraits", state.otherTraits.value?.map(x => x.trim()));
 
-    if (!state.alignment.value || state.alignment.value == Aligments.any) {
-        setField("alignment", Aligments.any, "Поле обязательно.");
+    if (!state.alignment.value || state.alignment.value == CharacterAlignmentType.Any) {
+        setField("alignment", CharacterAlignmentType.Any, "Поле обязательно.");
+        return false;
+    }
+
+    if(!state.age.value) {
+        setField("age", 1, "Укажите возраст.");
+        return false;
+    }
+
+    if(!state.speed.value) {
+        setField("speed", 1, "Укажите скорость.");
         return false;
     }
 
@@ -342,23 +354,23 @@ function isValidStep4(state: CreateCharacterFormState, dispatch: React.Dispatch<
             gold?: number,
             platinum?: number,
         } = {};
-        if (!wallet.copper || wallet.copper < 0) {
+        if (wallet.copper == undefined || wallet.copper < 0) {
             correctCurrency = false;
             fixedCurrency.copper = 0;
         }
-        if (!wallet.silver || wallet.silver < 0) {
+        if (wallet.silver == undefined || wallet.silver < 0) {
             correctCurrency = false;
             fixedCurrency.silver = 0;
         }
-        if (!wallet.electrum || wallet.electrum < 0) {
+        if (wallet.electrum == undefined || wallet.electrum < 0) {
             correctCurrency = false;
             fixedCurrency.electrum = 0;
         }
-        if (!wallet.gold || wallet.gold < 0) {
+        if (wallet.gold == undefined || wallet.gold < 0) {
             correctCurrency = false;
             fixedCurrency.gold = 0;
         }
-        if (!wallet.platinum || wallet.platinum < 0) {
+        if (wallet.platinum == undefined || wallet.platinum < 0) {
             correctCurrency = false;
             fixedCurrency.platinum = 0;
         }
@@ -373,7 +385,6 @@ function isValidStep4(state: CreateCharacterFormState, dispatch: React.Dispatch<
 
     return correctItemCount && correctCurrency;
 }
-
 
 export function useCreateCharacterReducer() {
     const [state, dispatch] = useReducer(reducer, initialState);

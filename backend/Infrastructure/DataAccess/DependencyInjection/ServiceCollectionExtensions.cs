@@ -1,6 +1,6 @@
 ﻿using DataAccess.DependencyInjection.Serialization;
 using Domain.Entities;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 using Domain.Entities.Classes;
 using Domain.Entities.Game.Items;
 using Domain.Entities.Game.Races;
@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
     {
         AddDatabaseProvider(serviceCollection, mongoDbSettings);
         AddRepositories(serviceCollection);
+
 
         return serviceCollection;
     }
@@ -55,7 +56,7 @@ public static class ServiceCollectionExtensions
         BsonSerializer.RegisterSerializer(new EnumSerializer<AccessType>(BsonType.String));
         BsonSerializer.RegisterSerializer(new DiceMongoSerializer());
 
-        BsonClassMap.RegisterClassMap<CharacterAggregate>(cm =>
+        BsonClassMap.RegisterClassMap<Character>(cm =>
         {
             cm.AutoMap();
             cm.MapIdProperty(x => x.Id);
@@ -117,7 +118,7 @@ public static class ServiceCollectionExtensions
                 .SetIsRequired(true);
         });
 
-        BsonClassMap.RegisterClassMap<RaceTraitWithOptions>(cm =>
+        BsonClassMap.RegisterClassMap<RaceTraitDescriptor>(cm =>
         {
             cm.AutoMap();
             cm.MapProperty(x => x.Options)
@@ -125,8 +126,36 @@ public static class ServiceCollectionExtensions
         });
     }
 
-    private static void AddRepositories(IServiceCollection serviceCollection)
+    private static void AddRepositories(IServiceCollection services)
     {
-        //todo: register repositories here
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Character>(Constants.CHARACTER_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Party>(Constants.PARTIES_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Race>(Constants.RACES_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Class>(Constants.CLASSES_COLLECTION_NAME);
+        });
+
+        services.AddScoped(serviceProvider =>
+        {
+            var context = serviceProvider.GetRequiredService<DndDatabase>();
+            return context.Database.GetCollection<Item>(Constants.ITEMS_COLLECTION_NAME);
+        });
     }
 }

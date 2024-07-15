@@ -1,32 +1,19 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { enumFromStringValue } from '@/shared/utils/enumFromStringParser';
 import { SelectorProps } from '@/shared/types/IGenericSelectorProps';
-import { Aligments } from '@/shared/types/domainTypes';
+import { CharacterAlignmentType } from '@/shared/api/gql/graphql';
+import { labelMap } from '@/shared/maps/AlignmentLabelMap';
 
-const AligmentsLabelMap = {
-    [Aligments.lawfulGood]: "Упорядоченно-добрый",
-    [Aligments.neutralGood]: "Добрый",
-    [Aligments.chaoticGood]: "Хаотично-добрый",
-    [Aligments.lawfulNeutral]: "Упорядоченный",
-    [Aligments.trueNeutral]: "Истинно нейтральный",
-    [Aligments.chaoticNeutral]: "Хаотичный",
-    [Aligments.lawfulEvil]: "Упорядоченно-злой",
-    [Aligments.neutralEvil]: "Злой",
-    [Aligments.chaoticEvil]: "Хаотично-злой",
-    [Aligments.unaligned]: "Без привязки",
-    [Aligments.any]: "Любое",
-}
-
-interface AlignmentSelectorProps extends SelectorProps<Aligments> {
+interface AlignmentSelectorProps extends SelectorProps<CharacterAlignmentType> {
     errorText?: string
 }
 
 export function AlignmentSelector({required, value, onValueChange, errorText}: AlignmentSelectorProps) {
-    const values = Object.values(Aligments);
+    const values = Object.values(CharacterAlignmentType);
 
-    const handleChange = (value: Aligments | string) => {
+    const handleChange = (value: CharacterAlignmentType | string) => {
         if (typeof value === 'string') {
-            const enumValue = enumFromStringValue(Aligments, value);
+            const enumValue = enumFromStringValue(CharacterAlignmentType, value);
             if (enumValue)
                 onValueChange(enumValue);
         } else {
@@ -46,7 +33,7 @@ export function AlignmentSelector({required, value, onValueChange, errorText}: A
             onChange={(e) => handleChange(e.target.value)}
         >
             {
-                values.map(alignment => <MenuItem key={alignment} value={alignment}>{AligmentsLabelMap[alignment]}</MenuItem>)
+                values.map(alignment => <MenuItem key={alignment} value={alignment}>{labelMap.get(alignment)}</MenuItem>)
             }
         </Select>
     </FormControl>

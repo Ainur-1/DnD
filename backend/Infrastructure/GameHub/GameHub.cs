@@ -12,7 +12,7 @@ using System.Collections.Concurrent;
 namespace GameHub;
 
 [Authorize]
-public class GameHub : Hub
+public class GameHub : Hub<IHubEventActions>
 {
     private static readonly ConcurrentDictionary<string, Guid> _connectionPartyMapping = new();
     private static readonly ConcurrentDictionary<string, Guid> _connectionCharacterMapping = new();
@@ -26,16 +26,12 @@ public class GameHub : Hub
         _partyService = partyService;
     }
 
-    public override async Task OnConnectedAsync()
-    {
-        _logger.LogInformation("Игрок с ID {ID} ConId '{ConId}' подключен.", Context.UserIdentifier, Context.ConnectionId);
-    }
 
-    public async Task<GameRoomDto?> JoinRoomAsync(Guid partyId)
+    public async Task<GameRoomDto?> JoinRoom(Guid partyId)
     {
         var userId = UserId;
 
-        if (await _partyService.IsUserInPartyAsync(userId, partyId))
+        if (!await _partyService.IsUserInPartyAsync(userId, partyId))
         {
             return null;
         }
@@ -145,9 +141,9 @@ public class GameHub : Hub
 
             foreach (var characterId in party.InGameCharactersIds)
             {
-                var characterStats = await _characterService.GetCharacterInGameStatsAsync(characterId);
+                var characterStats = await _characterService.GetCharacterFightOrderCalculationParametersAsync(characterId);
 
-                if (characterStats == null || characterStats.IsDead)
+                if (characterStats == null || characterStats.Value.IsDead)
                 {
                     continue;
                 }
@@ -163,7 +159,7 @@ public class GameHub : Hub
                     score = 20;
                 }
 
-                initiativeScores[characterId] = characterStats.Initiative + score;
+                initiativeScores[characterId] = characterStats.Value.InitiativeModifier + score;
             }
 
             room.SortedInitiativeScores = initiativeScores
@@ -176,11 +172,28 @@ public class GameHub : Hub
             room.SortedInitiativeScores = default;
         }
 
-        await Clients.Group(partyId.ToString()).SendAsync("FightStatusUpdate", new
+        //
+        var fightUpdatedEvent = new FightUpdatedEvent
         {
-            isFight = room.IsFight,
-            orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
-        });
+            Status = new FightStatusDto
+            {
+                IsFight = room.IsFight,
+                ScoreValues = room.SortedInitiativeScores?.Select(x => new CharacterInitciativeScoreDto
+                {
+                    CharacterId = x.Item1,
+                    Score = x.Item2
+                }).ToArray()
+            }
+        };
+
+
+        await Clients.Group(partyId.ToString()).OnFightUpdate(fightUpdatedEvent);
+        //
+        //await Clients.Group(partyId.ToString()).OnFightUpdate(new
+        //{
+        //    isFight = room.IsFight,
+        //    orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
+        //});
     }
     public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
     {

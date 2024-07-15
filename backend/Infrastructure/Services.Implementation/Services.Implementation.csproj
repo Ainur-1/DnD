@@ -7,14 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="MassTransit" Version="8.2.3" />
+    <PackageReference Include="MassTransit.Abstractions" Version="8.2.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Contracs\Contracts.csproj" />
+    <ProjectReference Include="..\..\Core\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
-    <ProjectReference Include="..\..\Core\Service.Abstractions\Services.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\Services.Abstractions\Services.Abstractions.csproj" />
     <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+    <ProjectReference Include="..\Mappings\Mappings.csproj" />
   </ItemGroup>
 
 </Project>
