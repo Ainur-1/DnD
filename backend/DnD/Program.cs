@@ -22,13 +22,14 @@ public class Program
         var configuration = builder.Configuration;
         var services = builder.Services;
 
-        var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings))?.Get<MongoDbSettings>() ?? throw new ArgumentNullException($"Provide {nameof(MongoDbSettings)}.");
+        var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings))?.Get<MongoDbSettings>() 
+            ?? throw new ArgumentNullException($"Provide {nameof(MongoDbSettings)}.");
 
         services
                 .AddIdentity<User, UserRole>(options =>
                 {
-                    options.SignIn.RequireConfirmedEmail = false;
-                    options.SignIn.RequireConfirmedAccount = false;
+                    options.SignIn.RequireConfirmedEmail = true;
+                    options.SignIn.RequireConfirmedAccount = true;
                     options.User.RequireUniqueEmail = true;
                     options.User.AllowedUserNameCharacters = new string(Enumerable.Range(65, 25)
                         .Select(upperEnglishLetterCode => (char)upperEnglishLetterCode)

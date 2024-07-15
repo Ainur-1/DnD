@@ -1,11 +1,11 @@
 ﻿using Contracts.Online;
 using Contracts.Parties;
 using Domain.Entities.Parties;
-using Domain.Exceptions;
+using Services.Abstractions;
 
 namespace Service.Abstractions;
 
-public interface IPartyService
+public interface IPartyService: IDomainService
 {
     Task<Party?> GetPartyByIdAsync(Guid partyId);
 

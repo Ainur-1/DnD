@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameHub.Dtos
+namespace Services.Abstractions
 {
-    public class FightUpdatedEvent
+    public interface IDomainService
     {
-        public FightStatusDto Status { get; set; }
     }
 }
