@@ -155,13 +155,20 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
             .withAutomaticReconnect()
             .build();
         
-        connection.on("OnFightUpdate", (args: FightInfo) => dispatch(setFight(args)));
+        connection.on("OnFightUpdate",
+             (args: FightInfo) => dispatch(setFight(args)));
         connection.on("OnPartyDisband", () => dispatch(setGameEnd(true)));
         connection.on("OnPartyJoin", (args: GameCharacterDto) => dispatch(addGameChracter(mapDtoToGameCharacter(args))));
-        connection.on("OnCharacterUpdate", (args: CharacterUpdatedEvent) => dispatch(updateCharacterDynamicStats({
+        connection.on("OnCharacterUpdate", (args) => {
+            console.log("Message");
+            console.log(args);
+        });
+        /*connection.on("OnCharacterUpdate",
+             (args: CharacterUpdatedEvent) => dispatch(updateCharacterDynamicStats({
             ...args.stats,
             id: args.id,
-        })));
+        })));*/
+
 
         try {
             const roomState = await connection.start()

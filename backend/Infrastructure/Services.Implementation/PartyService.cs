@@ -43,6 +43,7 @@ public class PartyService : IPartyService
         await _partyCollection.InsertOneAsync(newParty);
         return newParty.Id;
     }
+
     public async Task DisbandPartyAsync(Guid partyId, int xp)
     {
         if (xp < 0)
@@ -54,29 +55,19 @@ public class PartyService : IPartyService
             };
         }
 
-        using var session = await _client.StartSessionAsync();
-        session.StartTransaction();
-        try
-        {
-            var notDeadCharacterCount = await _characterCollection
-                .Find(filter => filter.Info.JoinedPartyId == partyId && !filter.Info.IsDead)
-                .CountDocumentsAsync();
-            var gainedXp = notDeadCharacterCount == 0 ? 0 : xp / notDeadCharacterCount;
+        var notDeadCharacterCount = await _characterCollection
+            .Find(filter => filter.Info.JoinedPartyId == partyId && !filter.Info.IsDead)
+            .CountDocumentsAsync();
+        var gainedXp = notDeadCharacterCount == 0 ? 0 : xp / notDeadCharacterCount;
 
-            var filter = Builders<Character>.Filter.Eq(filter => filter.Info.JoinedPartyId, partyId);
-            var update = Builders<Character>.Update
-                .Set(update => update.Info.JoinedPartyId, null)
-                .Set(update => update.InGameStats, null)
-                .Inc(xp => xp.Personality.Xp, gainedXp);
+        var filter = Builders<Character>.Filter.Eq(filter => filter.Info.JoinedPartyId, partyId);
+        var update = Builders<Character>.Update
+            .Set(update => update.Info.JoinedPartyId, null)
+            .Set(update => update.InGameStats, null)
+            .Inc(xp => xp.Personality.Xp, gainedXp);
 
-            await _characterCollection.UpdateManyAsync(session, filter, update);
-            await _partyCollection.DeleteOneAsync(session, p => p.Id == partyId);
-            await session.CommitTransactionAsync();
-        }
-        catch (Exception)
-        {
-            await session.AbortTransactionAsync();
-        }
+        await _characterCollection.UpdateManyAsync(filter, update);
+        await _partyCollection.DeleteOneAsync(p => p.Id == partyId);
         //
         await _hubContext.Clients.Group(partyId.ToString()).OnPartyDisband();
     }
@@ -106,35 +97,27 @@ public class PartyService : IPartyService
 
     public async Task<IEnumerable<UserPartyDto>> GetUserPartiesAsync(Guid userId)
     {
-        try
-        {
-            var result = new ConcurrentBag<UserPartyDto>();
+        var result = new ConcurrentBag<UserPartyDto>();
 
-            var partiesAsUserTask = _characterCollection
-                .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId != null)
-                .ProjectOnlyIdAndPersonalityAndInfo()
-                .ForEachAsync(async character =>
+        var partiesAsUserTask = _characterCollection
+            .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId != null)
+            .ProjectOnlyIdAndPersonalityAndInfo()
+            .ForEachAsync(async character =>
+            {
+                var party = await GetPartyByIdAsync(character.Info.JoinedPartyId!.Value);
+                if (party != null)
                 {
-                    var party = await GetPartyByIdAsync(character.Info.JoinedPartyId!.Value);
-                    if (party != null)
-                    {
-                        result.Add(UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name));
-                    }
-                });
+                    result.Add(UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name));
+                }
+            });
 
-            var partiesAsGameMasterTask = _partyCollection
-                .Find(x => x.GameMasterId == userId)
-                .ForEachAsync(party => result.Add(UserPartyDto.FromParty(party)));
+        var partiesAsGameMasterTask = _partyCollection
+            .Find(x => x.GameMasterId == userId)
+            .ForEachAsync(party => result.Add(UserPartyDto.FromParty(party)));
 
-            await Task.WhenAll(partiesAsUserTask, partiesAsGameMasterTask);
+        await Task.WhenAll(partiesAsUserTask, partiesAsGameMasterTask);
 
-            return result;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            throw;
-        }
+        return result;
     }
 
     public async Task<UserPartyDto> GetUserPartyAsync(Guid userId, Guid partyId)

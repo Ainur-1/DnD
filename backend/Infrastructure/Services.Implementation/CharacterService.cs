@@ -276,12 +276,12 @@ public class CharacterService : ICharacterService
             subRaceAbilities = race.GetSubRaceInfo(subRace!)?.Abilities ?? Array.Empty<AbilityBuff>();
         }
 
-        return (Strength: characterCreate.Strength + GetBuffValue(abilityBuffs, CharacterAbilityType.Strength) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Strength),
-            Dexterity: characterCreate.Dexterity + GetBuffValue(abilityBuffs, CharacterAbilityType.Dexterity) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Dexterity),
-            Constitution: characterCreate.Constitution + GetBuffValue(abilityBuffs, CharacterAbilityType.Constitution) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Constitution),
-            Intelligence: characterCreate.Intelligence + GetBuffValue(abilityBuffs, CharacterAbilityType.Intelligence) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Intelligence),
-            Wisdom: characterCreate.Wisdom + GetBuffValue(abilityBuffs, CharacterAbilityType.Wisdom) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Wisdom),
-            Charisma: characterCreate.Charisma + GetBuffValue(abilityBuffs, CharacterAbilityType.Charisma) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Charisma)
+        return (Strength: GetAbilityValueOr20(characterCreate.Strength + GetBuffValue(abilityBuffs, CharacterAbilityType.Strength) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Strength)),
+            Dexterity: GetAbilityValueOr20(characterCreate.Dexterity + GetBuffValue(abilityBuffs, CharacterAbilityType.Dexterity) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Dexterity)),
+            Constitution: GetAbilityValueOr20(characterCreate.Constitution + GetBuffValue(abilityBuffs, CharacterAbilityType.Constitution) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Constitution)),
+            Intelligence: GetAbilityValueOr20(characterCreate.Intelligence + GetBuffValue(abilityBuffs, CharacterAbilityType.Intelligence) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Intelligence)),
+            Wisdom: GetAbilityValueOr20(characterCreate.Wisdom + GetBuffValue(abilityBuffs, CharacterAbilityType.Wisdom) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Wisdom)),
+            Charisma: GetAbilityValueOr20(characterCreate.Charisma + GetBuffValue(abilityBuffs, CharacterAbilityType.Charisma) + GetBuffValue(subRaceAbilities, CharacterAbilityType.Charisma))
             );
     }
 

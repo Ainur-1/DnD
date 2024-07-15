@@ -1,5 +1,4 @@
 import useGameReducer from "@/features/game";
-import { damageCharacter, updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
 import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
@@ -30,6 +29,7 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
     const [formError, setFormError] = useState("");
     const { state, setFatalErrorOccured } = useGameReducer();
     const [requestSent, setRequestSent] = useState(false);
+    const { updateCharacter } = useGameReducer();
 
     if (state == undefined) {
         return <></>
@@ -164,6 +164,7 @@ export function DamageFormDialog({showForm, characterId, closeDialog}: HealFormD
     const [formError, setFormError] = useState("");
     const { state, setFatalErrorOccured } = useGameReducer();
     const [requestSent, setRequestSent] = useState(false);
+    const { damageCharacter } = useGameReducer();
 
     if (state == undefined) {
         return <></>
@@ -206,10 +207,10 @@ export function DamageFormDialog({showForm, characterId, closeDialog}: HealFormD
         setFormError("");
         setRequestSent(true);
         try {
-            await damageCharacter({
+            await damageCharacter(
                 characterId,
-                damage: damage as number,
-            });
+                damage as number,
+            );
         } catch {
             setFatalErrorOccured(true);
         } finally {
@@ -280,7 +281,7 @@ export function SuggestFormDialog({showForm, characterId, closeDialog}: HealForm
 }
 
 export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
-    const { state, setFatalErrorOccured } = useGameReducer();
+    const { state, setFatalErrorOccured, updateFight } = useGameReducer();
     if (state == undefined || !state?.gameInfo) {
         return <></>
     }
@@ -422,7 +423,7 @@ export function ShowInventoryDialog({characterId, showForm, closeDialog}: ShowIn
 
     return (
         <Dialog 
-            open={showForm}
+            open={showForm} 
             maxWidth="xs"
             fullWidth={true}
             scroll="paper"
