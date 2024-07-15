@@ -3,7 +3,7 @@ using Contracts;
 using Contracts.Online;
 using Contracts.Parties;
 using DataAccess.Extensions;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 using Domain.Entities.Parties;
 using Domain.Exceptions;
 using GameHub;
@@ -18,13 +18,13 @@ namespace Services.Implementation;
 public class PartyService : IPartyService
 {
     private readonly IMongoCollection<Party> _partyCollection;
-    private readonly IMongoCollection<CharacterAggregate> _characterCollection;
+    private readonly IMongoCollection<Character> _characterCollection;
     private readonly IMongoClient _client;
     private readonly IMapper _mapper;
     private readonly IHubContext<GameHub.GameHub, IHubEventActions> _hubContext;
 
     public PartyService(IMongoCollection<Party> partyCollection, 
-        IMongoCollection<CharacterAggregate> characterCollection, 
+        IMongoCollection<Character> characterCollection, 
         IMongoClient client, 
         IMapper mapper,
         IHubContext<GameHub.GameHub, IHubEventActions> hubContext
@@ -63,8 +63,8 @@ public class PartyService : IPartyService
                 .CountDocumentsAsync();
             var gainedXp = notDeadCharacterCount == 0 ? 0 : xp / notDeadCharacterCount;
 
-            var filter = Builders<CharacterAggregate>.Filter.Eq(filter => filter.Info.JoinedPartyId, partyId);
-            var update = Builders<CharacterAggregate>.Update
+            var filter = Builders<Character>.Filter.Eq(filter => filter.Info.JoinedPartyId, partyId);
+            var update = Builders<Character>.Update
                 .Set(update => update.Info.JoinedPartyId, null)
                 .Set(update => update.InGameStats, null)
                 .Inc(xp => xp.Personality.Xp, gainedXp);
@@ -114,7 +114,7 @@ public class PartyService : IPartyService
     {
         var result = new ConcurrentBag<UserPartyDto>();
 
-        var onlyIdAndNameProjection = Builders<CharacterAggregate>.Projection
+        var onlyIdAndNameProjection = Builders<Character>.Projection
             .Exclude(x => x.Inventory)
             .Exclude(x => x.Info)
             .Exclude(x => x.Stats)
@@ -204,8 +204,8 @@ public class PartyService : IPartyService
         try
         {
 
-            var characterFilter = Builders<CharacterAggregate>.Filter.Eq(filter => filter.Id, variables.CharacterId);
-            var characterUpdate = Builders<CharacterAggregate>.Update
+            var characterFilter = Builders<Character>.Filter.Eq(filter => filter.Id, variables.CharacterId);
+            var characterUpdate = Builders<Character>.Update
                 .Set(update => update.Info.JoinedPartyId, variables.PartyId)
                 .Set(update => update.InGameStats, character.InGameStats);
 

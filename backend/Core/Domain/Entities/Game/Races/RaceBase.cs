@@ -1,4 +1,4 @@
-﻿using Domain.Entities.Character;
+﻿using Domain.Entities.Characters;
 
 namespace Domain.Entities.Game.Races.Base;
 

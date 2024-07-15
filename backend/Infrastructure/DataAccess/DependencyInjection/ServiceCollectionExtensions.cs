@@ -1,6 +1,6 @@
 ﻿using DataAccess.DependencyInjection.Serialization;
 using Domain.Entities;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 using Domain.Entities.Classes;
 using Domain.Entities.Game.Items;
 using Domain.Entities.Game.Races;
@@ -56,7 +56,7 @@ public static class ServiceCollectionExtensions
         BsonSerializer.RegisterSerializer(new EnumSerializer<AccessType>(BsonType.String));
         BsonSerializer.RegisterSerializer(new DiceMongoSerializer());
 
-        BsonClassMap.RegisterClassMap<CharacterAggregate>(cm =>
+        BsonClassMap.RegisterClassMap<Character>(cm =>
         {
             cm.AutoMap();
             cm.MapIdProperty(x => x.Id);
@@ -131,7 +131,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(serviceProvider =>
         {
             var context = serviceProvider.GetRequiredService<DndDatabase>();
-            return context.Database.GetCollection<CharacterAggregate>(Constants.CHARACTER_COLLECTION_NAME);
+            return context.Database.GetCollection<Character>(Constants.CHARACTER_COLLECTION_NAME);
         });
 
         services.AddScoped(serviceProvider =>

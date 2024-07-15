@@ -1,6 +1,6 @@
 ﻿namespace Domain.Entities.Races;
 
-public class RaceTrait
+public class RaceTrait : IValueObject
 {
     public string Name { get; protected set; } 
 

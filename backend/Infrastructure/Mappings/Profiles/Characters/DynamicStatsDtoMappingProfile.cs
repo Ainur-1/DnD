@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
 using Contracts;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 using Mappings.Resolvers;
 
 
-namespace Mappings.Profiles.Character;
+namespace Mappings.Profiles.Characters;
 
 internal class DynamicStatsDtoMappingProfile : Profile
 {
     public DynamicStatsDtoMappingProfile()
     {
-        CreateMap<CharacterAggregate, DynamicStatsDto>()
+        CreateMap<Character, DynamicStatsDto>()
             .BeforeMap((x, _) => ArgumentNullException.ThrowIfNull(x.InGameStats, nameof(CharacterDynamicProperties)))
             .ForMember(x => x.IsDead, opt => opt.MapFrom(x => x.Info.IsDead))
             .ForMember(x => x.DeathSaves, opt => opt.MapFrom<DeathSavesResolver>())

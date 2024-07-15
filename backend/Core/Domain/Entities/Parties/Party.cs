@@ -1,4 +1,4 @@
-﻿using Domain.Entities.Character;
+﻿using Domain.Entities.Characters;
 using Domain.Exceptions;
 using System.Text.RegularExpressions;
 
@@ -34,7 +34,7 @@ public class Party
 
     protected Party() { }
 
-    public void AddCharacter(CharacterAggregate character)
+    public void AddCharacter(Character character)
     {   
         InGameCharactersIds.Add(character.Id);
         character.JoinParty(Id);

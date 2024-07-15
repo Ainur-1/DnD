@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Contracts;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 
 
-namespace Mappings.Profiles.Character;
+namespace Mappings.Profiles.Characters;
 
 internal class CharacterPersonalityMappingProfile : Profile
 {

@@ -2,7 +2,7 @@
 using Contracts.Character;
 ﻿using AutoMapper;
 using Contracts.Online;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 using Domain.Entities.Parties;
 using Domain.Exceptions;
 using MongoDB.Driver;
@@ -11,7 +11,7 @@ using DataAccess.Extensions;
 using Domain.Entities;
 using System.Diagnostics;
 using MassTransit;
-using Services.Implementation.Consumers.Character;
+using Services.Implementation.Consumers.Characters;
 using MassTransit.Initializers;
 using Domain.Entities.Races;
 using Domain.Entities.Classes;
@@ -23,7 +23,7 @@ namespace Services.Implementation;
 public class CharacterService : ICharacterService
 {
     private readonly IMongoCollection<Party> _partyCollection;
-    private readonly IMongoCollection<CharacterAggregate> _characterCollection;
+    private readonly IMongoCollection<Character> _characterCollection;
     private readonly IMongoCollection<Race> _raceCollection;
     private readonly IMongoCollection<Class> _classCollection;
     private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ public class CharacterService : ICharacterService
 
     public CharacterService(
         IMongoCollection<Party> partyCollection,
-        IMongoCollection<CharacterAggregate> characterCollection,
+        IMongoCollection<Character> characterCollection,
         IMongoCollection<Race> raceCollection,
         IMongoCollection<Class> classCollection,
         IMapper mapper,
@@ -138,9 +138,9 @@ public class CharacterService : ICharacterService
         character.TakeDamage(damage);
         Debug.Assert(character.InGameStats != null);
 
-        var selector = Builders<CharacterAggregate>.Filter
+        var selector = Builders<Character>.Filter
             .Eq(c => c.Id, characterId);
-        var updateHealthAndLiveStatus = Builders<CharacterAggregate>.Update
+        var updateHealthAndLiveStatus = Builders<Character>.Update
             .Set(dbCharacter => dbCharacter.InGameStats!.TemporaryHitPoints, character.InGameStats.TemporaryHitPoints)
             .Set(dbCharacter => dbCharacter.InGameStats!.HitPoints, character.InGameStats.HitPoints)
             .Set(dbCharacter => dbCharacter.InGameStats!.IsDying, character.InGameStats.IsDying)
@@ -162,9 +162,9 @@ public class CharacterService : ICharacterService
             hp = 1;
         }
 
-        var selector = Builders<CharacterAggregate>.Filter
+        var selector = Builders<Character>.Filter
             .Eq(c => c.Id, characterId);
-        var update = Builders<CharacterAggregate>.Update
+        var update = Builders<Character>.Update
             .Set(c => c.InGameStats.HitPoints, hp)
             .Set(c => c.InGameStats.TemporaryHitPoints, updateStats.TempHp)
             .Set(c => c.InGameStats.InspirationBonus, updateStats.Inspiration)
@@ -182,7 +182,7 @@ public class CharacterService : ICharacterService
     private Task SendCharacterUpdatedEventAsync(Guid characterId)
     => _eventBus.Send(new CharacterUpdatedEvent {Id = characterId});
 
-    private async Task<CharacterAggregate> CreateCharacterWithDatabaseDataAsync(Guid issuer, CreateCharacterDto characterCreate) 
+    private async Task<Character> CreateCharacterWithDatabaseDataAsync(Guid issuer, CreateCharacterDto characterCreate) 
     {
         var race = await _raceCollection.Find(x => x.Id == characterCreate.Race)
             .SingleOrDefaultAsync() ?? throw new ObjectNotFoundException();
@@ -205,7 +205,8 @@ public class CharacterService : ICharacterService
             bonds: characterCreate.MaybeBonds??[],
             flaws: characterCreate.MaybeFlaws??[],
             languages: characterCreate.MaybeLanguages??[],
-            otherTraits: characterCreate.MaybeOtherTraits??[]
+            otherTraits: characterCreate.MaybeOtherTraits??[],
+            size: race.Size
         );
 
         var management = new CharacterManagement(
@@ -223,7 +224,7 @@ public class CharacterService : ICharacterService
             platinum: startWealth.PlatinumCoins
         );
 
-        var inventory = new CharacterInventoryAggregate(
+        var inventory = new CharacterInventory(
             setCurrencyWeightEmulationOn: characterCreate.CoinsAffectOnWeight,
             initialWallet: initialWallet,
             initialItems: characterCreate?.MaybeStartInventory
@@ -233,7 +234,7 @@ public class CharacterService : ICharacterService
                         
         );
 
-        return new CharacterAggregate(
+        return new Character(
             setUpPersonality: personality,
             setUpStats: CreateCharacterStats(characterCreate!, race, @class, raceName),
             setUpInfo: management,

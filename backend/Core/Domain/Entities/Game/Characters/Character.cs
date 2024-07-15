@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
 using Domain.Entities.Items.Armors;
-using Domain.Extensions;
 
-namespace Domain.Entities.Character;
+namespace Domain.Entities.Characters;
 
-public class CharacterAggregate
+public class Character : IEntity<Guid>
 {
     public Guid Id { get; protected set; }
 
@@ -14,15 +13,15 @@ public class CharacterAggregate
 
     public CharacterManagement Info { get; protected set; }
 
-    public CharacterInventoryAggregate Inventory { get; protected set; }
+    public CharacterInventory Inventory { get; protected set; }
 
     public CharacterDynamicProperties? InGameStats { get; protected set; }
 
-    public CharacterAggregate(
+    public Character(
         CharacterPersonality setUpPersonality,
         CharacterStats setUpStats,
         CharacterManagement setUpInfo,
-        CharacterInventoryAggregate startInventory
+        CharacterInventory startInventory
     ) 
     {
         Id = Guid.NewGuid();
@@ -38,7 +37,7 @@ public class CharacterAggregate
         Inventory = startInventory;
     }
 
-    protected CharacterAggregate() {}
+    protected Character() {}
 
     internal void JoinParty(Guid partyId)
     {

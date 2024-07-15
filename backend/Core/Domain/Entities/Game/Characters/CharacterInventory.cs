@@ -1,8 +1,8 @@
 ﻿using Domain.Entities.Game.Items;
 
-namespace Domain.Entities.Character;
+namespace Domain.Entities.Characters;
 
-public class CharacterInventoryAggregate
+public class CharacterInventory
 {
     public bool CurrencyWeightEmulationEnabled { get; protected set; }
 
@@ -14,7 +14,7 @@ public class CharacterInventoryAggregate
 
     private float ItemsWeight => Items.Sum(x => x.Item.WeightInPounds);
 
-    public CharacterInventoryAggregate(
+    public CharacterInventory(
         bool setCurrencyWeightEmulationOn,
         CharacterCurrency initialWallet,
         IEnumerable<InventoryItem>? initialItems
@@ -29,5 +29,5 @@ public class CharacterInventoryAggregate
 
     }
 
-    protected CharacterInventoryAggregate() {}
+    protected CharacterInventory() {}
 }

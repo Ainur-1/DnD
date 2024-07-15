@@ -1,6 +1,4 @@
-﻿
-
-namespace Domain.Entities.Character;
+﻿namespace Domain.Entities.Characters;
 
 public class CharacterDynamicProperties
 {

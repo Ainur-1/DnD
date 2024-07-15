@@ -1,15 +1,15 @@
 using AutoMapper;
 using Contracts;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 
 
-namespace Mappings.Profiles.Character;
+namespace Mappings.Profiles.Characters;
 
 internal class CharacterDtoMappingProfile : Profile
 {
     public CharacterDtoMappingProfile()
     {
-        CreateMap<CharacterAggregate, CharacterDto>()
+        CreateMap<Character, CharacterDto>()
         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
         .ForMember(dest => dest.Personality, opt => opt.MapFrom(src => src.Personality))
         .ForMember(dest => dest.DynamicStats, opt => opt.MapFrom(src => ShouldMapDynamicStats(src) ? src : null))
@@ -17,7 +17,7 @@ internal class CharacterDtoMappingProfile : Profile
         .ForMember(dest => dest.IsDead, opt => opt.MapFrom(src => src.Info.IsDead));
     }
 
-    private bool ShouldMapDynamicStats(CharacterAggregate src)
+    private bool ShouldMapDynamicStats(Character src)
     {
         return src.Info.JoinedPartyId != default && src.InGameStats != null;
     }

@@ -2,7 +2,7 @@
 using Domain.Entities.Game.Races;
 using Domain.Entities.Races;
 
-namespace Domain.Entities.Character;
+namespace Domain.Entities.Characters;
 
 public class CharacterPersonality
 {
@@ -39,6 +39,7 @@ public class CharacterPersonality
 
     public int Level { get; protected set; }
 
+    public Size Size { get; protected set; }
     // so bad
     public CharacterPersonality(
         string name,
@@ -54,7 +55,8 @@ public class CharacterPersonality
         string[] bonds,
         string[] flaws,
         string[] languages,
-        string[] otherTraits
+        string[] otherTraits,
+        Size size
     ) 
     {
         // 1st level by default, 
@@ -102,6 +104,7 @@ public class CharacterPersonality
         RaceTraits = startRaceTraits;
         Languages = languages;
         OtherTraits = otherTraits;
+        Size = size;
     }
 
     protected CharacterPersonality() {}

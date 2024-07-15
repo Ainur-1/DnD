@@ -4,7 +4,7 @@ using Service.Abstractions;
 using Services.Abstractions;
 using MassTransit;
 using Services.Implementation.Consumers.Email;
-using Services.Implementation.Consumers.Character;
+using Services.Implementation.Consumers.Characters;
 
 namespace Services.Implementation.Extensions;
 

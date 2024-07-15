@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
 
-namespace Domain.Entities.Character;
+namespace Domain.Entities.Characters;
 
 [JsonConverter(typeof(StringEnumConverter))]
 public enum CharacterAlignmentType

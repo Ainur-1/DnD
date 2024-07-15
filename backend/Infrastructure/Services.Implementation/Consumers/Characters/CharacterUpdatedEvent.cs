@@ -1,4 +1,4 @@
-namespace Services.Implementation.Consumers.Character;
+namespace Services.Implementation.Consumers.Characters;
 
 public record CharacterUpdatedEvent 
 {

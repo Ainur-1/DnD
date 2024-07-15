@@ -1,24 +1,24 @@
 using AutoMapper;
 using Contracts;
 using DataAccess.Extensions;
-using Domain.Entities.Character;
+using Domain.Entities.Characters;
 using GameHub;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;
 using GameHubCHaracterUpdatedEvent = GameHub.Dtos.CharacterUpdatedEvent;
 
-namespace Services.Implementation.Consumers.Character;
+namespace Services.Implementation.Consumers.Characters;
 
 internal class CharacterUpdatedEventConsumer : IConsumer<CharacterUpdatedEvent>
 {
-    private readonly IMongoCollection<CharacterAggregate> _characters;
+    private readonly IMongoCollection<Character> _characters;
     private readonly IHubContext<GameHub.GameHub, IHubEventActions> _gameHub;
 
     private readonly IMapper _mapper;
 
     public CharacterUpdatedEventConsumer(
-        IMongoCollection<CharacterAggregate> characters,
+        IMongoCollection<Character> characters,
         IHubContext<GameHub.GameHub, IHubEventActions> hubContext,
         IMapper mapper
         )

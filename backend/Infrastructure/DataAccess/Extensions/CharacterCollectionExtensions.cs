@@ -1,21 +1,21 @@
-﻿using Domain.Entities.Character;
+﻿using Domain.Entities.Characters;
 using MongoDB.Driver;
 
 namespace DataAccess.Extensions;
 
 public static class CharacterCollectionExtensions
 {
-    public static IFindFluent<CharacterAggregate, CharacterAggregate> FindByOwnerAndParty(this IMongoCollection<CharacterAggregate> collection, Guid ownerId, Guid partyId)
+    public static IFindFluent<Character, Character> FindByOwnerAndParty(this IMongoCollection<Character> collection, Guid ownerId, Guid partyId)
         => collection.Find(x => x.Info.OwnerId == ownerId && x.Info.JoinedPartyId == partyId);
 
-    public static IFindFluent<CharacterAggregate, CharacterAggregate> WhereIdIsIn(this IMongoCollection<CharacterAggregate> collection, IEnumerable<Guid> filterIds)
-        => collection.Find(Builders<CharacterAggregate>.Filter.In(c => c.Id, filterIds));
+    public static IFindFluent<Character, Character> WhereIdIsIn(this IMongoCollection<Character> collection, IEnumerable<Guid> filterIds)
+        => collection.Find(Builders<Character>.Filter.In(c => c.Id, filterIds));
 
-    public static IFindFluent<CharacterAggregate, CharacterAggregate> FindById(this IMongoCollection<CharacterAggregate> collection, Guid characterId)
+    public static IFindFluent<Character, Character> FindById(this IMongoCollection<Character> collection, Guid characterId)
     => collection.Find(x => x.Id == characterId);
 
-    public static IFindFluent<CharacterAggregate, OnlyIdAndPersonalityProjection> ProjectOnlyIdAndPersonalityAndInfo(this IFindFluent<CharacterAggregate, CharacterAggregate> collection)
-    => collection.Project<OnlyIdAndPersonalityProjection>(Builders<CharacterAggregate>.Projection
+    public static IFindFluent<Character, OnlyIdAndPersonalityProjection> ProjectOnlyIdAndPersonalityAndInfo(this IFindFluent<Character, Character> collection)
+    => collection.Project<OnlyIdAndPersonalityProjection>(Builders<Character>.Projection
        .Exclude(x => x.Inventory)
             .Include(x => x.Info)
             .Exclude(x => x.Stats)
