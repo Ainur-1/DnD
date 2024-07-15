@@ -2,10 +2,11 @@
 using Contracts.Character;
 using Contracts.Online;
 using Domain.Exceptions;
+using Services.Abstractions;
 
 namespace Service.Abstractions;
 
-public interface ICharacterService
+public interface ICharacterService: IDomainService
 {
     Task<Guid> CreateCharacterAsync(Guid issuer, CreateCharacterDto character);
 

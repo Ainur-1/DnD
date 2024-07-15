@@ -1,9 +1,10 @@
 ﻿
 using Domain.Entities.Game.Items;
+using Services.Abstractions;
 
 namespace Service.Abstractions;
 
-public interface IInventoryService
+public interface IInventoryService: IDomainService
 {
     public Task<bool> CheckInventoryItem(Guid characterId, string inventoryItemId, int count);
 

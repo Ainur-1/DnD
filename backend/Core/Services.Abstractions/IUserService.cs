@@ -1,6 +1,6 @@
 ﻿namespace Services.Abstractions;
 
-public interface IUserService
+public interface IUserService: IDomainService
 {
     /// <exception cref="EmailTakenException"></exception>
     /// <exception cref="UsernameTakenException"></exception>
