@@ -44,7 +44,7 @@ public class UserManagementService : IUserService, IAuthorizationService
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(token);
-            var confirmationLink = $"https://yourapp.com/confirm-email?userId={user.Id}&token={encodedToken}";
+            var confirmationLink = $"https://localhost:7189/confirm-email?userId={user.Id}&token={encodedToken}";
             var subject = "Подтверждение регистрации";
             var message = $@"
             <html>
