@@ -1,28 +1,6 @@
-import { CharacterAlignmentType, CharacterSkillType, ClassType, CreateCharacterMutationVariables, KeyValuePairOfStringAndInt32Input, RaceType } from "@/shared/api/gql/graphql";
-import { Aligments } from "@/shared/types/domainTypes";
+import { CharacterSkillType, ClassType, CreateCharacterMutationVariables, CreateInventoryItemDtoInput, KeyValuePairOfStringAndInt32Input, RaceType } from "@/shared/api/gql/graphql";
 import { CreateCharacterFormState } from "./createCharacterFormReducer";
-
-const map: Map<Aligments, CharacterAlignmentType>
-= new Map([
-    [Aligments.chaoticEvil, CharacterAlignmentType.ChaoticEvil],
-    [Aligments.chaoticGood, CharacterAlignmentType.ChaoticGood],
-    [Aligments.chaoticNeutral, CharacterAlignmentType.ChaoticNeutral],
-    [Aligments.lawfulEvil, CharacterAlignmentType.LawfulEvil],
-    [Aligments.lawfulGood, CharacterAlignmentType.LawfulGood],
-    [Aligments.lawfulNeutral, CharacterAlignmentType.LawfulNeutral],
-    [Aligments.neutralEvil, CharacterAlignmentType.NeutralEvil],
-    [Aligments.neutralGood, CharacterAlignmentType.NeutralGood],
-    [Aligments.trueNeutral, CharacterAlignmentType.TrueNeutral],
-]);
-
-
-function alignmentToVariable(alignment: Aligments): CharacterAlignmentType {
-    const result = map.get(alignment);
-    if (result == undefined) 
-        throw new Error("Undefined Alignment");
-
-    return result as CharacterAlignmentType;
-}
+import { Armor, Weapon, Stuff } from "@/entities/item";
 
 export function stateToVariables(state: CreateCharacterFormState): CreateCharacterMutationVariables {
     const raceTraitsAdjustments = state.raceTraitsAdjustments.value ?? {};
@@ -30,7 +8,7 @@ export function stateToVariables(state: CreateCharacterFormState): CreateCharact
 
     return {
         age: state.age.value!,
-        alignment: alignmentToVariable(state.alignment!.value!),
+        alignment: state.alignment!.value!,
         charisma: state.charisma.value!,
         classId: state.classId!.value as ClassType,
         coinsAffectOnWeight: state.coinsAffectWeight!.value!,
@@ -59,7 +37,47 @@ export function stateToVariables(state: CreateCharacterFormState): CreateCharact
         base64Image: state.base64Image.value,
         bonds: state.bonds.value,
         flaws: state.flaws.value,
-        inventory: state.inventory.value,
+        inventory: state.inventory.value?.map(item => {
+            const base = {
+                count: item.count,
+                inUse: item.inUse,
+                isItemProficiencyOn: item.isItemProficiencyOn,
+            };
+            let result : CreateInventoryItemDtoInput;
+
+            if ("armorType" in item.item) {
+                const armor = item.item as Armor;
+                result = {
+                    ...base,
+                    maybeArmor: {
+                        ...armor,
+                        baseArmorClass: armor.armorClass,
+                        tags: armor.tags ?? [],
+                    }
+                }
+            } else if ("attackType" in item.item) {
+                const weapon = item.item as Weapon;
+
+                result = {
+                    ...base,
+                    maybeWeapon: {
+                        ...weapon,
+                        tags: weapon.tags ?? []
+                    },
+                };
+            } else {
+                const stuff = item.item as Stuff;
+                result = {
+                    ...base,
+                    maybeStuff: {
+                        ...stuff,
+                        tags: stuff.tags ?? []
+                    }
+                }
+            }
+
+            return result;
+        }),
         languages: state.languages.value,
         otherTraits: state.otherTraits.value,
         subrace: state.race.value?.subrace,

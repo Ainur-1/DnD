@@ -1,7 +1,8 @@
 import { Item } from "@/entities/item/model/types";
 import { BaseHp, DeathSaves, FullAbility, SkillModifiers } from "@/entities/character/";
-import { Aligments, NamePlusDescription, WithId } from "@/shared/types/domainTypes";
-import { DynamicStatsDto } from "./types";
+import { NamePlusDescription, WithId } from "@/shared/types/domainTypes";
+import { DynamicStatsDto, ProficencyWithInitiative } from "./types";
+import { CharacterAlignmentType } from "@/shared/api/gql/graphql";
 
 export type GameCharacter = {
     personality: {
@@ -10,7 +11,7 @@ export type GameCharacter = {
         age: number;
         race: string;
         class: string;
-        alignment: Aligments;
+        alignment: CharacterAlignmentType;
         bonds: string[];
         flaws: string[];
         background: string;
@@ -20,7 +21,7 @@ export type GameCharacter = {
         otherTraits: string[];
         level: number;
     },
-    characterStats: SkillModifiers & FullAbility & BaseHp,
+    characterStats: SkillModifiers & FullAbility & BaseHp & ProficencyWithInitiative,
     dynamicStats: DynamicStatsDto;
 } & WithId<string>;
 

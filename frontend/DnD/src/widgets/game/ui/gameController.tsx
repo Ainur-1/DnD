@@ -20,7 +20,7 @@ export default function GameController() {
 
     };
 
-    const showCharacterInfo = (charcterId: string) => {
+    const showCharacterInfo = (_: string) => {
         
     } 
 
@@ -30,10 +30,9 @@ export default function GameController() {
             hp,
             tempHp, 
             armorClass, 
-            initiativeModifier, 
-            proficiencyBonus, 
             speed
         } = character.mainStats;
+        const { proficiencyBonus, initiativeModifier} = character.otherStats;
 
         const Overlay = () => <InGameLiveOverlay 
             hp={hp} 

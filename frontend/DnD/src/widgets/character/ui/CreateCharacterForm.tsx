@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, FormControl, FormGroup, Grid, List, ListItem, Stack, Typography } from "@mui/material";
 import { AgeField, CharacterAbilities, CharacterIsPublicSwitch, CharacterNameField, CharacterUploadImage, CharacterXpField, CoinsAffectWeightSwitch, SpeedField } from "@/entities/character";
 import { FormStepsButtons } from "@/shared/ui/FormStepsButtons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateCharacterFormState, StateKeys, Steps, useCreateCharacterReducer } from "../model/createCharacterFormReducer";
 import { RaceSelector, useRaceInfoQuery } from "@/features/races";
 import { ClassSelector, useClassStartInventoryDescriptionQuery } from "@/features/classes";
@@ -14,11 +14,11 @@ import AddItemInventoryDialog from "./AddItemInventoryDialog";
 import { InventoryWeight } from "@/entities/item";
 import InventoryList from "@/entities/item/ui/InventoryList";
 import { AlignmentSelector } from "@/entities/character/ui/AlignmentSelector";
-import { Aligments, Currency } from "@/shared/types/domainTypes";
+import { Currency } from "@/shared/types/domainTypes";
 import { useCreateCharacterMutation } from "@/features/character";
 import { useNavigate } from "react-router-dom";
 import { InventoryCurrencies } from "@/entities/inventory";
-import { ClassType, RaceType } from "@/shared/api/gql/graphql";
+import { CharacterAlignmentType, ClassType, RaceType } from "@/shared/api/gql/graphql";
 import { stateToVariables } from "../model/utils";
 
 interface StepProps {
@@ -190,8 +190,8 @@ function Step3({ state, setStep, setField, isValid }: StepProps) {
         }
     };
 
-    const onAligmentChange = (alignment: Aligments) => {
-        if (alignment != Aligments.any)
+    const onAligmentChange = (alignment: CharacterAlignmentType) => {
+        if (alignment != CharacterAlignmentType.Any)
             setField("alignment", alignment);
     };
 
@@ -405,6 +405,9 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
                 onItemAdd={addItem}
             />
         </Stack>
+        <Typography variant="body1" textAlign="center" component="div" marginTop={1} marginBottom={0} color="error">
+                {state.formError}
+        </Typography>
         <FormStepsButtons 
             onPrevButtonClicked={() => setStep(3)}
             prevButtonText="Назад"
@@ -416,7 +419,7 @@ function Step4({ state, setStep, setField, disable, submit, isValid }: StepProps
     </Stack>
 }
 
-export default function CreateCharcaterForm() {
+export default function CreateCharacterForm() {
     const { state, 
         setField, 
         setStep,
@@ -427,7 +430,7 @@ export default function CreateCharcaterForm() {
         isValidStep4
      } = useCreateCharacterReducer();
 
-    const [createCharacter, {data, isLoading, isSuccess, isError}] = useCreateCharacterMutation();
+    const [createCharacter, {data, isLoading, isSuccess, isError, error}] = useCreateCharacterMutation();
     const navigate = useNavigate();
 
     async function onSubmit() {
@@ -451,7 +454,8 @@ export default function CreateCharcaterForm() {
 
     useEffect(() => {
         if (isError) {
-            //todo: handle create errors
+            console.log(error);
+            setFormError("Не удалось создать персонажа.");
         }
     }, [isError, data]);
 

@@ -1,7 +1,7 @@
 import { FormField } from "@/shared/types/IFormField";
-import { ArmorType, Item, ItemBase, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "./types";
-import { Dice } from "@/shared/types/domainTypes";
+import { Item, ItemBase } from "./types";
 import { isDecimal } from "@/shared/utils/isDecimal";
+import { ArmorType, Dice, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "@/shared/api/gql/graphql";
 
 interface ItemFormBaseState {    
   /* common props */
@@ -110,7 +110,7 @@ function resetArmorProperties(state: ItemFormBaseStateWithFormSelector) {
 
 function initArmorProperties(state: ItemFormBaseStateWithFormSelector) {
     state.armorType = {
-        value: ArmorType.light,
+        value: ArmorType.Light,
         error: null
     };
     state.material = {
@@ -137,15 +137,15 @@ function initArmorProperties(state: ItemFormBaseStateWithFormSelector) {
 
 function initWeaponProperties(state: ItemFormBaseStateWithFormSelector) {
     state.damageType = {
-        value: WeaponDamageType.ranged,
+        value: WeaponDamageType.Ranged,
         error: null
     };
     state.attackType = {
-        value: WeaponAttackType.bludgeoning,
+        value: WeaponAttackType.Bludgeoning,
         error: null
     };
     state.proficiencyType = {
-        value: WeaponProficiencyType.simple,
+        value: WeaponProficiencyType.Simple,
         error: null
     };
     state.normalDistanceInFoots = {
@@ -161,7 +161,7 @@ function initWeaponProperties(state: ItemFormBaseStateWithFormSelector) {
         error: null
     };   
     state.hitDice = {
-        value: Dice.oneD1,
+        value: Dice.OneD1,
         error: null
     };
     state.alternateHitDice = {
@@ -252,7 +252,7 @@ const validators: Validators = {
     },
     "normalDistanceInFoots": function(state, field) {
         if(state.selectedForm != SelectedItemForm.weapon 
-            || state.damageType?.value !== WeaponDamageType.ranged) {
+            || state.damageType?.value !== WeaponDamageType.Ranged) {
             return null;
         }
 
@@ -276,7 +276,7 @@ const validators: Validators = {
     },
     "criticalDistanceInFoots": function(state, field) {
         if(state.selectedForm != SelectedItemForm.weapon 
-            || state.damageType?.value !== WeaponDamageType.ranged) {
+            || state.damageType?.value !== WeaponDamageType.Ranged) {
             return null;
         }
 
@@ -318,7 +318,7 @@ const validators: Validators = {
         const value = field?.value;
         const mayBeProperties = state.properties?.value;
         if (!value && mayBeProperties 
-            && mayBeProperties.includes(WeaponProperty.versatile)
+            && mayBeProperties.includes(WeaponProperty.Versatile)
         ) {
             return requiredError;
         }

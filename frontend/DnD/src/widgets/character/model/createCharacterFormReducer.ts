@@ -2,7 +2,7 @@ import { ClassIdType } from "@/entities/classes";
 import { InventroryWallet } from "@/entities/inventory";
 import { Race } from "@/entities/races";
 import { ExpandedInventoryItem } from "@/features/inventory";
-import { Aligments } from "@/shared/types/domainTypes";
+import { CharacterAlignmentType } from "@/shared/api/gql/graphql";
 import { FormField } from "@/shared/types/IFormField";
 import { isDecimal } from "@/shared/utils/isDecimal";
 import { useReducer } from "react";
@@ -90,7 +90,7 @@ type Step3State = {
     base64Image: FormField<string>,
     age: FormField<number>,
     speed: FormField<number>,
-    alignment: FormField<Aligments>,
+    alignment: FormField<CharacterAlignmentType>,
     background: FormField<string>,
     languages: FormField<string[]>,
     flaws: FormField<string[]>,
@@ -109,7 +109,7 @@ const step3Init: Step3State = {
         error: null
     },
     alignment: {
-        value: Aligments.any,
+        value: CharacterAlignmentType.Any,
         error: null
     },
     background: fullyUndefined,
@@ -250,7 +250,7 @@ function validateAbility(dispatch: React.Dispatch<Action>, formField: "strength"
     }
 
     if (value < 3 || value > 18 || isDecimal(value)) {
-        setField(formField, 3, "Не валидное значение.");
+        setField(formField, 3, "Целое число от 3 до 18.");
         return false;
     }
 
@@ -318,8 +318,8 @@ function isValidStep3(state: CreateCharacterFormState, dispatch: React.Dispatch<
     setField("languages", state.languages.value?.map(x => x.trim()));
     setField("otherTraits", state.otherTraits.value?.map(x => x.trim()));
 
-    if (!state.alignment.value || state.alignment.value == Aligments.any) {
-        setField("alignment", Aligments.any, "Поле обязательно.");
+    if (!state.alignment.value || state.alignment.value == CharacterAlignmentType.Any) {
+        setField("alignment", CharacterAlignmentType.Any, "Поле обязательно.");
         return false;
     }
 

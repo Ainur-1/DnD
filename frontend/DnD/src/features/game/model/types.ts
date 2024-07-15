@@ -2,6 +2,11 @@ import {  DeathSaves, DynamicStats, FullAbility, FullPersonality, SkillModifiers
 import { WithId } from "@/shared/types/domainTypes";
 import { HubConnection } from "@microsoft/signalr"
 
+export type ProficencyWithInitiative = {
+    proficiencyBonus: number; 
+    initiativeModifier: number
+}
+
 export type GameState = {
     isGameEnd:boolean,
     partyId: string,
@@ -21,10 +26,9 @@ export type GameInfo = {
 
 export type GameCharacter = {
     mainStats: DynamicStats,
-    otherStats: FullAbility & SkillModifiers & { proficiencyBonus: number;},
+    otherStats: FullAbility & SkillModifiers & ProficencyWithInitiative & {maxHp: number;},
     personality: FullPersonality,
 } & WithId<string>
-
 
 export interface InitGameStateVariables {
     partyId: string;

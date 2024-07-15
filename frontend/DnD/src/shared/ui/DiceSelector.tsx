@@ -1,12 +1,14 @@
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import { Dice } from "../types/domainTypes";
 import { SelectorProps } from "../types/IGenericSelectorProps";
 import { enumFromStringValue } from "../utils/enumFromStringParser";
+import { Dice } from "../api/gql/graphql";
+import { labelMap } from "../maps/DiceLabelMap";
 
 interface DiceSelectorProps extends SelectorProps<Dice> {
     selectorLabel: string,
     id: string,
 }
+
 
 export function DiceSelector({id, required, selectorLabel, value, onValueChange}: DiceSelectorProps) {
     const values = Object.values(Dice);
@@ -32,7 +34,7 @@ export function DiceSelector({id, required, selectorLabel, value, onValueChange}
             onChange={(e) => handleChange(e.target.value)}
         >
             {
-                values.map(dice => <MenuItem key={dice} value={dice}>{dice}</MenuItem>)
+                values.map(dice => <MenuItem key={dice} value={dice}>{labelMap.get(dice)}</MenuItem>)
             }
         </Select>
     </FormControl>

@@ -18,7 +18,6 @@ export function mapDtoToGameCharacter(dto: GameCharacterDto): GameCharacter {
         },
         otherStats: {
             ...characterStats,
-            proficiencyBonus: dynamicStats.proficiency,
         },
         personality: {
             age: personality.age,

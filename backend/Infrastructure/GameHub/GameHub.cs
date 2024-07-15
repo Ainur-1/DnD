@@ -37,7 +37,7 @@ public class GameHub : Hub<IHubEventActions>
     {
         var userId = UserId;
 
-        if (await _partyService.IsUserInPartyAsync(userId, partyId))
+        if (!await _partyService.IsUserInPartyAsync(userId, partyId))
         {
             return null;
         }

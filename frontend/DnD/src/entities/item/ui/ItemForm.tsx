@@ -1,16 +1,14 @@
-import { ArmorType, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "../model/types";
 import { ReactNode, useContext,  createContext, useReducer, Dispatch, useEffect } from "react";
 import { FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import TagInput from "@/shared/ui/TagInput";
 import { ArmorTypeSelector, WeaponAttackTypeSelector, WeaponDamageTypeSelector, WeaponProficiencyTypeSelector } from "./EnumSelectors";
 import WeaponPropertiesAutocomplete from "./WeaponPropertiesAutocomplete ";
-import { } from 'react';
 import reducer, { initialState, ItemFormBaseAction, ItemFormBaseActionType, ItemFormBaseStateWithFormSelector, SelectedItemForm } from '../model/ItemFormBaseReducer';
 import { DiceSelector } from "@/shared/ui/DiceSelector";
-import { Dice } from "@/shared/types/domainTypes";
 import { MuiFileInput } from "mui-file-input";
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import { ArmorType, Dice, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "@/shared/api/gql/graphql";
 
 
 const ItemFormBaseStateContext = createContext<ItemFormBaseStateWithFormSelector>(initialState);
@@ -61,7 +59,7 @@ function WeaponSpecificBody({disabled}: WeaponSpecificBodyProps) {
             value: damageType,
         });
 
-        if (damageType == WeaponDamageType.ranged) {
+        if (damageType == WeaponDamageType.Ranged) {
             dispatch({
                 type: ItemFormBaseActionType.setFormProperty,
                 field: "criticalDistanceInFoots",
@@ -82,7 +80,7 @@ function WeaponSpecificBody({disabled}: WeaponSpecificBodyProps) {
             value: properties
         });
 
-        if (!properties.includes(WeaponProperty.versatile)) {
+        if (!properties.includes(WeaponProperty.Versatile)) {
             dispatch({
                 type: ItemFormBaseActionType.setFormProperty,
                 field: "alternateHitDice",
@@ -93,7 +91,7 @@ function WeaponSpecificBody({disabled}: WeaponSpecificBodyProps) {
             dispatch({
                 type: ItemFormBaseActionType.setFormProperty,
                 field: "alternateHitDice",
-                value: Dice.oneD1,
+                value: Dice.OneD1,
                 error: undefined
             });
         }
@@ -190,7 +188,7 @@ function WeaponSpecificBody({disabled}: WeaponSpecificBodyProps) {
             <WeaponDamageTypeSelector disabled={disabled} required onValueChange={setWeaponDamageType} />
         </Grid>
         {
-            state.damageType?.value === WeaponDamageType.ranged && 
+            state.damageType?.value === WeaponDamageType.Ranged && 
             <>
                 <Grid item sm={6} xs={6}>
                     <TextField
@@ -228,7 +226,7 @@ function WeaponSpecificBody({disabled}: WeaponSpecificBodyProps) {
         </Grid>
         <Grid item xs={6} sm={6}>
             { 
-                state.properties?.value?.includes(WeaponProperty.versatile) &&
+                state.properties?.value?.includes(WeaponProperty.Versatile) &&
                  <DiceSelector disabled={disabled} id="AlternateHit" selectorLabel="Алтернативный урон" value={state.alternateHitDice?.value ?? undefined} required onValueChange={setAlternateDice}  />
             }
         </Grid>
@@ -381,15 +379,15 @@ function ArmorSpesificBody({disabled}: ArmorSpesificBodyProps) {
         </Grid>
         <Grid item sm={6} xs={6}>
             <TextField
-                disabled={state.armorType!.value === ArmorType.shield || disabled}
-                value={state.armorType!.value === ArmorType.shield ? 2 : state.armorClass!.value}
+                disabled={state.armorType!.value === ArmorType.Shield || disabled}
+                value={state.armorType!.value === ArmorType.Shield ? 2 : state.armorClass!.value}
                 onChange={(e) => setArmorClass(e.target.value)}
                 error={state.armorClass!.error != null}
                 helperText={state.armorClass!.error}
                 fullWidth
                 label="Класс доспеха"
                 type="number"
-                required={state.armorType!.value !== ArmorType.shield}
+                required={state.armorType!.value !== ArmorType.Shield}
             />
         </Grid>
         <Grid item sm={12} xs={12}>

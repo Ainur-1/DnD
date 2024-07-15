@@ -141,7 +141,7 @@ function GameMasterControlBar({}: GameMasterControlBarProps) {
         <Button disabled={endFightRequestSent} variant="contained" onClick={state.gameInfo.isFighting ? startFightClick : endFightClick}>
             {`${state.gameInfo.isFighting ? "Завершить": "Начать" } битву`}
         </Button>
-        {!state.gameInfo.isFighting && <StartFightFormDialog showForm={startFightFormDialogOpen} closeDialog={() => setStartFightFormDialogOpen(false)} />}
+        <StartFightFormDialog showForm={startFightFormDialogOpen} closeDialog={() => setStartFightFormDialogOpen(false)} />
     </Stack>
 }
 

@@ -26,7 +26,7 @@ function CharacterAbility({abilityLabel, abilityValue, onAbilityValueChange, err
         if (success) {
             const floored = Math.floor(value!);
             
-            onAbilityValueChange(floored < 3 ? 3 : floored);
+            onAbilityValueChange(floored);
             return;
         }
 

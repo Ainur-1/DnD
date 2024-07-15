@@ -1,23 +1,9 @@
 import React from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import { WeaponProperty } from '../model/types';
 import { Chip, useTheme } from '@mui/material';
-
-const WeaponPropertiesLabelMap = {
-    [WeaponProperty.ammunition]: "Боеприпас",
-    [WeaponProperty.finesse]: "Фехтовальное",
-    [WeaponProperty.loading]: "Перезарядка",
-    [WeaponProperty.range]: "Дальнобойное",
-    [WeaponProperty.reach]: "Досягаемость",
-    [WeaponProperty.special]: "Особое",
-    [WeaponProperty.thrown]: "Метательное",
-    [WeaponProperty.light]: "Лёгкое",
-    [WeaponProperty.heavy]: "Тяжёлое",
-    [WeaponProperty.versatile]: "Универсальное",
-    [WeaponProperty.twoHanded]: "Двуручное",
-};
-
+import { WeaponProperty } from '@/shared/api/gql/graphql';
+import { labelMap } from '@/shared/maps/WeaponPropertiesLabelMap';
 
 interface WeaponPropertiesAutocompleteProps {
     selectedProperties: WeaponProperty[],
@@ -41,14 +27,13 @@ export default function WeaponPropertiesAutocomplete({selectedProperties, setSel
         !selectedProperties.includes(property)
     );
 
-
     return (
         <Autocomplete
             disabled={disabled}
             multiple
             id="weapon-properties"
             options={filteredOptions}
-            getOptionLabel={(option) => WeaponPropertiesLabelMap[option]}
+            getOptionLabel={(option) => labelMap[option]}
             value={selectedProperties}
             onChange={handlePropertyChange}
             renderInput={(params) => (
@@ -59,10 +44,10 @@ export default function WeaponPropertiesAutocomplete({selectedProperties, setSel
                 />
             )}
             renderTags={(value, getTagProps) => value.map((option, index) => (
-                <Chip variant="filled" label={WeaponPropertiesLabelMap[option]} {...getTagProps({ index })} sx={{
+                <Chip variant="filled" label={labelMap[option]} {...getTagProps({ index })} sx={{
                   background: theme.palette.secondary.main
                 }}
-                    title={WeaponPropertiesLabelMap[option]}
+                    title={labelMap[option]}
                  />
             ))}
         />

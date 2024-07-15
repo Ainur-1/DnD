@@ -112,31 +112,35 @@ public class PartyService : IPartyService
 
     public async Task<IEnumerable<UserPartyDto>> GetUserPartiesAsync(Guid userId)
     {
-        var result = new ConcurrentBag<UserPartyDto>();
+        try
+        {
+            var result = new ConcurrentBag<UserPartyDto>();
 
-        var onlyIdAndNameProjection = Builders<Character>.Projection
-            .Exclude(x => x.Inventory)
-            .Exclude(x => x.Info)
-            .Exclude(x => x.Stats)
-            .Exclude(x => x.InGameStats)
-            .Exclude(x => x.Personality)
-            .Include(x => x.Id)
-            .Include(x => x.Personality.Name);
-
-        var fetchTask = _characterCollection
-            .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId != null)
-            .ProjectOnlyIdAndPersonalityAndInfo()
-            .ForEachAsync(async character =>
-            {
-                var party = await GetPartyByIdAsync(character.Info.JoinedPartyId!.Value);
-                if (party != null)
+            var partiesAsUserTask = _characterCollection
+                .Find(x => x.Info.OwnerId == userId && x.Info.JoinedPartyId != null)
+                .ProjectOnlyIdAndPersonalityAndInfo()
+                .ForEachAsync(async character =>
                 {
-                    result.Add(UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name));
-                }
-            });
+                    var party = await GetPartyByIdAsync(character.Info.JoinedPartyId!.Value);
+                    if (party != null)
+                    {
+                        result.Add(UserPartyDto.FromPartyAndCharacterInfo(party, character.Id, character.Personality.Name));
+                    }
+                });
 
-        await fetchTask;
-        return result;
+            var partiesAsGameMasterTask = _partyCollection
+                .Find(x => x.GameMasterId == userId)
+                .ForEachAsync(party => result.Add(UserPartyDto.FromParty(party)));
+
+            await Task.WhenAll(partiesAsUserTask, partiesAsGameMasterTask);
+
+            return result;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
     }
 
     public async Task<UserPartyDto> GetUserPartyAsync(Guid userId, Guid partyId)

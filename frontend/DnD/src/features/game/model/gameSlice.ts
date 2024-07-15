@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DynamicStatsDto, GameCharacter, GameState, InitGameStateVariables } from "./types";
 import { CharacterUpdatedEvent, DamageCharacterVariables, EndGameVariables,
          FightInfo,

@@ -1,3 +1,4 @@
+import { ArmorType, Dice, WeaponAttackType, WeaponDamageType, WeaponProficiencyType, WeaponProperty } from "@/shared/api/gql/graphql";
 import { WithId } from "@/shared/types/domainTypes";
 
 export type ItemBase = {
@@ -9,42 +10,10 @@ export type ItemBase = {
     tags?: string[];
 }
 
-type Stuff = ItemBase;
+export type Stuff = ItemBase;
 
-export enum WeaponDamageType {
-    ranged = "Ranged",
-    melee = "Melee",
-}
 
-export enum WeaponAttackType
-{
-    piercing = "Piercing",
-    bludgeoning= "Bludgeoning",
-    slashing = "Slashing",
-}
-
-export enum WeaponProficiencyType
-{
-    simple = "Simple",
-    martial = "Martial",
-}
-
-export enum WeaponProperty
-{
-    ammunition = "Ammunition",
-    finesse = "Finesse",
-    loading = "Loading",
-    range = "Range",
-    reach = "Reach",
-    special = "Special",
-    thrown = "Thrown",
-    light = "Light",
-    heavy = "Heavy",
-    versatile = "Versatile",
-    twoHanded = "TwoHanded",
-}
-
-type Weapon = {
+export type Weapon = {
     attackType: WeaponAttackType;
     proficiencyType: WeaponProficiencyType;
 
@@ -53,18 +22,11 @@ type Weapon = {
     criticalDistanceInFoots?: number;
 
     properties?: WeaponProperty[];
-    hitDice: string;
-    alternateHitDice?: string;
+    hitDice: Dice;
+    alternateHitDice?: Dice;
 } & ItemBase;
 
-export enum ArmorType {
-    light,
-    medium,
-    heavy,
-    shield
-}
-
-type Armor = {
+export type Armor = {
     armorType: ArmorType;
     material: string;
     requiredStrength?: number

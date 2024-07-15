@@ -16,10 +16,6 @@ public static class CharacterCollectionExtensions
 
     public static IFindFluent<Character, OnlyIdAndPersonalityProjection> ProjectOnlyIdAndPersonalityAndInfo(this IFindFluent<Character, Character> collection)
     => collection.Project<OnlyIdAndPersonalityProjection>(Builders<Character>.Projection
-       .Exclude(x => x.Inventory)
-            .Include(x => x.Info)
-            .Exclude(x => x.Stats)
-            .Exclude(x => x.InGameStats)
             .Include(x => x.Info)
             .Include(x => x.Id)
             .Include(x => x.Personality));

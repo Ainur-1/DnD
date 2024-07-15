@@ -1,6 +1,6 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { ArmorType, WeaponAttackType, WeaponDamageType, WeaponProficiencyType } from "../model/types";
 import { SelectorProps } from "@/shared/types/IGenericSelectorProps";
+import { ArmorType, WeaponAttackType, WeaponDamageType, WeaponProficiencyType } from "@/shared/api/gql/graphql";
 
 interface ArmorTypeSelectorProps extends SelectorProps<ArmorType> {
 }
@@ -25,10 +25,10 @@ export function ArmorTypeSelector({value, onValueChange, required}: ArmorTypeSel
             label="Тип брони"
             onChange={(e) => handleChange(e.target.value)}
         >
-            <MenuItem value={ArmorType.light}>Легкий</MenuItem>
-            <MenuItem value={ArmorType.medium}>Средний</MenuItem>
-            <MenuItem value={ArmorType.heavy}>Тяжелый</MenuItem>
-            <MenuItem value={ArmorType.shield}>Щит</MenuItem>
+            <MenuItem value={ArmorType.Light}>Легкий</MenuItem>
+            <MenuItem value={ArmorType.Medium}>Средний</MenuItem>
+            <MenuItem value={ArmorType.Heavy}>Тяжелый</MenuItem>
+            <MenuItem value={ArmorType.Shield}>Щит</MenuItem>
         </Select>
   </FormControl>
 }
@@ -48,8 +48,8 @@ export function WeaponProficiencyTypeSelector({required, value, onValueChange}: 
             label="Оружейное мастерство"
             onChange={(e) => handleChange(e.target.value)}
         >
-            <MenuItem value={WeaponProficiencyType.simple}>Обычное</MenuItem>
-            <MenuItem value={WeaponProficiencyType.martial}>Воинское</MenuItem>
+            <MenuItem value={WeaponProficiencyType.Simple}>Обычное</MenuItem>
+            <MenuItem value={WeaponProficiencyType.Martial}>Воинское</MenuItem>
         </Select>
   </FormControl>
 }
@@ -69,9 +69,9 @@ export function WeaponAttackTypeSelector({required, value, onValueChange}: Selec
             label="Тип атаки"
             onChange={(e) => handleChange(e.target.value)}
         >
-            <MenuItem value={WeaponAttackType.bludgeoning}>Дробящее</MenuItem>
-            <MenuItem value={WeaponAttackType.piercing}>Колющее</MenuItem>
-            <MenuItem value={WeaponAttackType.slashing}>Режущее</MenuItem>
+            <MenuItem value={WeaponAttackType.Bludgeoning}>Дробящее</MenuItem>
+            <MenuItem value={WeaponAttackType.Piercing}>Колющее</MenuItem>
+            <MenuItem value={WeaponAttackType.Slashing}>Режущее</MenuItem>
         </Select>
   </FormControl>
 }
@@ -91,8 +91,8 @@ export function WeaponDamageTypeSelector({required, value, onValueChange}: Selec
             label="Радиус действия"
             onChange={(e) => handleChange(e.target.value)}
         >
-            <MenuItem value={WeaponDamageType.melee}>Ближний бой</MenuItem>
-            <MenuItem value={WeaponDamageType.ranged}>Дальний бой</MenuItem>
+            <MenuItem value={WeaponDamageType.Melee}>Ближний бой</MenuItem>
+            <MenuItem value={WeaponDamageType.Ranged}>Дальний бой</MenuItem>
         </Select>
   </FormControl>
 }
