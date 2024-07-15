@@ -112,7 +112,7 @@ export function CarouselCardOverlay({showDeadIcon, showInPartyLabel, showCanUpda
                     },
                 }}
                 >
-                    <CloseIcon sx={{color: "#f523005c"}}/>
+                    <CloseIcon sx={{color: "#f52300ad", zIndex: 50}}/>
                 </Box>
             }
         </Box>

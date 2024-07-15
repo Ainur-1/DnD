@@ -92,13 +92,13 @@ export default function JoinPartyForm() {
             fullWidth
             label="Код доступа"
         />
-        <Stack alignItems="center" marginTop={!requestError ? 3 : 0}>
+        <Stack  marginTop={!requestError ? 3 : 0}>
             { requestError && 
                 <Typography component="span" color="error" marginBottom={3}>
                     {requestError}
                 </Typography>
             }
-            <Button variant="contained" onClick={() => setShowCharacterList(true)}  size="large" fullWidth disabled={isLoading}>
+            <Button variant="contained"  onClick={() => setShowCharacterList(true)}  size="large" fullWidth disabled={isLoading}>
                 Присоединиться
             </Button>
         </Stack>

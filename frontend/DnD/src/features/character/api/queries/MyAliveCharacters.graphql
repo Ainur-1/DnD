@@ -1,5 +1,5 @@
 query myAliveCharacters {
-  myCharacters(where: { isInParty: { eq: true } }) {
+  myCharacters(where: { and: { isDead: { eq: false }, isInParty: { eq: false } } }) {
     id
     personality {
       name

@@ -46,7 +46,9 @@ export default function SelectCharacterDialog({open, onClose}:SelectCharacterDia
               </ListItemButton>
             </ListItem>
           ))}
-          { !isFetching && data?.myCharacters.length == 0 && <Button onClick={() => navigate('/my-characters/create')}>Создайте персонажа</Button>}
+          { !isFetching && data?.myCharacters.length == 0 && <Box display="flex" alignItems="center" justifyContent="center">
+            <Button onClick={() => navigate('/my-characters/create')}>Создайте персонажа</Button>
+          </Box>}
           { isFetching && <ListItem>
                 <Box display="flex" alignItems="center" justifyContent="center">
                     <CircularProgress />
