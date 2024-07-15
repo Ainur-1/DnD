@@ -47,16 +47,60 @@ public class UserManagementService : IUserService, IAuthorizationService
             var confirmationLink = $"https://localhost:7189/confirm-email?userId={user.Id}&token={encodedToken}";
             var subject = "Подтверждение регистрации";
             var message = $@"
-            <html>
-            <body>
-                <h2>Здравствуйте, {username}!</h2>
-                <p>Спасибо за регистрацию на нашем сайте.</p>
-                <p>Пожалуйста, подтвердите свой email, нажав на ссылку ниже:</p>
-                <a href='{confirmationLink}'>Подтвердить email</a>
-                <p>Если вы не регистрировались на нашем сайте, проигнорируйте это сообщение.</p>
-            </body>
-            </html>";
+                <html>
+                <head>
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f4;
+                            padding: 20px;
+                        }}
+                        .container {{
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #fff;
+                            padding: 20px;
+                            border-radius: 5px;
+                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        }}
+                        h2 {{
+                            color: #333;
+                        }}
+                        p {{
+                            color: #666;
+                        }}
+                        .btn {{
+                            display: inline-block;
+                            background-color: #007bff;
+                            color: #fff;
+                            text-decoration: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            margin-top: 15px;
+                        }}
+                        .btn:hover {{
+                            background-color: #0056b3;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <h2>Здравствуйте, {username}!</h2>
+                        <p>Спасибо за регистрацию на нашем сайте.</p>
+                        <p>Пожалуйста, подтвердите свой email, нажав на кнопку ниже:</p>
+                        <a class='btn' href='{confirmationLink}'>Подтвердить email</a>
+                        <p>Если вы не регистрировались на нашем сайте, проигнорируйте это сообщение.</p>
+                    </div>
+                </body>
+                </html>";
 
+            await _bus.Send(new EmailSendCommand()
+            {
+                Email = email,
+                Subject = subject,
+                Message = message
+            });
+            
             await _bus.Send(new EmailSendCommand()
             {
                 Email = email,
@@ -95,15 +139,51 @@ public class UserManagementService : IUserService, IAuthorizationService
         var encodedCode = HttpUtility.UrlEncode(code);
         var subject = "Сброс пароля";
         var message = $@"
-        <html>
-        <body>
-            <h2>Здравствуйте, {user.UserName}!</h2>
-            <p>Вы запросили сброс пароля для вашей учетной записи.</p>
-            <p>Пожалуйста, используйте код ниже для сброса пароля:</p>
-            <p><strong>{encodedCode}</strong></p>
-            <p>Если вы не запрашивали сброс пароля, проигнорируйте это сообщение.</p>
-        </body>
-        </html>";
+            <html>
+            <head>
+                <meta charset=""UTF-8"">
+                <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                <title>Сброс пароля</title>
+                <style>
+                    /* Вставить содержимое styles.css сюда */
+                    body {{
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        padding: 20px;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background-color: #fff;
+                        padding: 20px;
+                        border-radius: 5px;
+                        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                    }}
+                    h2 {{
+                        color: #333;
+                    }}
+                    p {{
+                        color: #666;
+                    }}
+                    .code {{
+                        background-color: #f0f0f0;
+                        padding: 10px;
+                        font-size: 18px;
+                        border-radius: 5px;
+                        margin-top: 10px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class=""container"">
+                    <h2>Здравствуйте, {email}!</h2>
+                    <p>Вы запросили сброс пароля для вашей учетной записи.</p>
+                    <p>Пожалуйста, используйте код ниже для сброса пароля:</p>
+                    <p class=""code""><strong>{encodedCode}</strong></p>
+                    <p>Если вы не запрашивали сброс пароля, проигнорируйте это сообщение.</p>
+                </div>
+            </body>
+            </html>";
 
         await _bus.Send(new EmailSendCommand()
         {
