@@ -118,6 +118,7 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
             maxWidth="xs"
             fullWidth={true}
             scroll="body"
+            onClose={closeDialog}
         >
             <DialogTitle>
                 Лечить персонажа
@@ -219,6 +220,7 @@ export function DamageFormDialog({showForm, characterId, closeDialog}: HealFormD
 
     return (
         <Dialog 
+            onClose={closeDialog}
             open={showForm}
             maxWidth="xs"
             fullWidth={true}
@@ -262,6 +264,7 @@ export function SuggestFormDialog({showForm, characterId, closeDialog}: HealForm
     return (
         <Dialog 
             open={showForm}
+            onClose={closeDialog}
             maxWidth="xs"
             fullWidth={true}
             scroll="body"
@@ -367,6 +370,7 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
             maxWidth="xs"
             fullWidth={true}
             scroll="body"
+            onClose={closeDialog}
         >
             <DialogTitle>
                 Начать режим боя
@@ -411,7 +415,7 @@ interface ShowInventoryDialogProps extends DialogProps {
     characterId: string
 }
 
-export function ShowInventoryDialog({characterId, showForm}: ShowInventoryDialogProps) {
+export function ShowInventoryDialog({characterId, showForm, closeDialog}: ShowInventoryDialogProps) {
     const { data, isLoading, isSuccess } = useInventoryItemsQuery({
         characterId
     });
@@ -422,6 +426,7 @@ export function ShowInventoryDialog({characterId, showForm}: ShowInventoryDialog
             maxWidth="xs"
             fullWidth={true}
             scroll="paper"
+            onClose={closeDialog}
         >
             <DialogTitle>
                 Инвентарь

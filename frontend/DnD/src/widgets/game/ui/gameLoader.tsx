@@ -38,7 +38,7 @@ export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderPro
     const { state:authState } = useAuthReducer();
 
     const [fetchParty, {data:partyData, isFetching:isPartyFetching, isError: isPartyError, isSuccess:isPartySuccess}] = useLazyPartyQuery();
-    const [fetchDeathSaves, {data:deathSavesData, isFetching:isDeathSavesFetching, isError: isDeathSavesError, isSuccess:isDeathSavesSuccess}] = useLazyDeathSavesQuery();
+    const [fetchDeathSaves, {data:deathSavesData, isFetching:isDeathSavesFetching, isError: isDeathSavesError, isSuccess:isDeathSavesSuccess, error:deathSavesError}] = useLazyDeathSavesQuery();
 
     const notifyProgress = (progress: number) => setProggress(progress);
 
@@ -54,9 +54,10 @@ export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderPro
 
         if (isPartySuccess) {
             notifyProgress(Progress.partyInfoLoaded);
-            const { gameMasterId, inGameCharacter } = partyData.party;
+            const { gameMasterId } = partyData.party;
+            const character = partyData.party.inGameCharacter;
             setIsUserGameMaster(authState.currentUserId === gameMasterId);
-            setInGameCharacter(inGameCharacter ?? null);
+            setInGameCharacter(character ?? null);
             notifyProgress(Progress.partyParsed);
 
             return;
@@ -75,7 +76,7 @@ export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderPro
                 return;
             }
             
-            fetchDeathSaves(inGameCharacter.id);
+            fetchDeathSaves({ characterId: inGameCharacter.id });
         } else {
             setDeathSaves(null);
         }

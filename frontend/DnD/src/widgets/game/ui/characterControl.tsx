@@ -74,7 +74,7 @@ function GameMasterControlBar({
     resurrectButtonInfo}: GameMasterControlBarProps) {
     
     return <ButtonBar>
-        <Button disabled={resurrectButtonInfo.disabled} onClick={resurrectButtonInfo.onClick}>
+        <Button variant="outlined" disabled={resurrectButtonInfo.disabled} onClick={resurrectButtonInfo.onClick}>
             Воскресить персонажа
         </Button>
         <SuggestButton disabled={suggestButtonInfo.disabled} onClick={suggestButtonInfo.onClick}/>
