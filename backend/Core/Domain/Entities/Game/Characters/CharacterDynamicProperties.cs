@@ -99,7 +99,7 @@ public class CharacterDynamicProperties
 
     internal void SetDeathSaves(int success, int failures, out bool characterHasBeenDead)
     {
-        DeathSavesFailureCount = success;
+        DeathSavesSuccessCount = success;
         DeathSavesFailureCount = failures;
         characterHasBeenDead = failures == 3;
 

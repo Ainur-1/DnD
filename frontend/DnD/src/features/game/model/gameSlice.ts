@@ -208,7 +208,7 @@ function onCharacterUpdate(args: CharacterUpdatedEvent, dispatch: any) {
         tempHp: stats.tempHp,
         deathSaves: stats.deathSaves,
         id: id,
-    }))
+    }));
 }
 
 export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, { state: RootState }>(
