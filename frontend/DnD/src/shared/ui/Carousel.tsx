@@ -1,5 +1,5 @@
 import { Box, Typography, useTheme } from "@mui/material";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import CommunityCarousel from 'react-material-ui-carousel'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
@@ -7,12 +7,21 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 interface CarouselProps<T> {
     items: T[],
     constructNode: (item:T, itemIndex: number) => ReactNode;
+    setActiveStepRequestCallback?: (callback: (index: number) => void) => void;
 }
 
-export default function Carousel<T>({items, constructNode}: CarouselProps<T>) {
+export default function Carousel<T>({items, constructNode, setActiveStepRequestCallback}: CarouselProps<T>) {
     const [activeStep, setActiveStep] = React.useState<number>(0);
     const theme = useTheme();
 
+    useEffect(() => {
+        setActiveStepRequestCallback?.(function (index: number) {
+            if (index >=0 && index < items.length) {
+                setActiveStep(index);
+            }
+        });
+    }, [setActiveStepRequestCallback]);
+    
     return <Box>
         <Typography variant="h6" gutterBottom sx={{textAlign: 'center'}}>  
             {`${activeStep + 1} / ${items.length}`}
