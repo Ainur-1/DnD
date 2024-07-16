@@ -18,7 +18,7 @@ function BaseLayout() {
             <Route path="/sign-up" element={<SignUpPage/>}/>
             <Route element={<PrivateRoute/>}>
               <Route path="/my-characters">
-                <Route path="" index element={<MyCharactersPage/>} />
+                <Route index path="" element={<MyCharactersPage/>} />
                 <Route path="create" element={<CreateCharacterPage/>}/>
               </Route>
               <Route path="/my-parties" element={<PartiesPage/>} />
