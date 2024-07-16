@@ -13,6 +13,7 @@ COPY ["Core/Domain/Domain.csproj", "Core/Domain/"]
 COPY ["Infrastructure/DataAccess/DataAccess.csproj", "Infrastructure/DataAccess/"]
 COPY ["Infrastructure/GameHub/GameHub.csproj", "Infrastructure/GameHub/"]
 COPY ["Infrastructure/Services.Implementation/Services.Implementation.csproj", "Infrastructure/Services.Implementation/"]
+COPY ["Infrastructure/Mappings/Mappings.csproj", "Infrastructure/Mappings/"]
 COPY ["DnD/DnD.csproj", "DnD/"]
 RUN dotnet restore "./DnD/DnD.csproj"
 
