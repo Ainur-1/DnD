@@ -14,7 +14,7 @@ export default function CenterContent({children}: CenterContentProps) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '80vh',
+            minHeight: '70vh',
             }}
         >
             {children}

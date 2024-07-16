@@ -3,7 +3,7 @@ import { QuestionMark } from "@mui/icons-material";
 import { Box, CardMedia, Skeleton, useTheme } from "@mui/material";
 import { ReactNode } from "react";
 
-const defaultImageHeight = 150;
+const defaultImageHeight = 250;
 
 const CharacterImageWrapper = ({children, imageHeight}: ReactChildrenProps & { imageHeight: number | string}) => {
     const theme = useTheme();

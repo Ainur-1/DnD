@@ -33,6 +33,34 @@ export enum ApplyPolicy {
   Validation = 'VALIDATION'
 }
 
+export type Armor = {
+  __typename?: 'Armor';
+  armorType: ArmorType;
+  baseArmorClass: Scalars['Int']['output'];
+  calculateArmorClass: Scalars['Int']['output'];
+  calculateSpeedExpenses: Scalars['Int']['output'];
+  costInGold: Scalars['Decimal']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  hasStealthDisadvantage: Scalars['Boolean']['output'];
+  iconUrl?: Maybe<Scalars['String']['output']>;
+  material: Scalars['String']['output'];
+  maxPossibleDexterityModifier?: Maybe<Scalars['Int']['output']>;
+  name: Scalars['String']['output'];
+  requiredStrength?: Maybe<Scalars['Int']['output']>;
+  tags: Array<Scalars['String']['output']>;
+  weightInPounds: Scalars['Float']['output'];
+};
+
+
+export type ArmorCalculateArmorClassArgs = {
+  characterDexterityModifier: Scalars['Int']['input'];
+};
+
+
+export type ArmorCalculateSpeedExpensesArgs = {
+  characterStrength: Scalars['Int']['input'];
+};
+
 export type ArmorInput = {
   armorType: ArmorType;
   baseArmorClass: Scalars['Int']['input'];
@@ -119,6 +147,13 @@ export type CharacterDtoFilterInput = {
   personality?: InputMaybe<CharacterPersonalityDtoFilterInput>;
 };
 
+export type CharacterInventoryDto = {
+  __typename?: 'CharacterInventoryDto';
+  items: Array<InventoryItemDto>;
+  totalWeightInPounds: Scalars['Float']['output'];
+  wallet: WalletDto;
+};
+
 export type CharacterPersonalityDto = {
   __typename?: 'CharacterPersonalityDto';
   age: Scalars['Int']['output'];
@@ -127,7 +162,7 @@ export type CharacterPersonalityDto = {
   base64Image?: Maybe<Scalars['String']['output']>;
   bonds: Array<Scalars['String']['output']>;
   canLevelUp: Scalars['Boolean']['output'];
-  class: ClassType;
+  class: Scalars['String']['output'];
   classFeatures: Array<ClassFeatureDto>;
   flaws: Array<Scalars['String']['output']>;
   languages: Array<Scalars['String']['output']>;
@@ -146,7 +181,7 @@ export type CharacterPersonalityDtoFilterInput = {
   base64Image?: InputMaybe<StringOperationFilterInput>;
   bonds?: InputMaybe<ListStringOperationFilterInput>;
   canLevelUp?: InputMaybe<BooleanOperationFilterInput>;
-  class?: InputMaybe<ClassTypeOperationFilterInput>;
+  class?: InputMaybe<StringOperationFilterInput>;
   classFeatures?: InputMaybe<ListFilterInputTypeOfClassFeatureDtoFilterInput>;
   flaws?: InputMaybe<ListStringOperationFilterInput>;
   languages?: InputMaybe<ListStringOperationFilterInput>;
@@ -223,18 +258,12 @@ export enum ClassType {
   Fighter = 'FIGHTER',
   Monk = 'MONK',
   Paladin = 'PALADIN',
+  Ranger = 'RANGER',
   Rogue = 'ROGUE',
   Sorcerer = 'SORCERER',
   Warlock = 'WARLOCK',
   Wizard = 'WIZARD'
 }
-
-export type ClassTypeOperationFilterInput = {
-  eq?: InputMaybe<ClassType>;
-  in?: InputMaybe<Array<ClassType>>;
-  neq?: InputMaybe<ClassType>;
-  nin?: InputMaybe<Array<ClassType>>;
-};
 
 export type CreateCharacterDtoInput = {
   age: Scalars['Int']['input'];
@@ -279,7 +308,7 @@ export type CreateInventoryItemDtoInput = {
   inUse: Scalars['Boolean']['input'];
   isItemProficiencyOn: Scalars['Boolean']['input'];
   maybeArmor?: InputMaybe<ArmorInput>;
-  maybeStuff?: InputMaybe<ItemInput>;
+  maybeStuff?: InputMaybe<StuffInput>;
   maybeWeapon?: InputMaybe<WeaponInput>;
 };
 
@@ -374,13 +403,13 @@ export type InvalidArgumentValueError = Error & {
   message: Scalars['String']['output'];
 };
 
-export type ItemInput = {
-  costInGold: Scalars['Decimal']['input'];
-  description?: InputMaybe<Scalars['String']['input']>;
-  iconUrl?: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
-  tags: Array<Scalars['String']['input']>;
-  weightInPounds: Scalars['Float']['input'];
+export type InventoryItemDto = {
+  __typename?: 'InventoryItemDto';
+  count: Scalars['Int']['output'];
+  id: Scalars['UUID']['output'];
+  inUse: Scalars['Boolean']['output'];
+  isItemProficiencyOn: Scalars['Boolean']['output'];
+  item: OneOfItem;
 };
 
 export type JoinPartyInput = {
@@ -478,6 +507,13 @@ export type ObjectNotFoundError = Error & {
   message: Scalars['String']['output'];
 };
 
+export type OneOfItem = {
+  __typename?: 'OneOfItem';
+  armor?: Maybe<Armor>;
+  stuff?: Maybe<Stuff>;
+  weapon?: Maybe<Weapon>;
+};
+
 export type PartyCharacterDto = {
   __typename?: 'PartyCharacterDto';
   characterName: Scalars['String']['output'];
@@ -487,6 +523,7 @@ export type PartyCharacterDto = {
 export type Query = {
   __typename?: 'Query';
   character: CharacterDto;
+  characterInventory: CharacterInventoryDto;
   classInfo: Class;
   classes: Array<Class>;
   myCharacters: Array<CharacterDto>;
@@ -498,6 +535,11 @@ export type Query = {
 
 
 export type QueryCharacterArgs = {
+  characterId: Scalars['UUID']['input'];
+};
+
+
+export type QueryCharacterInventoryArgs = {
   characterId: Scalars['UUID']['input'];
 };
 
@@ -654,6 +696,25 @@ export type StringOperationFilterInput = {
   startsWith?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type Stuff = {
+  __typename?: 'Stuff';
+  costInGold: Scalars['Decimal']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  iconUrl?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  tags: Array<Scalars['String']['output']>;
+  weightInPounds: Scalars['Float']['output'];
+};
+
+export type StuffInput = {
+  costInGold: Scalars['Decimal']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  iconUrl?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  tags: Array<Scalars['String']['input']>;
+  weightInPounds: Scalars['Float']['input'];
+};
+
 export type SubRaceInfo = {
   __typename?: 'SubRaceInfo';
   abilities: Array<AbilityBuff>;
@@ -683,6 +744,33 @@ export type UuidOperationFilterInput = {
   nin?: InputMaybe<Array<InputMaybe<Scalars['UUID']['input']>>>;
   nlt?: InputMaybe<Scalars['UUID']['input']>;
   nlte?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+export type WalletDto = {
+  __typename?: 'WalletDto';
+  copper: Scalars['Int']['output'];
+  electrum: Scalars['Int']['output'];
+  gold: Scalars['Int']['output'];
+  platinum: Scalars['Int']['output'];
+  silver: Scalars['Int']['output'];
+};
+
+export type Weapon = {
+  __typename?: 'Weapon';
+  alternateHitDice?: Maybe<Dice>;
+  attackType: WeaponAttackType;
+  costInGold: Scalars['Decimal']['output'];
+  criticalDistanceInFoots?: Maybe<Scalars['Int']['output']>;
+  damageType: WeaponDamageType;
+  description?: Maybe<Scalars['String']['output']>;
+  hitDice: Dice;
+  iconUrl?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  normalDistanceInFoots?: Maybe<Scalars['Int']['output']>;
+  proficiencyType: WeaponProficiencyType;
+  properties?: Maybe<Array<WeaponProperty>>;
+  tags: Array<Scalars['String']['output']>;
+  weightInPounds: Scalars['Float']['output'];
 };
 
 export enum WeaponAttackType {
@@ -759,7 +847,7 @@ export type SignUpMutation = { __typename?: 'Mutation', signUp: { __typename?: '
 export type CarouselCharactersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CarouselCharactersQuery = { __typename?: 'Query', myCharacters: Array<{ __typename?: 'CharacterDto', id: any, isInParty: boolean, isDead: boolean, personality: { __typename?: 'CharacterPersonalityDto', name: string, race: string, class: ClassType, level: number, base64Image?: string | null, canLevelUp: boolean } }> };
+export type CarouselCharactersQuery = { __typename?: 'Query', myCharacters: Array<{ __typename?: 'CharacterDto', id: any, isInParty: boolean, isDead: boolean, personality: { __typename?: 'CharacterPersonalityDto', name: string, race: string, class: string, level: number, base64Image?: string | null, canLevelUp: boolean } }> };
 
 export type CharacterDeathSavesQueryVariables = Exact<{
   characterId: Scalars['UUID']['input'];
@@ -823,6 +911,13 @@ export type StrictClassesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type StrictClassesQuery = { __typename?: 'Query', classes: Array<{ __typename?: 'Class', id: ClassType, name: string }> };
+
+export type GetCharacterInventoryQueryVariables = Exact<{
+  characterId: Scalars['UUID']['input'];
+}>;
+
+
+export type GetCharacterInventoryQuery = { __typename?: 'Query', characterInventory: { __typename?: 'CharacterInventoryDto', items: Array<{ __typename?: 'InventoryItemDto', count: number, id: any, inUse: boolean, isItemProficiencyOn: boolean, item: { __typename?: 'OneOfItem', armor?: { __typename?: 'Armor', armorType: ArmorType, baseArmorClass: number, costInGold: any, description?: string | null, hasStealthDisadvantage: boolean, iconUrl?: string | null, material: string, maxPossibleDexterityModifier?: number | null, name: string, requiredStrength?: number | null, tags: Array<string>, weightInPounds: number } | null, stuff?: { __typename?: 'Stuff', costInGold: any, description?: string | null, iconUrl?: string | null, name: string, tags: Array<string>, weightInPounds: number } | null, weapon?: { __typename?: 'Weapon', alternateHitDice?: Dice | null, attackType: WeaponAttackType, costInGold: any, criticalDistanceInFoots?: number | null, damageType: WeaponDamageType, description?: string | null, hitDice: Dice, iconUrl?: string | null, name: string, normalDistanceInFoots?: number | null, proficiencyType: WeaponProficiencyType, properties?: Array<WeaponProperty> | null, tags: Array<string>, weightInPounds: number } | null } }> } };
 
 export type CreatePartyMutationVariables = Exact<{
   accessCode: Scalars['String']['input'];

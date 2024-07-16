@@ -1,4 +1,5 @@
 ﻿
+using Contracts;
 using Domain.Entities.Game.Items;
 using Services.Abstractions;
 
@@ -11,4 +12,6 @@ public interface IInventoryService: IDomainService
     public Task AddItemAsync(Guid characterId, Item item);
 
     public Task DeleteItemAsync(Guid characterId, Guid inventoryItemId);
+
+    public Task<CharacterInventoryDto> GetCharacterInventoryAsync(Guid issuerId, Guid characterId);
 }

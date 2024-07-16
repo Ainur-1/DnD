@@ -1,6 +1,6 @@
 ﻿namespace Domain.Entities.Game.Items;
 
-public record Item
+public record Item : IValueObject
 {
     public string Name { get; init; }
 

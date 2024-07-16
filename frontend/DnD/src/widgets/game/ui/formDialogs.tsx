@@ -1,7 +1,7 @@
 import useGameReducer from "@/features/game";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
-import { Box, Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, Stack, Switch, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import SuggesItemForm from "./SuggesItemForm";
 import { FormField } from "@/shared/types/IFormField";
@@ -462,25 +462,26 @@ export function ShowInventoryDialog({characterId, showForm, closeDialog}: ShowIn
             <DialogTitle>
                 Инвентарь
             </DialogTitle>
-            <DialogContent>
-                <Paper style={{overflow: 'auto'}}>
-                    { isLoading && <Skeleton animation="wave" variant="rounded" width="auto" height="100%"/>}
-                    {
-                        isSuccess &&
-                        <List>
-                            {data.items
-                                .map(item => <ListItem key={item.id}>
-                                <InventoryItemCard 
-                                    title={item.item.name} 
-                                    iconUrl={item.item.iconUrl} 
-                                    count={item.count} 
-                                    cardHeight={64} />
-                                Здесь кнопки действия
-                            </ListItem>
-                            )}
-                        </List>
-                    }
-                </Paper>
+            <DialogContent style={{overflow: 'auto'}}>
+                { isLoading && <Skeleton animation="wave" variant="rounded" width="auto" height="100%"/>}
+                {
+                    isSuccess &&
+                    <List>
+                        {data.characterInventory.items
+                            .map(item => <ListItem key={item.id}>
+                            <InventoryItemCard 
+                                title={item.item.armor?.name ?? item.item.stuff?.name ?? item.item.weapon?.name ?? ""} 
+                                iconUrl={""} 
+                                count={item.count} 
+                                cardHeight={64} />
+                            <Stack>
+                                <Switch/>
+                                <Switch/>
+                            </Stack>
+                        </ListItem>
+                        )}
+                    </List>
+                }
             </DialogContent>
         </Dialog>
     )
