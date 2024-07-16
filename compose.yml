@@ -30,6 +30,9 @@ services:
       context: ./frontend/DnD
       dockerfile: ./Dockerfile
     container_name: dnd_frontend
+    environment:
+      - VITE_GRAPHQL_HOST="http://localhost:8080/graphql"
+      - VITE_HUB_HOST="http://localhost:8080/gamehub"
     ports:
       - 3000:3000
     
