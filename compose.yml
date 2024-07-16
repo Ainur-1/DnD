@@ -18,7 +18,19 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
-      
+   
+  postgresql:
+    image: postgres
+    container_name: dnd_postgresql
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=dnd_postgresql
+    volumes:
+      - ./volumes/postgresql:/var/lib/postgresql/data
+  
   backend:
     build:
       context: ./backend
@@ -32,9 +44,11 @@ services:
       - MongoDbSettings__Port=27018
       - ASPNETCORE_ENVIRONMENT=Development
       - FrontendHost ="http://localhost:3000/"
+      - ConnectionStrings__LogsPostgresql=Host=host.docker.internal;Database=dnd_postgresql;Username=user;Password=123
     depends_on:
       - mongo
       - rabbitmq
+      - postgresql
 
   frontend:
     build:
