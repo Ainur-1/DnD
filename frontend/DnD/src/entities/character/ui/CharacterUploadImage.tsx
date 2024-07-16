@@ -28,10 +28,7 @@ interface AddImageOverlayProps {
 
 function AddImageOverlay({addImage}: AddImageOverlayProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const [error, setError] = useState<boolean>(false);
     const [disabled, setDisabled] = useState(false);
-
     const handleButtonClick = () => {
         fileInputRef.current?.click();
       };
@@ -42,21 +39,17 @@ function AddImageOverlay({addImage}: AddImageOverlayProps) {
         }
 
         if (!e.type.startsWith("image/jpeg")) {
-            setError(true);
             return;
         } else if (e.size > 3 * 1024 * 1024) {
-            setError(true);
             alert("Файл слишком большой. Не более 3 мб.");
             return;
         }
 
-        setError(false);
         setDisabled(true);
         try {
             const base64 = await convertFileToBase64(e);
             addImage(base64);
         } catch {
-            setError(true);
             alert("Не удалось загурзить изображение.");
         } finally {
             setDisabled(false);
@@ -67,7 +60,7 @@ function AddImageOverlay({addImage}: AddImageOverlayProps) {
         width: "100%",
         height: "100%"
     }}>
-        <input type="file" hidden ref={fileInputRef} accept="image/jpeg" onChange={(e) => handleChange(e.target.files?.item(0) ?? null)}/>
+        <input type="file" disabled={disabled} hidden ref={fileInputRef} accept="image/jpeg" onChange={(e) => handleChange(e.target.files?.item(0) ?? null)}/>
     </CardActionArea>
 }
 

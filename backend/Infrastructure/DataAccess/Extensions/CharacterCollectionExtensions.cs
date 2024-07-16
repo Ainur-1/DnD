@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Characters;
 using MongoDB.Driver;
+using MongoDB.Driver.Search;
 
 namespace DataAccess.Extensions;
 
@@ -28,4 +29,16 @@ public static class CharacterCollectionExtensions
 
         public CharacterManagement Info { get; set; }
     }
+
+    public static FilterDefinition<Character> GetByIdFilter(Guid id) => Builders<Character>.Filter
+        .Eq(x => x.Id, id);
+
+    public static Task<Character?> GetByIdAsync(this IMongoCollection<Character> collection, Guid id)
+        => collection.FindById(id).SingleOrDefaultAsync();
+
+    public static UpdateDefinition<Character> SetInGameStats(this UpdateDefinition<Character> updateDefinition, CharacterDynamicProperties inGameStats)
+        => updateDefinition.Set(x => x.InGameStats, inGameStats);
+
+    public static UpdateDefinition<Character> SetInGameStats(this UpdateDefinitionBuilder<Character> updateDefinition, CharacterDynamicProperties inGameStats)
+    => updateDefinition.Set(x => x.InGameStats, inGameStats);
 }

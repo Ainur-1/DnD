@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Domain.Entities.Items.Armors;
+using Domain.Exceptions;
 
 namespace Domain.Entities.Characters;
 
@@ -16,6 +17,8 @@ public class Character : IEntity<Guid>
     public CharacterInventory Inventory { get; protected set; }
 
     public CharacterDynamicProperties? InGameStats { get; protected set; }
+
+    public bool CanResurrect => Info.IsDead || InGameStats != null && !InGameStats.IsDying;
 
     public Character(
         CharacterPersonality setUpPersonality,
@@ -38,6 +41,84 @@ public class Character : IEntity<Guid>
     }
 
     protected Character() {}
+
+    public void TakeDamage(int damage)
+    {
+        if (damage < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(damage));
+        }
+        ThrowIfNotInGameStats();
+        Debug.Assert(InGameStats != null, "Inconsistent character state!");
+
+        InGameStats.TakeDamage(damage, Stats.HitPointsMaximum, out var isMomentalDeath);
+
+        if (isMomentalDeath)
+        {
+            Die();
+        }
+    }
+
+    public void Resurrect()
+    {
+        if (!CanResurrect)
+        {
+            return;
+        }
+
+        Info.IsDead = false;
+        InGameStats?.Resurrect();
+    }
+
+    public void Heal(int hpAddition)
+    {
+        ThrowIfNotInGameStats();
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(hpAddition);
+        ThrowIfIsDead();
+
+        var possibleAddition = Math.Min(hpAddition, Stats.HitPointsMaximum - InGameStats!.HitPoints);
+        
+        if (InGameStats.IsDying)
+        {
+            InGameStats.Resurrect();
+            // one hp is set up by default after Resurrection
+            InGameStats.Heal(Math.Max(possibleAddition - 1, 0));
+        } 
+        else
+        {
+            InGameStats.Heal(possibleAddition);
+        }
+    }
+
+    public void SetTempHp(int tempHp)
+    {
+        ThrowIfNotInGameStats();
+        InGameStats!.SetTemporaryHitPoints(tempHp);
+    }
+
+    public void UseHitDice()
+    {
+        ThrowIfNotInGameStats();
+        ThrowIfIsDead();
+
+        if (InGameStats!.HitDicesLeft > 0)
+            InGameStats!.UseHitDice();
+    }
+
+    public void UpdateDeathSaves(int success, int failures)
+    {
+        ValidateDeathSaves(success, nameof(success));
+        ValidateDeathSaves(failures, nameof(failures));
+        ThrowIfNotInGameStats();
+        ThrowIfIsDead();
+
+        InGameStats!.SetDeathSaves(success, failures, out var mustDie);
+
+        if (mustDie)
+        {
+            Die();
+        }
+    }
 
     internal void JoinParty(Guid partyId)
     {
@@ -101,29 +182,28 @@ public class Character : IEntity<Guid>
         return (actualArmor, actualSpeed);
     }
 
-    public void TakeDamage(int damage) 
-    {
-        if (damage < 0) 
-        {
-            throw new ArgumentOutOfRangeException(nameof(damage));
-        }
-        else if (InGameStats == null && Info.JoinedPartyId == default) 
-        {
-            throw new InvalidOperationException("Could not complete operation since character is not initialized.");
-        }
-
-        Debug.Assert(InGameStats != null, "Inconsistent character state!");
-
-        InGameStats.TakeDamage(damage, Stats.HitPointsMaximum, out var isMomentalDeath);
-
-        if (isMomentalDeath) 
-        {
-            Die();
-        }
-    }
-
     private void Die() 
     {
         Info.IsDead = true;
+    }
+
+    private void ThrowIfNotInGameStats()
+    {
+        if (InGameStats == null)
+        {
+            throw new InconsistentOperationException("Персонаж не в отряде.");
+        }
+    }
+
+    private void ThrowIfIsDead()
+    {
+        if (Info.IsDead)
+            throw new InconsistentOperationException("Персонаж мертв!");
+    }
+
+    private void ValidateDeathSaves(int deathSaves, string paramName)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(deathSaves, paramName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(deathSaves, 3, paramName);
     }
 }

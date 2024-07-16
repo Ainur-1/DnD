@@ -89,9 +89,7 @@ public class CharacterService : ICharacterService
 
     public async Task<CharacterDto?> GetCharacterForUserAsync(Guid userId, Guid characterId)
     {
-        var character = await _characterCollection
-            .Find(c => c.Id == characterId)
-            .SingleOrDefaultAsync();
+        var character = await _characterCollection.GetByIdAsync(characterId);
 
         if (character == null) 
         {
@@ -130,53 +128,113 @@ public class CharacterService : ICharacterService
             };
         }
 
-        var character = await _characterCollection
-            .FindById(characterId)
-            .SingleOrDefaultAsync() 
-            ?? throw new ObjectNotFoundException();
+        var character = await _characterCollection.GetByIdAsync(characterId) ?? throw new ObjectNotFoundException();
         
         character.TakeDamage(damage);
         Debug.Assert(character.InGameStats != null);
 
-        var selector = Builders<Character>.Filter
-            .Eq(c => c.Id, characterId);
-        var updateHealthAndLiveStatus = Builders<Character>.Update
-            .Set(dbCharacter => dbCharacter.InGameStats!.TemporaryHitPoints, character.InGameStats.TemporaryHitPoints)
-            .Set(dbCharacter => dbCharacter.InGameStats!.HitPoints, character.InGameStats.HitPoints)
-            .Set(dbCharacter => dbCharacter.InGameStats!.IsDying, character.InGameStats.IsDying)
-            .Set(dbCharacter => dbCharacter.InGameStats!.DeathSavesFailureCount, character.InGameStats.DeathSavesFailureCount)
-            .Set(dbCharacter => dbCharacter.Info.IsDead, character.Info.IsDead);
-        await _characterCollection.UpdateOneAsync(selector, updateHealthAndLiveStatus);
+        await UpdateInGameStatsAsync(character);
+    }
 
+    public async Task ResurrectAsync(Guid characterId)
+    {
+        var character = await _characterCollection.GetByIdAsync(characterId) ?? throw new ObjectNotFoundException();
+
+        if (!character.CanResurrect)
+        {
+            return;
+        }
+
+        character.Resurrect();
+
+        var updateDef = Builders<Character>.Update
+            .Set(x => x.Info.IsDead, character.Info.IsDead);
+        if (character.InGameStats != null)
+        {
+            updateDef = updateDef.SetInGameStats(character.InGameStats);
+        }
+
+        await _characterCollection.UpdateOneAsync(CharacterCollectionExtensions.GetByIdFilter(characterId), updateDef);
         await PublishCharacterUpdatedEventAsync(characterId);
+    }
+
+    public async Task HealAsync(Guid issuerId, Guid characterId, int hpAddition, int tempHp, int usedDiceCount)
+    {
+        var character = await _characterCollection.GetByIdAsync(characterId) ?? throw new ObjectNotFoundException();
+
+        if (hpAddition == 0 && tempHp == 0)
+            throw new InvalidArgumentValueException(nameof(hpAddition), "Проведите лечение хотя бы на 1 хит.");
+
+        if (hpAddition > 0)
+        {
+            character.Heal(hpAddition);
+        }
+        if (tempHp > 0)
+        {
+            character.SetTempHp(tempHp);
+        }
+
+        if (usedDiceCount > 0)
+        {
+            if (issuerId != character.Info.OwnerId)
+                throw new AccessDeniedException("Только владелец может изменять количество костей хитов.");
+
+            for (var i = 0; i < usedDiceCount; i++)
+                character.UseHitDice();
+        }
+
+        await UpdateInGameStatsAsync(character);
+    }
+
+    public async Task UpdateDeathSavesAsync(Guid characterId, DeathSavesDto deathSaves)
+    {
+        var character = await _characterCollection.GetByIdAsync(characterId) ?? throw new ObjectNotFoundException();
+
+        character.UpdateDeathSaves(deathSaves.SuccessCount, deathSaves.FailureCount);
+
+        await UpdateInGameStatsAsync(character);
     }
 
     public async Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats)
     {
         //todo: validate update variables before call
-        // question need we check if hp is greater than max hp?
+        var atleastHasUpdate = updateStats.Speed.HasValue || !updateStats.Inspiration.HasValue;
+        if (!atleastHasUpdate)
+            throw new InvalidArgumentValueException(nameof(updateStats), "Нет никаких обновлений характеристик");
 
-        var hp = updateStats.Hp;
-        if (!updateStats.IsDead && updateStats.Hp == 0)
+        if (updateStats.Inspiration.HasValue && updateStats.Inspiration < 0)
+            throw new InvalidArgumentValueException(nameof(updateStats.Inspiration), "Бонус вдохновения не может быть отрицательным.");
+
+        if (updateStats.Speed.HasValue && updateStats.Speed < 1)
+            throw new InvalidArgumentValueException(nameof(updateStats.Speed), "Скорость персонажа не может быть меньше 1 фут., он не сможет передвигаться!");
+
+        var characterSelector = Builders<Character>.Filter
+            .And(
+                Builders<Character>.Filter.Eq(x => x.Id, characterId),
+                Builders<Character>.Filter.Not(Builders<Character>.Filter.Eq(x => x.InGameStats, null))
+            );
+
+        var updateBuilder = Builders<Character>.Update;
+        UpdateDefinition<Character>? updateDefinition = null;
+
+        // can not update hp to 0 or negative;
+        if (updateStats.Inspiration.HasValue)
         {
-            hp = 1;
+            updateDefinition = updateBuilder.Set(x => x.InGameStats!.InspirationBonus, updateStats.Inspiration.Value);
         }
 
-        var selector = Builders<Character>.Filter
-            .Eq(c => c.Id, characterId);
-        var update = Builders<Character>.Update
-            .Set(c => c.InGameStats.HitPoints, hp)
-            .Set(c => c.InGameStats.TemporaryHitPoints, updateStats.TempHp)
-            .Set(c => c.InGameStats.InspirationBonus, updateStats.Inspiration)
-            .Set(c => c.InGameStats.ActualSpeed, updateStats.Speed)
-            .Set(c => c.InGameStats.HitDicesLeft, updateStats.HitDicesLeftCount)
-            .Set(c => c.InGameStats.IsDying, updateStats.IsDying)
-            .Set(c => c.InGameStats.DeathSavesSuccessCount, updateStats.DeathSaves?.SuccessCount ?? 0)
-            .Set(c => c.InGameStats.DeathSavesFailureCount, updateStats.DeathSaves?.FailureCount ?? 0)
-            .Set(c => c.Info.IsDead, updateStats.IsDead);
-        await _characterCollection.UpdateOneAsync(selector, update);
+        if (updateStats.Speed.HasValue)
+        {
+            updateDefinition = updateDefinition?.Set(x => x.InGameStats!.ActualSpeed, updateStats.Speed.Value)
+                ?? updateBuilder.Set(x => x.InGameStats!.ActualSpeed, updateStats.Speed.Value);
+        }
 
-        await PublishCharacterUpdatedEventAsync(characterId);
+        if (updateDefinition != null)
+        {
+            await _characterCollection.UpdateOneAsync(characterSelector, updateDefinition);
+
+            await PublishCharacterUpdatedEventAsync(characterId);
+        }
     }
 
     private Task PublishCharacterUpdatedEventAsync(Guid characterId)
@@ -359,18 +417,13 @@ public class CharacterService : ICharacterService
         return new RaceTrait(raceTraitDescriptor.Name, description);
     }
 
-    public Task ResurrectAsync(Guid characterId)
+    private async Task UpdateInGameStatsAsync(Character character)
     {
-        throw new NotImplementedException();
+        await _characterCollection.UpdateOneAsync(CharacterCollectionExtensions.GetByIdFilter(character.Id), GetInGameUpdateDefinition(character));
+        await PublishCharacterUpdatedEventAsync(character.Id);
     }
 
-    public Task HealAsync(Guid characterId, int hpAddition, int tempHpAddition, int usedDiceCount)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task UpdateDeathSavesAsync(Guid characterId, DeathSavesDto deathSaves)
-    {
-        throw new NotImplementedException();
-    }
+    private static UpdateDefinition<Character> GetInGameUpdateDefinition(Character character) => Builders<Character>.Update
+        .SetInGameStats(character!.InGameStats)
+        .Set(x => x.Info.IsDead, character.Info.IsDead);
 }

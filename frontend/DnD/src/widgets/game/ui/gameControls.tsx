@@ -6,7 +6,6 @@ import useGameReducer from "@/features/game";
 import { DeathSaves } from "@/entities/character/model/types";
 import { ShowInventoryDialog, StartFightFormDialog } from "./formDialogs";
 import { useState } from "react";
-import { updateCharacter, updateFight } from "@/features/game/model/gameSlice";
 
 interface UserControlBarProps {
     findMeButtonInfo: ButtonProps
@@ -45,7 +44,7 @@ interface DyingUserControlBar {
 }
 
 function DyingUserControlBar({}: DyingUserControlBar) {
-    const { state, setFatalErrorOccured } = useGameReducer();
+    const { state, setFatalErrorOccured, updateDeathSaves } = useGameReducer();
     const [ requestSent, setRequestSent ] = useState(false);
 
     if(state === undefined) {
@@ -57,7 +56,7 @@ function DyingUserControlBar({}: DyingUserControlBar) {
         successCount: 0,
     };
 
-    async function updateDeathSaves(deathSaves: DeathSaves) {
+    async function onUpdateDeathSaves(deathSaves: DeathSaves) {
         if (requestSent) {
             return;
         }
@@ -69,13 +68,7 @@ function DyingUserControlBar({}: DyingUserControlBar) {
                 return;
             }
 
-            await updateCharacter({
-                targetCharacterId: character.id,
-                deathSavesUpdate: {
-                    deathSaves: deathSaves
-                },
-            });
-
+            await updateDeathSaves(deathSaves);
         } catch {
             setFatalErrorOccured(true);
         } finally {
@@ -86,7 +79,7 @@ function DyingUserControlBar({}: DyingUserControlBar) {
     function changeSuccessCount(number: number | null) {
         const value = number ?? 0;
 
-        return updateDeathSaves({
+        return onUpdateDeathSaves({
             ...deathSaves,
             successCount: value,
         });
@@ -95,7 +88,7 @@ function DyingUserControlBar({}: DyingUserControlBar) {
     function changeFailuresCount(number: number | null) {
         const value = number ?? 0;
 
-        return updateDeathSaves({
+        return onUpdateDeathSaves({
             ...deathSaves,
             failureCount: value,
         });
@@ -115,7 +108,7 @@ interface GameMasterControlBarProps {
 }
 
 function GameMasterControlBar({}: GameMasterControlBarProps) {
-    const { state, setFatalErrorOccured } = useGameReducer();
+    const { state, setFatalErrorOccured, updateFight } = useGameReducer();
     const [endFightRequestSent, setEndFightRequestSent] = useState(false);
 
     if (!state) {

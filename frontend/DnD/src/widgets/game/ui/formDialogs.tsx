@@ -22,14 +22,16 @@ interface HealFormDialogProps extends FormDialogProps {
 }
 
 export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDialogProps) {
-    const [tempHpAddition, setTempHpAddition] = useState<number | undefined>();
-    const [tempHpAdditionError, setTempHpAdditionError] = useState("");
+    const [tempHp, settempHp] = useState<number | undefined>();
+    const [tempHpError, settempHpError] = useState("");
     const [hpAddition, setHpAddition] = useState<number | undefined>();
     const [hpAdditionError, setHpAdditionError] = useState("");
+    const [usedHitDiceCount, setUsedHitDiceCount] = useState<number|undefined>(0);
+    const [usedHitDiceCountError, setUsedHitDiceCountError] = useState("");
     const [formError, setFormError] = useState("");
     const { state, setFatalErrorOccured } = useGameReducer();
     const [requestSent, setRequestSent] = useState(false);
-    const { updateCharacter } = useGameReducer();
+    const { healCharacter } = useGameReducer();
 
     if (state == undefined) {
         return <></>
@@ -54,11 +56,12 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
                 setHpAdditionError("У персонажа максимальное количество здоровья!");
                 setHpAddition(undefined);
             } else {
-                setHpAddition(value == 0 ? undefined : value);
+                setHpAddition(Math.abs(value));
                 setHpAdditionError("");
             }
             setFormError("");
         } else {
+            setHpAddition(undefined);
             setHpAdditionError(`Введите число (макс. ${maxAvailableHpAddition}).`);
         }
     }
@@ -66,9 +69,23 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
     const onTempHpChange = (strValue: string) => {
         const { success, value } = tryParseNumber(strValue);
         if (success) {
-            setTempHpAddition(Math.floor(value!));
+            settempHp(Math.floor(Math.abs(value!)));
+            settempHpError("");
         } else {
-            setTempHpAdditionError("Введите число.");
+            settempHpError("Введите число.");
+            settempHp(undefined);
+        }
+        setFormError("");
+    }
+
+    const onDiceCountChange = (strValue: string) => {
+        const { success, value } = tryParseNumber(strValue);
+        if (success) {
+            setUsedHitDiceCount(Math.floor(Math.abs(value!)));
+            setUsedHitDiceCountError("");
+        } else {
+            setUsedHitDiceCountError("Введите число.");
+            setUsedHitDiceCount(undefined);
         }
         setFormError("");
     }
@@ -82,7 +99,7 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
         const rangeErrorLabel = "Не верный диапозон значений.";
         
         setFormError("");
-        if (!hpAddition || !tempHpAddition) {
+        if (!(hpAddition || tempHp)) {
             setFormError("Введите +HP и/или +TempHp.");
             return;
         }
@@ -92,17 +109,18 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
             return;
         }
 
-        if (tempHpAddition && tempHpAddition <= 0) {
-            setTempHpAdditionError(rangeErrorLabel);
+        if (tempHp && tempHp <= 0) {
+            settempHpError(rangeErrorLabel);
             return;
         }
 
         setRequestSent(true);
         try {
-            await updateCharacter({
-                targetCharacterId: characterId,
-                hp: hpAddition ? charcter.mainStats.hp + hpAddition : undefined,
-                tempHp: tempHpAddition ? charcter.mainStats.tempHp + tempHpAddition : undefined
+            await healCharacter({
+                targetId: characterId,
+                hpAddition: hpAddition,
+                tempHp: tempHp,
+                usedHitDicesCount: usedHitDiceCount,
             });
         } catch {
             setFatalErrorOccured(true);
@@ -141,13 +159,22 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
                         error={hpAdditionError != ""}
                     />
                     <TextField 
-                        value={tempHpAddition}
+                        value={tempHp}
                         onChange={(e) => onTempHpChange(e.target.value)}
                         margin="normal" 
                         fullWidth 
-                        label="+ Temp HP" 
+                        label="Установить Temp HP" 
                         type="number"
-                        error={tempHpAdditionError != ""}
+                        error={tempHpError != ""}
+                    />
+                    <TextField 
+                        value={usedHitDiceCount}
+                        onChange={(e) => onDiceCountChange(e.target.value)}
+                        margin="normal" 
+                        fullWidth 
+                        label="Потрачено костей здоровья" 
+                        type="number"
+                        error={usedHitDiceCountError != ""}
                     />
                     <Button disabled={requestSent} type="submit" fullWidth variant="outlined" sx={{ mt: 3, mb: 2 }}>
                         Лечить

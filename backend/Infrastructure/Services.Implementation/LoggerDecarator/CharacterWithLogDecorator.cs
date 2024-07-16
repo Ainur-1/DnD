@@ -1,7 +1,6 @@
 ﻿using Contracts;
 using Contracts.Character;
 using Contracts.Online;
-using Domain.Entities.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Service.Abstractions;
@@ -54,9 +53,9 @@ public class CharacterWithLogDecorator : ServiceLoggerBase<ICharacterService>, I
         return task.Result;
     }
 
-    public async Task HealAsync(Guid characterId, int hpAddition, int tempHpAddition, int usedDiceCount)
+    public async Task HealAsync(Guid issuerId, Guid characterId, int hpAddition, int tempHpAddition, int usedDiceCount)
     {
-        var task = _characterService.HealAsync(characterId, hpAddition, tempHpAddition, usedDiceCount);
+        var task = _characterService.HealAsync(issuerId, characterId, hpAddition, tempHpAddition, usedDiceCount);
         await AwaitWithLogAsync(task, nameof(GetUserCharactersAsync));
     }
 

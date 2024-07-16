@@ -15,7 +15,7 @@ public interface ICharacterService: IDomainService
     Task<GameCharacterDto> GetByIdAsync(Guid id, Guid partyId);
     Task<(bool IsDead, int InitiativeModifier)?> GetCharacterFightOrderCalculationParametersAsync(Guid characterId);
     Task UpdateCharacterInGameStatsAsync(Guid characterId, InGameStatsUpdateDto updateStats);
-    
+
     /// <exception cref="InvalidArgumentValueException">if damage is invalid</exception>
     /// <exception cref="ObjectNotFoundException">if character is not found</exception>
     Task TakeDamageAsync(Guid characterId, int damage);
@@ -23,7 +23,7 @@ public interface ICharacterService: IDomainService
     /// <exception cref="InconsistentOperationException">if damage is invalid</exception> 
     Task ResurrectAsync(Guid characterId);
 
-    Task HealAsync(Guid characterId, int hpAddition, int tempHpAddition, int usedDiceCount);
+    Task HealAsync(Guid issuerId, Guid characterId, int hpAddition, int tempHp, int usedDiceCount);
 
     Task UpdateDeathSavesAsync(Guid characterId, DeathSavesDto deathSaves);
 
