@@ -211,6 +211,22 @@ function onCharacterUpdate(args: CharacterUpdatedEvent, dispatch: any) {
     }));
 }
 
+function onFightUpdate(args: {
+    isFight: boolean;
+    scoreValues: {
+            characterId: string;
+            score: number;
+        }[] | null | undefined
+    }, 
+    dispatch: any) {
+    const { isFight, scoreValues } = args;
+
+    dispatch(setFight({
+        isFight: isFight,
+        order: scoreValues?.map(x => x.characterId) ?? null
+    }));
+}
+
 export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, { state: RootState }>(
     "game/initGameState",
     async function (args, { dispatch }) {
@@ -220,8 +236,7 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
             .withAutomaticReconnect()
             .build();
         
-        connection.on("OnFightUpdate",
-             (args: FightInfo) => dispatch(setFight(args)));
+        connection.on("OnFightUpdate", (args) => onFightUpdate(args, dispatch));
         connection.on("OnPartyDisband", () => dispatch(setGameEnd(true)));
         connection.on("OnPartyJoin", (args: GameCharacterDto) => dispatch(addGameChracter(mapDtoToGameCharacter(args))));
         connection.on("OnCharacterUpdate", (args) => onCharacterUpdate(args, dispatch));

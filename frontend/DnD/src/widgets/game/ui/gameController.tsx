@@ -6,6 +6,7 @@ import { CharacterCard } from "@/entities/character";
 import { InGameLiveOverlay } from "@/entities/character/ui/characterCardTopOverlays";
 import CharacterControlBar from "./characterControl";
 import { Box, Stack } from "@mui/material";
+import FightStatusWidget from "./FightStatusWidget";
 
 export default function GameController() {
 
@@ -57,7 +58,7 @@ export default function GameController() {
         <Stack>
             <Carousel items={items} constructNode={constructCharacterCard}/>
         </Stack>
-        
+        <FightStatusWidget/>
         <Box sx={{transform: "translateY(35%)"}}>
             <BottomControlBar findMyCharacter={navigateCarouselToMyCharacter} />
         </Box>

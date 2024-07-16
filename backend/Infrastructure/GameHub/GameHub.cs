@@ -215,28 +215,15 @@ public class GameHub : Hub<IHubEventActions>
             room.SortedInitiativeScores = default;
         }
 
-        //
-        var fightUpdatedEvent = new FightUpdatedEvent
+        await Clients.Group(partyId.ToString()).OnFightUpdate(new FightStatusDto
         {
-            Status = new FightStatusDto
+            IsFight = room.IsFight,
+            ScoreValues = room.SortedInitiativeScores?.Select(x => new CharacterInitiativeScoreDto
             {
-                IsFight = room.IsFight,
-                ScoreValues = room.SortedInitiativeScores?.Select(x => new CharacterInitciativeScoreDto
-                {
-                    CharacterId = x.Item1,
-                    Score = x.Item2
-                }).ToArray()
-            }
-        };
-
-
-        await Clients.Group(partyId.ToString()).OnFightUpdate(fightUpdatedEvent);
-        //
-        //await Clients.Group(partyId.ToString()).OnFightUpdate(new
-        //{
-        //    isFight = room.IsFight,
-        //    orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
-        //});
+                CharacterId = x.Item1,
+                Score = x.Item2
+            }).ToArray()
+        });
     }
     public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
     {

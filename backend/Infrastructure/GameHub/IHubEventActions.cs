@@ -8,5 +8,5 @@ public interface IHubEventActions
     public Task OnPartyJoin(CharacterDto characterDto);
     public Task OnPartyDisband();
     public Task OnCharacterUpdate(CharacterUpdatedEvent @event);
-    public Task OnFightUpdate(FightUpdatedEvent @event);
+    public Task OnFightUpdate(FightStatusDto @event);
 }

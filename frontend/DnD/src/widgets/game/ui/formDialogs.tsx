@@ -1,7 +1,7 @@
 import useGameReducer from "@/features/game";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
-import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import SuggesItemForm from "./SuggesItemForm";
 import { FormField } from "@/shared/types/IFormField";
@@ -339,9 +339,10 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
         } 
 
         const { success, value } = tryParseNumber(strValue!.trim());
-        let actualValue = 1;
+        let actualValue: number | undefined = 1;
         if (!success) {
             error = "Не число.";
+            actualValue = undefined;
         } else if (value! < 1 || value! > 20 || isDecimal(value!)) {
             actualValue = 1;
             error = "Кубик d20."
@@ -396,40 +397,46 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
             scroll="body"
             onClose={closeDialog}
         >
-            <DialogTitle>
-                Начать режим боя
-            </DialogTitle>
             <DialogContent>
-                <FormBox handleSubmit={handleSubmit} formTitle="Значения бросков инициативы" formError={fromError}>
-                    {state.gameInfo.partyCharacters
-                        .filter(x => !x.mainStats.isDead)
-                        .map((character, index) => <Grid key={`grid-fight-${index}`} container spacing={2}>
-                            <Grid item xs={7.2}>
-                                <Typography variant="h6">
-                                    {character.personality.characterName}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={2.4}>
-                                <TextField 
-                                    disabled={requestSent}
-                                    value={values[character.id].value} 
-                                    onChange={(e) => onChange(character.id, e.target.value)} 
-                                    fullWidth  
-                                    label="Лов." 
-                                    type="number" 
-                                    error={values[character.id].error != null}
-                                />
-                            </Grid>
-                            <Grid item xs={2.4}>
-                                <Typography variant="body2">
-                                    + {character.otherStats.dexterityModifier}
-                                </Typography>
-                            </Grid>
-                    </Grid>)}
-                    <Button disabled={!Object.values(values).every(x => validDexValue(x)) || requestSent} type="submit" fullWidth variant="outlined" sx={{ mt: 3, mb: 2 }}>
-                        Лечить
-                    </Button>
-                </FormBox>
+                <Stack>
+                    <Typography component="h5" variant="h5" fontWeight="bold">
+                        Инициатива
+                    </Typography>
+                    <Typography component="h6" variant="h6" color="error" textAlign="center">
+                        {fromError}
+                    </Typography>
+                    <Box component="form" sx={{ mt: 1 }} onSubmit={handleSubmit}>
+                        {state.gameInfo.partyCharacters
+                            .filter(x => !x.mainStats.isDead)
+                            .map((character, index) => <Grid key={`grid-fight-${index}`} container spacing={2}>
+                                <Grid item xs={7.2} alignContent="center">
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {character.personality.characterName}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={2.4} alignContent="center">
+                                    <TextField 
+                                        disabled={requestSent}
+                                        value={values[character.id].value} 
+                                        onChange={(e) => onChange(character.id, e.target.value)} 
+                                        fullWidth  
+                                        label="Лов." 
+                                        type="number" 
+                                        error={values[character.id].error != null}
+                                    />
+                                </Grid>
+                                <Grid item xs={2.4} alignContent="center">
+                                    <Typography>
+                                        + {character.otherStats.dexterityModifier}
+                                    </Typography>
+                                </Grid>
+                        </Grid>)}
+
+                        <Button disabled={!Object.values(values).every(x => validDexValue(x)) || requestSent} type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                            Битва
+                        </Button>
+                    </Box>
+                </Stack>
             </DialogContent>
         </Dialog>
     )
