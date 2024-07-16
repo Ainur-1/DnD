@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Races;
+using Newtonsoft.Json;
 
 namespace Domain.Entities.Game.Races;
 
@@ -22,5 +23,5 @@ public class RaceName
 
     protected RaceName() { }
 
-    public override string ToString() => string.IsNullOrEmpty(SubRaceName) ? Race.ToString() : $"{SubRaceName} {Race}";
+    public override string ToString() => string.IsNullOrEmpty(SubRaceName) ? JsonConvert.SerializeObject(Race) : $"{SubRaceName} {JsonConvert.SerializeObject(Race)}";
 }

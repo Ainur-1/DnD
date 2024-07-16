@@ -77,5 +77,18 @@ export interface UpdateCharacterVariables {
 
 export interface CharacterUpdatedEvent {
     id: string;
-    stats: DynamicStatsDto;
+    stats: {
+        armorClass: number;
+        deathSaves: {
+            failureCount: number;
+            successCount: number;
+        };
+        hitDicesLeftCount: number;
+        hp: number;
+        inspiration: number;
+        isDead: boolean;
+        isDying: boolean;
+        speed: number;
+        tempHp: number;
+    };
 }

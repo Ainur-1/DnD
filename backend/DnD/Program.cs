@@ -10,7 +10,6 @@ using Services.Abstractions;
 using Services.Implementation;
 using MassTransit;
 using static DnD.Data.WebApplicationExtensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DnD;
 
@@ -49,8 +48,6 @@ public class Program
 
         services.AddLogging(x => x.AddConsole().AddDebug());
 
-        services.AddLogging();
-
         if (builder.Environment.IsDevelopment())
         {
             services.AddCors(options =>
@@ -70,17 +67,8 @@ public class Program
         services.AddSignalR();
         services.AddGraphQlApi();
 
-        services.AddTransient<IEmailService>(provider =>
-            new EmailService(
-                configuration["Smtp:Server"],
-                int.Parse(configuration["Smtp:Port"]),
-                configuration["Smtp:User"],
-                configuration["Smtp:Pass"]
-            ));
-        services.AddTransient<IUserService, UserManagementService>();
-
         services.RegisterDatabaseServices(mongoDbSettings);
-        services.AddDomainServicesImplementations();
+        services.AddDomainServicesImplementations(configuration);
 
         var app = builder.Build();
 

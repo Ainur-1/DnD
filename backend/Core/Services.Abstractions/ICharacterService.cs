@@ -19,6 +19,13 @@ public interface ICharacterService: IDomainService
     /// <exception cref="InvalidArgumentValueException">if damage is invalid</exception>
     /// <exception cref="ObjectNotFoundException">if character is not found</exception>
     Task TakeDamageAsync(Guid characterId, int damage);
+    
+    /// <exception cref="InconsistentOperationException">if damage is invalid</exception> 
+    Task ResurrectAsync(Guid characterId);
+
+    Task HealAsync(Guid characterId, int hpAddition, int tempHpAddition, int usedDiceCount);
+
+    Task UpdateDeathSavesAsync(Guid characterId, DeathSavesDto deathSaves);
 
     /// <summary>
     /// Should be used to retrieve Character information

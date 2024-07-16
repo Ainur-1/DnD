@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
+using Domain.Extensions.Serialization;
 
 namespace Domain.Entities.Classes;
 
-[JsonConverter(typeof(StringEnumConverter))]
+[JsonConverter(typeof(ClassTypeJsonConverter))]
 public enum ClassType
 {
     Barbarian = 1,
@@ -17,4 +18,5 @@ public enum ClassType
     Sorcerer,
     Warlock,
     Wizard,
+    Ranger
 }

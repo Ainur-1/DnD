@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using Domain.Extensions.Serialization;
+using Newtonsoft.Json;
 
 namespace Domain.Entities.Races;
 
-[JsonConverter(typeof(StringEnumConverter))]
+[JsonConverter(typeof(SizeJsonConverter))]
 public enum Size
 {
     Small,
