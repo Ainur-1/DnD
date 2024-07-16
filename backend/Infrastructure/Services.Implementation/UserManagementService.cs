@@ -5,6 +5,7 @@ using Services.Abstractions;
 using System.Web;
 using MassTransit;
 using Services.Implementation.Consumers.Email;
+using Microsoft.Extensions.Configuration;
 namespace Services.Implementation;
 
 public class UserManagementService : IUserService, IAuthorizationService
@@ -13,17 +14,20 @@ public class UserManagementService : IUserService, IAuthorizationService
     private readonly SignInManager<User> _signInManager;
     private readonly IEmailService _emailService;
     private readonly IBus _bus;
+    private readonly IConfiguration _configuration;
 
     public UserManagementService(
         UserManager<User> userManager, 
         SignInManager<User> signInManager, 
         IEmailService emailService,
-        IBus bus)
+        IBus bus,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _emailService = emailService;
         _bus = bus;
+        _configuration = configuration;
     }
 
     public async Task CreateAsync(string email, string username, string password, string? name = null)
@@ -43,7 +47,9 @@ public class UserManagementService : IUserService, IAuthorizationService
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(token);
-            var confirmationLink = $"https://localhost:7189/confirm-email?userId={user.Id}&token={encodedToken}";
+            var baseUrl = _configuration["AppSettings:BaseUrl"];
+
+            var confirmationLink = $"{baseUrl}/confirm-email?userId={user.Id}&token={encodedToken}";
             var subject = "Подтверждение регистрации";
             var message = $@"
                 <html>
