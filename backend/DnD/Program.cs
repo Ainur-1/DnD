@@ -10,6 +10,11 @@ using Services.Abstractions;
 using Services.Implementation;
 using MassTransit;
 using static DnD.Data.WebApplicationExtensions;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.PostgreSQL;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 
 namespace DnD;
 
@@ -45,6 +50,17 @@ public class Program
                 })
                 .AddMongoDbStores<User, UserRole, Guid>(mongoDbSettings.GetConnectionString(), Constants.DATABASE_NAME)
                 .AddDefaultTokenProviders();
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.PostgreSQL(
+                connectionString: configuration.GetConnectionString("LogsPostgresql"),
+                tableName: "DnDServiceLogger",
+                needAutoCreateTable: true)
+            .CreateLogger();
+        builder.Host.UseSerilog();
 
         services.AddLogging(x => x.AddConsole().AddDebug());
 

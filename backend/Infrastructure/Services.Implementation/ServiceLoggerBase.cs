@@ -3,14 +3,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Services.Abstractions;
 using System.Security.Claims;
+using Serilog;
+using Serilog.Events;
 
 namespace Services.Implementation
 {
+    
     public abstract class ServiceLoggerBase<TService> where TService : IDomainService
     {
         protected readonly ILogger<TService> _logger;
         private readonly string? _callerUserId;
-
         protected ServiceLoggerBase(ILogger<TService> logger, IHttpContextAccessor httpContext)
         {
             _logger = logger;
