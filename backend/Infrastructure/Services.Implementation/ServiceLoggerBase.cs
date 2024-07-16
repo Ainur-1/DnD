@@ -21,13 +21,13 @@ namespace Services.Implementation
         {
             try
             {
-                _logger.LogInformation("User {userId} called {operation} [yyyy-MM-dd HH:mm:ss].",
-                    _callerUserId, operationName, DateTime.UtcNow);
+                _logger.LogInformation("User {userId} called {operation} {timestamp}.",
+                    _callerUserId, operationName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
 
                 await task;
 
-                _logger.LogInformation("User {userId} completed {operation} [yyyy-MM-dd HH:mm:ss].",
-                    _callerUserId, operationName, DateTime.UtcNow);
+                _logger.LogInformation("User {userId} completed {operation} {timestamp}.",
+                    _callerUserId, operationName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
             }
             catch (DomainException)
             {
@@ -35,8 +35,8 @@ namespace Services.Implementation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "User {userId} raised exceptions: {ex} at {operation} [yyyy-MM-dd HH:mm:ss].",
-                    _callerUserId, ex.GetType().Name, operationName, DateTime.UtcNow);
+                _logger.LogError(ex, "User {userId} raised exceptions: {ex} at {operation} {timestamp}.",
+                    _callerUserId, ex.GetType().Name, operationName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
 
                 throw;
             }

@@ -11,7 +11,7 @@ public class PartyWithLogDecorator : ServiceLoggerBase<IPartyService>, IPartySer
 {
     private readonly IPartyService _partyService;
     public PartyWithLogDecorator(
-        IPartyService partyService,
+        PartyService partyService,
         ILogger<IPartyService> logger, 
         IHttpContextAccessor httpContext) : base(logger, httpContext)
     {

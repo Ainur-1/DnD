@@ -6,11 +6,11 @@ namespace Services.Implementation.LoggerDecarator;
 
 public class AuthorizationWithLogDecorator : ServiceLoggerBase<IAuthorizationService>, IAuthorizationService
 {
-    private readonly UserManagementService _userManagementService;
+    private readonly IAuthorizationService _userManagementService;
     public AuthorizationWithLogDecorator(
         UserManagementService userManagementService, 
         ILogger<IAuthorizationService> logger, 
-        HttpContextAccessor httpContextAccessor) : base(logger, httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor) : base(logger, httpContextAccessor)
     {
         _userManagementService = userManagementService;
     }

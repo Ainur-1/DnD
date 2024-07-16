@@ -66,6 +66,7 @@ public class Program
 
         services.AddSignalR();
         services.AddGraphQlApi();
+        services.AddControllers();
 
         services.RegisterDatabaseServices(mongoDbSettings);
         services.AddDomainServicesImplementations(configuration);
@@ -82,6 +83,7 @@ public class Program
            .UseAuthorization();
 
         app.MapHub<GameHub.GameHub>("/gamehub");
+        app.MapControllers();
         app.MapGraphQL();
 
         if (configuration.IsDataSeedRequested())
