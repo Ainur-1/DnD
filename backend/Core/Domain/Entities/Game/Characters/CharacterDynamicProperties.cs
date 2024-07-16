@@ -66,6 +66,7 @@ public class CharacterDynamicProperties
         TemporaryHitPoints = 0;
         HitPoints = 1;
         DeathSavesFailureCount = DeathSavesSuccessCount = 0;
+        IsDying = false;
     }
 
     internal void Heal(int hp)

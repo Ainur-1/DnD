@@ -74,7 +74,7 @@ function GameMasterControlBar({
     
     return <ButtonBar>
         <Button variant="outlined" disabled={resurrectButtonInfo.disabled} onClick={resurrectButtonInfo.onClick}>
-            Воскресить персонажа
+            {resurrectButtonInfo.children}
         </Button>
         <SuggestButton disabled={suggestButtonInfo.disabled} onClick={suggestButtonInfo.onClick}/>
         <HitButton disabled={hitButtonInfo.disabled} onClick={hitButtonInfo.onClick}/>
@@ -111,10 +111,10 @@ function ControlBar({characterId, showHealCharacterDialog, showDamageCharacterDi
             return;
         }
         try {
-            if (userCharacterDead) {
+            if (character.mainStats.isDead || character.mainStats.isDying) {
                 await resurrect(characterId);
             } else {
-                await damageCharacter(characterId, character.mainStats.hp + 100);
+                await damageCharacter(characterId, character.mainStats.hp + character.mainStats.tempHp);
             }
         } catch {
             setFatalErrorOccured(true);

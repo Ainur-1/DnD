@@ -313,8 +313,7 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
         return <></>
     }
 
-    const [values, setValues] = useState<{[key: string]: FormField<number>}>(state?.gameInfo.partyCharacters.
-        filter(x => !x.mainStats.isDead)
+    const [values, setValues] = useState<{[key: string]: FormField<number>}>(state?.gameInfo.partyCharacters
         .reduce((acc, value, _) => {
         const key = value.id;
         acc[key] = {
@@ -333,9 +332,6 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
     }
 
     function onChange(characterId: string, strValue: string | undefined) {
-        if (!(characterId in values)) {
-            return;
-        }
 
         let error: string | null = null;
         if (strValue === undefined || strValue.trim().length == 0) {

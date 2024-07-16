@@ -151,13 +151,11 @@ public class GameHub : Hub<IHubEventActions>
             return;
         }
 
-        if (!await IsGameMasterAsync(partyId) 
-            || !(_connectionCharacterMapping.TryGetValue(Context.ConnectionId, out var characterId) && characterId == targetCharacterId))
+        if (await IsGameMasterAsync(partyId) 
+            || (_connectionCharacterMapping.TryGetValue(Context.ConnectionId, out var characterId) && characterId == targetCharacterId))
         {
-            return;
+            await _characterService.ResurrectAsync(targetCharacterId);
         }
-
-        await _characterService.ResurrectAsync(characterId);
     }
 
     public async Task UpdateFight(FightStatusDto fightStatus)
