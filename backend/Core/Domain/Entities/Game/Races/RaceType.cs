@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
+using Domain.Extensions.Serialization;
 
 namespace Domain.Entities.Races;
 
-[JsonConverter(typeof(StringEnumConverter))]
+[JsonConverter(typeof(RaceTypeJsonConverter))]
 public enum RaceType 
 {
     Dwarf,

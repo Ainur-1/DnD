@@ -10,7 +10,6 @@ using Services.Abstractions;
 using Services.Implementation;
 using MassTransit;
 using static DnD.Data.WebApplicationExtensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DnD;
 
@@ -48,8 +47,6 @@ public class Program
                 .AddDefaultTokenProviders();
 
         services.AddLogging(x => x.AddConsole().AddDebug());
-
-        services.AddLogging();
 
         if (builder.Environment.IsDevelopment())
         {

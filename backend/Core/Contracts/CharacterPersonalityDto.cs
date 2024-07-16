@@ -14,7 +14,7 @@ public class CharacterPersonalityDto
 
     public string Race { get; init; }
 
-    public ClassType Class { get; init; }
+    public string Class { get; init; }
 
     public CharacterAlignmentType Alignment { get; init; }
 
