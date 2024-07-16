@@ -21,12 +21,12 @@ namespace Services.Implementation
         {
             try
             {
-                _logger.LogInformation("User {userId} called {operation} [yyyy-MM-dd HH:mm:ss].",
+                _logger.LogInformation("User {userId} called {operation} {yyyy-MM-dd HH:mm:ss}.",
                     _callerUserId, operationName, DateTime.UtcNow);
 
                 await task;
 
-                _logger.LogInformation("User {userId} completed {operation} [yyyy-MM-dd HH:mm:ss].",
+                _logger.LogInformation("User {userId} completed {operation} {yyyy-MM-dd HH:mm:ss}.",
                     _callerUserId, operationName, DateTime.UtcNow);
             }
             catch (DomainException)
@@ -35,7 +35,7 @@ namespace Services.Implementation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "User {userId} raised exceptions: {ex} at {operation} [yyyy-MM-dd HH:mm:ss].",
+                _logger.LogError(ex, "User {userId} raised exceptions: {ex} at {operation} {yyyy-MM-dd HH:mm:ss}.",
                     _callerUserId, ex.GetType().Name, operationName, DateTime.UtcNow);
 
                 throw;

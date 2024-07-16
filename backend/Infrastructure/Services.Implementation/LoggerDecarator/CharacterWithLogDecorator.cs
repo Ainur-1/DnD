@@ -10,7 +10,7 @@ namespace Services.Implementation.LoggerDecarator;
 
 public class CharacterWithLogDecorator : ServiceLoggerBase<ICharacterService>, ICharacterService
 {
-    private readonly CharacterService _characterService;
+    private readonly ICharacterService _characterService;
     public CharacterWithLogDecorator(
         CharacterService characterService, 
         ILogger<ICharacterService> logger, 

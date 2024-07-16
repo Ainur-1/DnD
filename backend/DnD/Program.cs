@@ -27,8 +27,8 @@ public class Program
         services
                 .AddIdentity<User, UserRole>(options =>
                 {
-                    options.SignIn.RequireConfirmedEmail = true;
-                    options.SignIn.RequireConfirmedAccount = true;
+                    options.SignIn.RequireConfirmedEmail = false;
+                    options.SignIn.RequireConfirmedAccount = false;
                     options.User.RequireUniqueEmail = true;
                     options.User.AllowedUserNameCharacters = new string(Enumerable.Range(65, 25)
                         .Select(upperEnglishLetterCode => (char)upperEnglishLetterCode)
@@ -66,6 +66,7 @@ public class Program
 
         services.AddSignalR();
         services.AddGraphQlApi();
+        services.AddControllers();
 
         services.RegisterDatabaseServices(mongoDbSettings);
         services.AddDomainServicesImplementations(configuration);
@@ -82,6 +83,7 @@ public class Program
            .UseAuthorization();
 
         app.MapHub<GameHub.GameHub>("/gamehub");
+        app.MapControllers();
         app.MapGraphQL();
 
         if (configuration.IsDataSeedRequested())

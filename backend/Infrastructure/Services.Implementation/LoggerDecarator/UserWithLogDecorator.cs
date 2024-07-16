@@ -8,7 +8,7 @@ public class UserWithLogDecorator : ServiceLoggerBase<IUserService>, IUserServic
 {
     private readonly IUserService _userService;
     public UserWithLogDecorator(
-        IUserService userService,
+        UserManagementService userService,
         ILogger<IUserService> logger, 
         IHttpContextAccessor httpContext) : base(logger, httpContext)
     {

@@ -39,11 +39,21 @@ public static class ServiceCollectionExtensions
             x.AddConsumer<EmailSendCommandConsumer>();
             x.AddConsumer<CharacterUpdatedEventConsumer>();
 
-            x.UsingInMemory((ctx, cfg) => 
+            x.UsingRabbitMq((ctx, cfg) =>
             {
+                var rabbitMqSettings = configuration.GetSection("RabbitMqSettings");
+                cfg.Host(rabbitMqSettings["Host"], "/", h =>
+                {
+                    h.Username(rabbitMqSettings["Username"]);
+                    h.Password(rabbitMqSettings["Password"]);
+                });
+
                 cfg.ConfigureEndpoints(ctx);
             });
-        });
+
+
+        }
+        );
 
         return serviceCollection;
     }

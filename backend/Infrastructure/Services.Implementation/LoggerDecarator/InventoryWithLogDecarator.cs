@@ -14,7 +14,7 @@ public class InventoryWithLogDecarator : ServiceLoggerBase<IInventoryService>, I
 {
     private readonly IInventoryService _inventoryService;
     public InventoryWithLogDecarator(
-        IInventoryService inventoryService,
+        InventoryService inventoryService,
         ILogger<IInventoryService> logger, 
         IHttpContextAccessor httpContext) : base(logger, httpContext)
     {

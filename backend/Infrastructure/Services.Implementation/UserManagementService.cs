@@ -48,8 +48,8 @@ public class UserManagementService : IUserService, IAuthorizationService
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(token);
             var baseUrl = _configuration["AppSettings:BaseUrl"];
-
-            var confirmationLink = $"{baseUrl}/confirm-email?userId={user.Id}&token={encodedToken}";
+            var controlleremail = _configuration["AppSettings:EmailConfirmationUri"];
+            var confirmationLink = $"{baseUrl}{controlleremail}?userId={user.Id}&token={encodedToken}";
             var subject = "Подтверждение регистрации";
             var message = $@"
                 <html>
@@ -80,7 +80,7 @@ public class UserManagementService : IUserService, IAuthorizationService
                         .btn {{
                             display: inline-block;
                             background-color: #007bff;
-                            color: #fff;
+                            color: WHITE !important;
                             text-decoration: none;
                             padding: 10px 20px;
                             border-radius: 5px;
@@ -88,7 +88,9 @@ public class UserManagementService : IUserService, IAuthorizationService
                         }}
                         .btn:hover {{
                             background-color: #0056b3;
-                        }}
+                        }}                        
+
+                        
                     </style>
                 </head>
                 <body>
@@ -109,12 +111,6 @@ public class UserManagementService : IUserService, IAuthorizationService
                 Message = message
             });
             
-            await _bus.Send(new EmailSendCommand()
-            {
-                Email = email,
-                Subject = subject,
-                Message = message
-            });
             return;
         }
 

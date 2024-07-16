@@ -8,7 +8,17 @@ services:
       - 27018:27017
     volumes:
       - ./volumes/mongo:/data/db
-  
+      
+  rabbitmq:
+    image: rabbitmq
+    container_name: dnd_rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      
   backend:
     build:
       context: ./backend
@@ -24,6 +34,7 @@ services:
       - FrontendHost ="http://localhost:3000/"
     depends_on:
       - mongo
+      - rabbitmq
 
   frontend:
     build:
