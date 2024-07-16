@@ -38,7 +38,7 @@ export default function GameLoader({partyId, onLoaded, onFailure}: GameLoaderPro
     const { state:authState } = useAuthReducer();
 
     const [fetchParty, {data:partyData, isFetching:isPartyFetching, isError: isPartyError, isSuccess:isPartySuccess}] = useLazyPartyQuery();
-    const [fetchDeathSaves, {data:deathSavesData, isFetching:isDeathSavesFetching, isError: isDeathSavesError, isSuccess:isDeathSavesSuccess, error:deathSavesError}] = useLazyDeathSavesQuery();
+    const [fetchDeathSaves, {data:deathSavesData, isFetching:isDeathSavesFetching, isError: isDeathSavesError, isSuccess:isDeathSavesSuccess}] = useLazyDeathSavesQuery();
 
     const notifyProgress = (progress: number) => setProggress(progress);
 

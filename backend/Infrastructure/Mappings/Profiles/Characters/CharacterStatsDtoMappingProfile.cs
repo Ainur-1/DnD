@@ -40,6 +40,9 @@ internal class CharacterStatsDtoMappingProfile : Profile
         .ForMember(dest => dest.ConstitutionSavingThrowModifier, opt => opt.MapFrom(src => src.ConstitutionSavingThrowModifier))
         .ForMember(dest => dest.IntelligenceSavingThrowModifier, opt => opt.MapFrom(src => src.IntelligenceSavingThrowModifier))
         .ForMember(dest => dest.WisdomSavingThrowModifier, opt => opt.MapFrom(src => src.WisdomSavingThrowModifier))
+        .ForMember(dest => dest.HitPointsMaximum, opt => opt.MapFrom(src => src.HitPointsMaximum))
+        .ForMember(dest => dest.HitPointDice, opt => opt.MapFrom(src => src.HitPointDice))
+        .ForMember(dest => dest.HitPointsDiceMaximumCount, opt => opt.MapFrom(src => src.HitPointsDiceMaximumCount))
         .ForMember(dest => dest.CharismaSavingThrowModifier, opt => opt.MapFrom(src => src.CharismaSavingThrowModifier));
     }
 }

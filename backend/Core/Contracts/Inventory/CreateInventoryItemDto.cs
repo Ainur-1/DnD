@@ -1,5 +1,4 @@
 ﻿using Domain.Entities.Game.Items;
-using Domain.Entities.Items;
 using Domain.Entities.Items.Armors;
 using Domain.Entities.Items.Weapons;
 
@@ -20,7 +19,7 @@ public record CreateInventoryItemDto
 
     public Armor? MaybeArmor { get; init; }
 
-    public Item? MaybeStuff { get; init; }
+    public Stuff? MaybeStuff { get; init; }
 
     public bool IsValidItemDescriptor() 
         => MaybeWeapon is not null && MaybeArmor is null && MaybeStuff is null

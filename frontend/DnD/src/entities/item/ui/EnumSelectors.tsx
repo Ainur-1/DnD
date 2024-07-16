@@ -8,8 +8,7 @@ interface ArmorTypeSelectorProps extends SelectorProps<ArmorType> {
 export function ArmorTypeSelector({value, onValueChange, required}: ArmorTypeSelectorProps) {
     const handleChange = (value: ArmorType | string) => {
         if (typeof value === 'string') {
-            const enumValue = value.toLowerCase();
-            onValueChange(ArmorType[enumValue as keyof typeof ArmorType]);
+            onValueChange(value as ArmorType);
         } else {
             onValueChange(value);
         }
@@ -35,7 +34,7 @@ export function ArmorTypeSelector({value, onValueChange, required}: ArmorTypeSel
 
 export function WeaponProficiencyTypeSelector({required, value, onValueChange}: SelectorProps<WeaponProficiencyType>) {
     const handleChange = (value: WeaponProficiencyType | string) => {
-        onValueChange(typeof value === 'string' ? WeaponProficiencyType[(value.toLowerCase() as keyof typeof WeaponProficiencyType)] : value);
+        onValueChange(typeof value === 'string' ? value as WeaponProficiencyType : value);
     };
 
     return <FormControl required={required} fullWidth>
@@ -56,7 +55,7 @@ export function WeaponProficiencyTypeSelector({required, value, onValueChange}: 
 
 export function WeaponAttackTypeSelector({required, value, onValueChange}: SelectorProps<WeaponAttackType>) {
     const handleChange = (value: WeaponAttackType | string) => {
-        onValueChange(typeof value === 'string' ? WeaponAttackType[(value.toLowerCase() as keyof typeof WeaponAttackType)] : value);
+        onValueChange(typeof value === 'string' ? value as WeaponAttackType : value);
     };
 
     return <FormControl required={required} fullWidth>
@@ -78,7 +77,7 @@ export function WeaponAttackTypeSelector({required, value, onValueChange}: Selec
 
 export function WeaponDamageTypeSelector({required, value, onValueChange}: SelectorProps<WeaponDamageType>) {
     const handleChange = (value: WeaponDamageType | string) => {
-        onValueChange(typeof value === 'string' ? WeaponDamageType[(value.toLowerCase() as keyof typeof WeaponDamageType)] : value);
+        onValueChange(typeof value === 'string' ? value as WeaponDamageType : value);
     };
 
     return <FormControl required={required} fullWidth>

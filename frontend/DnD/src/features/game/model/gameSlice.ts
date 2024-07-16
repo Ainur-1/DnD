@@ -2,18 +2,20 @@ import { createAsyncThunk, createSlice, PayloadAction, ThunkDispatch } from "@re
 import { DynamicStatsDto, GameCharacter, GameState, InitGameStateVariables } from "./types";
 import { CharacterUpdatedEvent, DamageCharacterVariables, EndGameVariables,
          FightInfo,
+         HealCharacterVariables,
          ItemFromInventory, RoomState, 
          SuggestItemVariables, UpdateCharacterVariables, 
          UpdateFightVariables } from "./signalRTypes";
 import { Item } from "@/entities/item/model/types";
 import { inventoryApi } from "@/features/inventory/api/api";
-import { AppDispatch, RootState } from "@/app/appStore";
+import { RootState } from "@/app/appStore";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { HUB_URL } from "@/shared/configuration/enviromentConstants";
 import { mapDtoToGameCharacter } from "./mapDtoToGameCharter";
 import { GameCharacter as GameCharacterDto } from "./signalRTypes";
 import { WithId } from "@/shared/types/domainTypes";
 import { DeathSaves } from "@/entities/character";
+import { DeathSavesDto } from "@/shared/api/gql/graphql";
 
 
 export const damageCharacter = createAsyncThunk<void, DamageCharacterVariables, {state: RootState}>(
@@ -97,6 +99,61 @@ export const updateFight = createAsyncThunk<void, UpdateFightVariables, {state: 
     }
 );
 
+export const healCharacter = createAsyncThunk<void, HealCharacterVariables, {state: RootState}>(
+    'game/healCharacter',
+    async function (args, {getState, dispatch}) {
+        const {state} = getState().game;
+        if (!state) {
+            return;
+        }
+        const { connection } = state;
+
+        try {
+            await connection.invoke("Heal", args.targetId, {
+                hpAddition: args.hpAddition ?? null,
+                tempHp : args.tempHp ?? null,
+                usedHitDicesCount: args.usedHitDicesCount ?? null
+            });
+        } catch{
+            dispatch(setFatalErrorOccured(true));
+        }
+    }
+);
+
+export const updateDeathSaves = createAsyncThunk<void, DeathSavesDto, {state: RootState}>(
+    'game/updateDeathSaves',
+    async function (args, {getState, dispatch}) {
+        const {state} = getState().game;
+        if (!state) {
+            return;
+        }
+        const { connection } = state;
+
+        try {
+            await connection.invoke("UpdateDeathSaves", args);
+        } catch{
+            dispatch(setFatalErrorOccured(true));
+        }
+    }
+);
+
+export const resurrect = createAsyncThunk<void, {targetId?: string}, {state: RootState}>(
+    'game/resurrect',
+    async function (args, {getState, dispatch}) {
+        const {state} = getState().game;
+        if (!state) {
+            return;
+        }
+        const { connection, isUserGameMaster, gameInfo } = state;
+        const targetId = isUserGameMaster ? args.targetId! : gameInfo.userCharacterId; 
+        try {
+            await connection.invoke("Resurrect", targetId);
+        } catch{
+            dispatch(setFatalErrorOccured(true));
+        }
+    }
+);
+
 export const updateCharacter = createAsyncThunk<void, UpdateCharacterVariables, {state: RootState}>(
     'game/updateCharacter',
     async function(args, { getState, dispatch }){
@@ -104,25 +161,16 @@ export const updateCharacter = createAsyncThunk<void, UpdateCharacterVariables, 
         if (!state) {
             return;
         }
-        const { connection, gameInfo } = state;
-        const { userCharacterId, partyCharacters } = gameInfo;
+        const { connection, gameInfo, isUserGameMaster } = state;
+        const { userCharacterId } = gameInfo;
         try {
-            const character = partyCharacters.find(x => x.id == userCharacterId);
-            if (character) {
-                const currentStats = character.mainStats;
-                await connection.invoke("UpdateCharacterStat", {
-                    targetCharacterId: args.targetCharacterId ?? gameInfo.userCharacterId,
-    
-                    hp: args.hp ?? currentStats.hp,
-                    tempHp: args.tempHp ?? currentStats.tempHp,
-                    inspiration: args.inspiration ?? currentStats.inspiration,
-                    speed: args.speed ?? currentStats.speed,
-                    hitDicesLeftCount: args.hitDicesLeftCount ?? currentStats.hitDicesLeftCount,
-                    isDead: args.isDead ?? currentStats.isDead,
-                    isDying: args.isDying ?? currentStats.isDying,
-                    deathSaves: args.deathSavesUpdate?.deathSaves ?? gameInfo.deathSaves
+            const searchId = isUserGameMaster ? args.targetCharacterId! : userCharacterId; 
+            await connection.invoke("UpdateCharacterStat", 
+                searchId,
+                {    
+                    speed: args.speed,
+                    inspiration: args.inspiration,
                 });
-            }
         } catch{
             dispatch(setFatalErrorOccured(true));
         }
@@ -160,7 +208,23 @@ function onCharacterUpdate(args: CharacterUpdatedEvent, dispatch: any) {
         tempHp: stats.tempHp,
         deathSaves: stats.deathSaves,
         id: id,
-    }))
+    }));
+}
+
+function onFightUpdate(args: {
+    isFight: boolean;
+    scoreValues: {
+            characterId: string;
+            score: number;
+        }[] | null | undefined
+    }, 
+    dispatch: any) {
+    const { isFight, scoreValues } = args;
+
+    dispatch(setFight({
+        isFight: isFight,
+        order: scoreValues?.map(x => x.characterId) ?? null
+    }));
 }
 
 export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, { state: RootState }>(
@@ -172,8 +236,7 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
             .withAutomaticReconnect()
             .build();
         
-        connection.on("OnFightUpdate",
-             (args: FightInfo) => dispatch(setFight(args)));
+        connection.on("OnFightUpdate", (args) => onFightUpdate(args, dispatch));
         connection.on("OnPartyDisband", () => dispatch(setGameEnd(true)));
         connection.on("OnPartyJoin", (args: GameCharacterDto) => dispatch(addGameChracter(mapDtoToGameCharacter(args))));
         connection.on("OnCharacterUpdate", (args) => onCharacterUpdate(args, dispatch));

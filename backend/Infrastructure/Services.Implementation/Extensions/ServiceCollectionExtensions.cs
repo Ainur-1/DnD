@@ -7,6 +7,7 @@ using Services.Abstractions;
 using Services.Implementation.Consumers.Characters;
 using Services.Implementation.Consumers.Email;
 using Services.Implementation.LoggerDecarator;
+using Services.Implementation.LoggerDecorator;
 
 namespace Services.Implementation.Extensions;
 
@@ -18,7 +19,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped<IUserService, UserWithLogDecorator>();
         serviceCollection.AddScoped<IPartyService, PartyWithLogDecorator>();
         serviceCollection.AddScoped<ICharacterService, CharacterWithLogDecorator>();
-        serviceCollection.AddScoped<IInventoryService, InventoryWithLogDecarator>();
+        serviceCollection.AddScoped<IInventoryService, InventoryWithLogDecorator>();
         serviceCollection.AddScoped<CharacterService>();
         serviceCollection.AddScoped<PartyService>();
         serviceCollection.AddScoped<UserManagementService>();

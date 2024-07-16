@@ -3,7 +3,6 @@ import { Button, Container, Stack } from "@mui/material";
 import { ButtonProps, ButtonPropsWithChildren } from "../model/widgetTypes";
 import useGameReducer from "@/features/game";
 import { useState } from "react";
-import { updateCharacter } from "@/features/game/model/gameSlice";
 import { DamageFormDialog, HealFormDialog, SuggestFormDialog } from "./formDialogs";
 
 const OutlinedButton = ({onClick, children, disabled}: ButtonPropsWithChildren) =>
@@ -75,7 +74,7 @@ function GameMasterControlBar({
     
     return <ButtonBar>
         <Button variant="outlined" disabled={resurrectButtonInfo.disabled} onClick={resurrectButtonInfo.onClick}>
-            Воскресить персонажа
+            {resurrectButtonInfo.children}
         </Button>
         <SuggestButton disabled={suggestButtonInfo.disabled} onClick={suggestButtonInfo.onClick}/>
         <HitButton disabled={hitButtonInfo.disabled} onClick={hitButtonInfo.onClick}/>
@@ -93,7 +92,7 @@ interface ControlBarProps {
 function ControlBar({characterId, showHealCharacterDialog, showDamageCharacterDialog, showSuggestItemDialog}: ControlBarProps) {
     const [resurrectSent, setResurrectSent] = useState(false);
 
-    const { state, setFatalErrorOccured } = useGameReducer();
+    const { state, setFatalErrorOccured, resurrect, damageCharacter } = useGameReducer();
 
     if (state == undefined) {
         return <></>
@@ -108,12 +107,15 @@ function ControlBar({characterId, showHealCharacterDialog, showDamageCharacterDi
     const resurrectToggleButton = async (characterId: string) => {
         setResurrectSent(true);
         const character = findCharacterById(characterId);
+        if (!character) {
+            return;
+        }
         try {
-            await updateCharacter({
-                targetCharacterId: characterId,
-                isDead: !userCharacterDead,
-                isDying: userCharacterDead ? false : character?.mainStats.isDying,
-            });
+            if (character.mainStats.isDead || character.mainStats.isDying) {
+                await resurrect(characterId);
+            } else {
+                await damageCharacter(characterId, character.mainStats.hp + character.mainStats.tempHp);
+            }
         } catch {
             setFatalErrorOccured(true);
         } finally {

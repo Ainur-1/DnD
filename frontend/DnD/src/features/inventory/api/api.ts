@@ -1,18 +1,17 @@
-import { BASE_URL } from "@/shared/configuration/enviromentConstants";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { UpdateInventoryItemMutationResult, UpdateInventoryItemMutationVariables, InventoryItemsQueryResult, InventoryItemsQueryVariables } from "../model/types";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { UpdateInventoryItemMutationResult, UpdateInventoryItemMutationVariables } from "../model/types";
+import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+import { client } from "@/shared/api";
+import { GetCharacterInventoryQuery, GetCharacterInventoryQueryVariables } from "@/shared/api/gql/graphql";
+import GetCharacterInventoryDocument from './queries/GetCharacterInventory.graphql';
 
 export const inventoryApi = createApi({
     reducerPath: 'inventory/api',
-    baseQuery: fetchBaseQuery({baseUrl: BASE_URL}),
+    baseQuery: graphqlRequestBaseQuery({client: client}),
     tagTypes: ['InventoryItems'],
     endpoints: (build) => ({
-        inventoryItems: build.query<InventoryItemsQueryResult, InventoryItemsQueryVariables>({
-            query: (body) => ({
-                url: " mutation",
-                method: "GET",
-                body
-            }),
+        inventoryItems: build.query<GetCharacterInventoryQuery, GetCharacterInventoryQueryVariables>({
+            query: (variables) => ({document: GetCharacterInventoryDocument, variables}),
             providesTags: ['InventoryItems']
         }),
         updateInventoryItem: build.mutation<UpdateInventoryItemMutationResult, UpdateInventoryItemMutationVariables>({

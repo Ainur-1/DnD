@@ -3,6 +3,7 @@
 public class CharacterDynamicProperties
 {
     public int HitPoints { get; protected set; }
+
     public int TemporaryHitPoints { get; protected set; }
 
     public int HitDicesLeft { get; protected set; }
@@ -60,10 +61,28 @@ public class CharacterDynamicProperties
         }
     }
 
+    internal void Resurrect()
+    {
+        TemporaryHitPoints = 0;
+        HitPoints = 1;
+        DeathSavesFailureCount = DeathSavesSuccessCount = 0;
+        IsDying = false;
+    }
+
+    internal void Heal(int hp)
+    {
+        HitPoints += hp;
+    }
+
     internal void SetInspirationBonus(int inspiration) 
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(inspiration, 0, nameof(inspiration));
         InspirationBonus = inspiration;
+    }
+
+    internal void UseHitDice()
+    {
+        HitDicesLeft = Math.Max(0, HitDicesLeft - 1);
     }
 
     internal void SetActualSpeed(int speed) 
@@ -78,33 +97,19 @@ public class CharacterDynamicProperties
         ActualArmorClass = armorClass;
     }
 
-    internal void IncreaseOneOfDeathSavesCounters(bool isSuccessful, out bool characterHasBeenDead) 
+    internal void SetDeathSaves(int success, int failures, out bool characterHasBeenDead)
     {
-        characterHasBeenDead = false;
+        DeathSavesSuccessCount = success;
+        DeathSavesFailureCount = failures;
+        characterHasBeenDead = failures == 3;
 
-        if (isSuccessful) 
-        {
-            DeathSavesSuccessCount++;
-        }
-        else 
-        {
-            DeathSavesFailureCount++;
-        }
+        if (!characterHasBeenDead && success == 3)
+            Resurrect();
+    }
 
-        // stable health
-        if (DeathSavesSuccessCount == 3) 
-        {
-            IsDying = false;
-            ResetDeathSavesCounters();
-        }
-        else if (DeathSavesFailureCount == 3) 
-        {
-            characterHasBeenDead = true;
-        }
-    } 
-
-    private void ResetDeathSavesCounters()
+    internal void SetTemporaryHitPoints(int hp)
     {
-        DeathSavesSuccessCount = DeathSavesFailureCount =0;
+        ArgumentOutOfRangeException.ThrowIfNegative(hp, nameof(hp));
+        TemporaryHitPoints = hp;
     }
 }

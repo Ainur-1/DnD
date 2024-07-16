@@ -92,7 +92,7 @@ public static class WebApplicationExtensions
         return dataSeed ?? throw new InvalidOperationException("Could not find correct data seed.");
     }
 
-    public class DataSeed
+    private class DataSeed
     {
         public IEnumerable<Class> Classes { get; set; } = Array.Empty<Class>();
 

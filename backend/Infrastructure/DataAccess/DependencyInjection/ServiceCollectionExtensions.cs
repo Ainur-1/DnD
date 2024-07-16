@@ -124,6 +124,15 @@ public static class ServiceCollectionExtensions
             cm.MapProperty(x => x.Options)
                 .SetIgnoreIfNull(true);
         });
+
+        BsonClassMap.RegisterClassMap<Item>(cm =>
+        {
+            cm.AutoMap();
+            cm.SetIsRootClass(true);
+            cm.AddKnownType(typeof(Weapon));
+            cm.AddKnownType(typeof(Armor));
+            cm.AddKnownType(typeof(Item));
+        });
     }
 
     private static void AddRepositories(IServiceCollection services)

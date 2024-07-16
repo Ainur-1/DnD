@@ -1,5 +1,5 @@
 import { Item } from "@/entities/item/model/types";
-import { BaseHp, DeathSaves, FullAbility, SkillModifiers } from "@/entities/character/";
+import { BaseHp, FullAbility, SkillModifiers } from "@/entities/character/";
 import { NamePlusDescription, WithId } from "@/shared/types/domainTypes";
 import { DynamicStatsDto, ProficencyWithInitiative } from "./types";
 import { CharacterAlignmentType } from "@/shared/api/gql/graphql";
@@ -63,16 +63,15 @@ export interface EndGameVariables {
 
 export interface UpdateCharacterVariables {
     targetCharacterId: string | null,
-    hp?: number,
-    tempHp?: number,
     inspiration?: number
     speed?: number,
-    hitDicesLeftCount?: number,
-    deathSavesUpdate?: {
-        deathSaves: DeathSaves | null
-    },
-    isDead?: boolean,
-    isDying?: boolean,
+}
+
+export interface HealCharacterVariables {
+    targetId: string;
+    hpAddition?: number;
+    tempHp?: number;
+    usedHitDicesCount?: number;
 }
 
 export interface CharacterUpdatedEvent {

@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
                 .AddTypeExtension<CharacterQuery>()
                 .AddTypeExtension<RaceQuery>()
                 .AddTypeExtension<ClassQuery>()
+                .AddTypeExtension<InventoryQuery>()
             .AddMutationType(x => x.Name("Mutation"))
                 .AddTypeExtension<AuthorizationMutation>()
                 .AddTypeExtension<PartyMutation>()

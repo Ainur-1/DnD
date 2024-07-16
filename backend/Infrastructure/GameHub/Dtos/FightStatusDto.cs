@@ -3,10 +3,10 @@
 public class FightStatusDto
 {
     public bool IsFight { get; set; }
-    public CharacterInitciativeScoreDto[]? ScoreValues { get; set; }
+    public CharacterInitiativeScoreDto[]? ScoreValues { get; set; }
 
 }
-public class CharacterInitciativeScoreDto
+public class CharacterInitiativeScoreDto
 {
     public Guid CharacterId { get; set; }
     public int Score { get; set; }

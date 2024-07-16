@@ -1,7 +1,7 @@
 import useGameReducer from "@/features/game";
 import { tryParseNumber } from "@/shared/utils/parsers";
 import FormBox from "@/widgets/sign-in/ui/FormBox";
-import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogContent, DialogContentText, DialogTitle, Grid, List, ListItem, Paper, Skeleton, Stack, Switch, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import SuggesItemForm from "./SuggesItemForm";
 import { FormField } from "@/shared/types/IFormField";
@@ -22,14 +22,16 @@ interface HealFormDialogProps extends FormDialogProps {
 }
 
 export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDialogProps) {
-    const [tempHpAddition, setTempHpAddition] = useState<number | undefined>();
-    const [tempHpAdditionError, setTempHpAdditionError] = useState("");
+    const [tempHp, settempHp] = useState<number | undefined>();
+    const [tempHpError, settempHpError] = useState("");
     const [hpAddition, setHpAddition] = useState<number | undefined>();
     const [hpAdditionError, setHpAdditionError] = useState("");
+    const [usedHitDiceCount, setUsedHitDiceCount] = useState<number|undefined>(0);
+    const [usedHitDiceCountError, setUsedHitDiceCountError] = useState("");
     const [formError, setFormError] = useState("");
     const { state, setFatalErrorOccured } = useGameReducer();
     const [requestSent, setRequestSent] = useState(false);
-    const { updateCharacter } = useGameReducer();
+    const { healCharacter } = useGameReducer();
 
     if (state == undefined) {
         return <></>
@@ -54,11 +56,12 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
                 setHpAdditionError("У персонажа максимальное количество здоровья!");
                 setHpAddition(undefined);
             } else {
-                setHpAddition(value == 0 ? undefined : value);
+                setHpAddition(Math.abs(value));
                 setHpAdditionError("");
             }
             setFormError("");
         } else {
+            setHpAddition(undefined);
             setHpAdditionError(`Введите число (макс. ${maxAvailableHpAddition}).`);
         }
     }
@@ -66,9 +69,23 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
     const onTempHpChange = (strValue: string) => {
         const { success, value } = tryParseNumber(strValue);
         if (success) {
-            setTempHpAddition(Math.floor(value!));
+            settempHp(Math.floor(Math.abs(value!)));
+            settempHpError("");
         } else {
-            setTempHpAdditionError("Введите число.");
+            settempHpError("Введите число.");
+            settempHp(undefined);
+        }
+        setFormError("");
+    }
+
+    const onDiceCountChange = (strValue: string) => {
+        const { success, value } = tryParseNumber(strValue);
+        if (success) {
+            setUsedHitDiceCount(Math.floor(Math.abs(value!)));
+            setUsedHitDiceCountError("");
+        } else {
+            setUsedHitDiceCountError("Введите число.");
+            setUsedHitDiceCount(undefined);
         }
         setFormError("");
     }
@@ -82,7 +99,7 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
         const rangeErrorLabel = "Не верный диапозон значений.";
         
         setFormError("");
-        if (!hpAddition || !tempHpAddition) {
+        if (!(hpAddition || tempHp)) {
             setFormError("Введите +HP и/или +TempHp.");
             return;
         }
@@ -92,17 +109,18 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
             return;
         }
 
-        if (tempHpAddition && tempHpAddition <= 0) {
-            setTempHpAdditionError(rangeErrorLabel);
+        if (tempHp && tempHp <= 0) {
+            settempHpError(rangeErrorLabel);
             return;
         }
 
         setRequestSent(true);
         try {
-            await updateCharacter({
-                targetCharacterId: characterId,
-                hp: hpAddition ? charcter.mainStats.hp + hpAddition : undefined,
-                tempHp: tempHpAddition ? charcter.mainStats.tempHp + tempHpAddition : undefined
+            await healCharacter({
+                targetId: characterId,
+                hpAddition: hpAddition,
+                tempHp: tempHp,
+                usedHitDicesCount: usedHitDiceCount,
             });
         } catch {
             setFatalErrorOccured(true);
@@ -141,13 +159,22 @@ export function HealFormDialog({showForm, characterId, closeDialog}: HealFormDia
                         error={hpAdditionError != ""}
                     />
                     <TextField 
-                        value={tempHpAddition}
+                        value={tempHp}
                         onChange={(e) => onTempHpChange(e.target.value)}
                         margin="normal" 
                         fullWidth 
-                        label="+ Temp HP" 
+                        label="Установить Temp HP" 
                         type="number"
-                        error={tempHpAdditionError != ""}
+                        error={tempHpError != ""}
+                    />
+                    <TextField 
+                        value={usedHitDiceCount}
+                        onChange={(e) => onDiceCountChange(e.target.value)}
+                        margin="normal" 
+                        fullWidth 
+                        label="Потрачено костей здоровья" 
+                        type="number"
+                        error={usedHitDiceCountError != ""}
                     />
                     <Button disabled={requestSent} type="submit" fullWidth variant="outlined" sx={{ mt: 3, mb: 2 }}>
                         Лечить
@@ -286,8 +313,7 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
         return <></>
     }
 
-    const [values, setValues] = useState<{[key: string]: FormField<number>}>(state?.gameInfo.partyCharacters.
-        filter(x => !x.mainStats.isDead)
+    const [values, setValues] = useState<{[key: string]: FormField<number>}>(state?.gameInfo.partyCharacters
         .reduce((acc, value, _) => {
         const key = value.id;
         acc[key] = {
@@ -306,9 +332,6 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
     }
 
     function onChange(characterId: string, strValue: string | undefined) {
-        if (!(characterId in values)) {
-            return;
-        }
 
         let error: string | null = null;
         if (strValue === undefined || strValue.trim().length == 0) {
@@ -316,9 +339,10 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
         } 
 
         const { success, value } = tryParseNumber(strValue!.trim());
-        let actualValue = 1;
+        let actualValue: number | undefined = 1;
         if (!success) {
             error = "Не число.";
+            actualValue = undefined;
         } else if (value! < 1 || value! > 20 || isDecimal(value!)) {
             actualValue = 1;
             error = "Кубик d20."
@@ -373,40 +397,46 @@ export function StartFightFormDialog({showForm, closeDialog}: DialogProps) {
             scroll="body"
             onClose={closeDialog}
         >
-            <DialogTitle>
-                Начать режим боя
-            </DialogTitle>
             <DialogContent>
-                <FormBox handleSubmit={handleSubmit} formTitle="Значения бросков инициативы" formError={fromError}>
-                    {state.gameInfo.partyCharacters
-                        .filter(x => !x.mainStats.isDead)
-                        .map((character, index) => <Grid key={`grid-fight-${index}`} container spacing={2}>
-                            <Grid item xs={7.2}>
-                                <Typography variant="h6">
-                                    {character.personality.characterName}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={2.4}>
-                                <TextField 
-                                    disabled={requestSent}
-                                    value={values[character.id].value} 
-                                    onChange={(e) => onChange(character.id, e.target.value)} 
-                                    fullWidth  
-                                    label="Лов." 
-                                    type="number" 
-                                    error={values[character.id].error != null}
-                                />
-                            </Grid>
-                            <Grid item xs={2.4}>
-                                <Typography variant="body2">
-                                    + {character.otherStats.dexterityModifier}
-                                </Typography>
-                            </Grid>
-                    </Grid>)}
-                    <Button disabled={!Object.values(values).every(x => validDexValue(x)) || requestSent} type="submit" fullWidth variant="outlined" sx={{ mt: 3, mb: 2 }}>
-                        Лечить
-                    </Button>
-                </FormBox>
+                <Stack>
+                    <Typography component="h5" variant="h5" fontWeight="bold">
+                        Инициатива
+                    </Typography>
+                    <Typography component="h6" variant="h6" color="error" textAlign="center">
+                        {fromError}
+                    </Typography>
+                    <Box component="form" sx={{ mt: 1 }} onSubmit={handleSubmit}>
+                        {state.gameInfo.partyCharacters
+                            .filter(x => !x.mainStats.isDead)
+                            .map((character, index) => <Grid key={`grid-fight-${index}`} container spacing={2}>
+                                <Grid item xs={7.2} alignContent="center">
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {character.personality.characterName}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={2.4} alignContent="center">
+                                    <TextField 
+                                        disabled={requestSent}
+                                        value={values[character.id].value} 
+                                        onChange={(e) => onChange(character.id, e.target.value)} 
+                                        fullWidth  
+                                        label="Лов." 
+                                        type="number" 
+                                        error={values[character.id].error != null}
+                                    />
+                                </Grid>
+                                <Grid item xs={2.4} alignContent="center">
+                                    <Typography>
+                                        + {character.otherStats.dexterityModifier}
+                                    </Typography>
+                                </Grid>
+                        </Grid>)}
+
+                        <Button disabled={!Object.values(values).every(x => validDexValue(x)) || requestSent} type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                            Битва
+                        </Button>
+                    </Box>
+                </Stack>
             </DialogContent>
         </Dialog>
     )
@@ -432,25 +462,26 @@ export function ShowInventoryDialog({characterId, showForm, closeDialog}: ShowIn
             <DialogTitle>
                 Инвентарь
             </DialogTitle>
-            <DialogContent>
-                <Paper style={{overflow: 'auto'}}>
-                    { isLoading && <Skeleton animation="wave" variant="rounded" width="auto" height="100%"/>}
-                    {
-                        isSuccess &&
-                        <List>
-                            {data.items
-                                .map(item => <ListItem key={item.id}>
-                                <InventoryItemCard 
-                                    title={item.item.name} 
-                                    iconUrl={item.item.iconUrl} 
-                                    count={item.count} 
-                                    cardHeight={64} />
-                                Здесь кнопки действия
-                            </ListItem>
-                            )}
-                        </List>
-                    }
-                </Paper>
+            <DialogContent style={{overflow: 'auto'}}>
+                { isLoading && <Skeleton animation="wave" variant="rounded" width="auto" height="100%"/>}
+                {
+                    isSuccess &&
+                    <List>
+                        {data.characterInventory.items
+                            .map(item => <ListItem key={item.id}>
+                            <InventoryItemCard 
+                                title={item.item.armor?.name ?? item.item.stuff?.name ?? item.item.weapon?.name ?? ""} 
+                                iconUrl={""} 
+                                count={item.count} 
+                                cardHeight={64} />
+                            <Stack>
+                                <Switch/>
+                                <Switch/>
+                            </Stack>
+                        </ListItem>
+                        )}
+                    </List>
+                }
             </DialogContent>
         </Dialog>
     )

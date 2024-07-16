@@ -1,5 +1,7 @@
 ﻿using Amazon.Runtime.Internal.Util;
+using Contracts;
 using Contracts.Online;
+using Domain.Entities.Parties;
 using GameHub.Dtos;
 using GameHub.Models;
 using GameHub.Repositories;
@@ -24,8 +26,8 @@ public class GameHub : Hub<IHubEventActions>
     {
         _characterService = characterService;
         _partyService = partyService;
+        _logger = logger;
     }
-
 
     public async Task<GameRoomDto?> JoinRoom(Guid partyId)
     {
@@ -115,6 +117,47 @@ public class GameHub : Hub<IHubEventActions>
         await _characterService.TakeDamageAsync(targetCharacterId, damageAmount);
     }
 
+    public async Task Heal(Guid targetCharacterId, HealUpdateDto healUpdate)
+    {
+        if (!_connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId) || 
+            !await IsCharacterInParty(targetCharacterId, partyId) || 
+            !healUpdate.AreValidArguments)
+        {
+            return;
+        }
+
+        await _characterService
+            .HealAsync(
+                UserId,
+                targetCharacterId, 
+                hpAddition: healUpdate.HpAddition ?? 0, 
+                tempHp: healUpdate.TempHp ?? 0, 
+                usedDiceCount: healUpdate.UsedHitDicesCount ?? 0
+       );
+    }
+
+    public async Task UpdateDeathSaves(DeathSavesDto deathSavesDto)
+    {
+        if(_connectionCharacterMapping.TryGetValue(Context.ConnectionId, out var characterId))
+        {
+            await _characterService.UpdateDeathSavesAsync(characterId, deathSavesDto);
+        }
+    }
+
+    public async Task Resurrect(Guid targetCharacterId)
+    {
+        if (!_connectionPartyMapping.TryGetValue(Context.ConnectionId, out var partyId) || !await IsCharacterInParty(targetCharacterId, partyId))
+        {
+            return;
+        }
+
+        if (await IsGameMasterAsync(partyId) 
+            || (_connectionCharacterMapping.TryGetValue(Context.ConnectionId, out var characterId) && characterId == targetCharacterId))
+        {
+            await _characterService.ResurrectAsync(targetCharacterId);
+        }
+    }
+
     public async Task UpdateFight(FightStatusDto fightStatus)
     {
         if (!await CheckIfPartyKnownAndUserGameMasterAsync() || !RoomRepository.Contains(GetPartyByConnection()))
@@ -172,28 +215,15 @@ public class GameHub : Hub<IHubEventActions>
             room.SortedInitiativeScores = default;
         }
 
-        //
-        var fightUpdatedEvent = new FightUpdatedEvent
+        await Clients.Group(partyId.ToString()).OnFightUpdate(new FightStatusDto
         {
-            Status = new FightStatusDto
+            IsFight = room.IsFight,
+            ScoreValues = room.SortedInitiativeScores?.Select(x => new CharacterInitiativeScoreDto
             {
-                IsFight = room.IsFight,
-                ScoreValues = room.SortedInitiativeScores?.Select(x => new CharacterInitciativeScoreDto
-                {
-                    CharacterId = x.Item1,
-                    Score = x.Item2
-                }).ToArray()
-            }
-        };
-
-
-        await Clients.Group(partyId.ToString()).OnFightUpdate(fightUpdatedEvent);
-        //
-        //await Clients.Group(partyId.ToString()).OnFightUpdate(new
-        //{
-        //    isFight = room.IsFight,
-        //    orders = room.SortedInitiativeScores?.Select(x => x.CharacterId)
-        //});
+                CharacterId = x.Item1,
+                Score = x.Item2
+            }).ToArray()
+        });
     }
     public async Task SuggestInventoryItem(SuggestInvenotyItemDto suggestInventoryAbout)
     {
@@ -240,7 +270,7 @@ public class GameHub : Hub<IHubEventActions>
         if (await IsGameMasterAsync(partyId))
         {
             if (!targetCharacterId.HasValue
-                || targetCharacterId.Value != default
+                || targetCharacterId.Value == default
                 || !await IsCharacterInParty(targetCharacterId.Value, partyId))
             {
                 return;

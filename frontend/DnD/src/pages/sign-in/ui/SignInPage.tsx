@@ -17,12 +17,12 @@ export default function SignInPage() {
             navigate(returnUri);
         }
         else {
-            navigate('/');
+            navigate('/my-characters');
         }
     }
 
     if (state.isAuthenticated) {
-        return <Navigate to="/"/>
+        return <Navigate to="/my-characters"/>
     }
 
     return <>

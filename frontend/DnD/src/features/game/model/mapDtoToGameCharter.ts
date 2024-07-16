@@ -18,6 +18,7 @@ export function mapDtoToGameCharacter(dto: GameCharacterDto): GameCharacter {
         },
         otherStats: {
             ...characterStats,
+            maxHp: characterStats.hitPointsMaximum,
         },
         personality: {
             age: personality.age,

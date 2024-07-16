@@ -1,19 +1,15 @@
-﻿using Domain.Entities.Game.Items;
+﻿using Contracts;
+using Domain.Entities.Game.Items;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Service.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Services.Implementation.LoggerDecarator;
+namespace Services.Implementation.LoggerDecorator;
 
-public class InventoryWithLogDecarator : ServiceLoggerBase<IInventoryService>, IInventoryService
+public class InventoryWithLogDecorator : ServiceLoggerBase<IInventoryService>, IInventoryService
 {
     private readonly IInventoryService _inventoryService;
-    public InventoryWithLogDecarator(
+    public InventoryWithLogDecorator(
         InventoryService inventoryService,
         ILogger<IInventoryService> logger, 
         IHttpContextAccessor httpContext) : base(logger, httpContext)
@@ -38,5 +34,12 @@ public class InventoryWithLogDecarator : ServiceLoggerBase<IInventoryService>, I
     {
         var task = _inventoryService.DeleteItemAsync(characterId, inventoryItemId);
         await AwaitWithLogAsync(task, nameof(DeleteItemAsync));
+    }
+
+    public async Task<CharacterInventoryDto> GetCharacterInventoryAsync(Guid issuerId, Guid characterId)
+    {
+        var task = _inventoryService.GetCharacterInventoryAsync(issuerId, characterId);
+        await AwaitWithLogAsync(task, nameof(GetCharacterInventoryAsync));
+        return task.Result;
     }
 }
