@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction, ThunkDispatch } from "@reduxjs/toolkit";
 import { DynamicStatsDto, GameCharacter, GameState, InitGameStateVariables } from "./types";
 import { CharacterUpdatedEvent, DamageCharacterVariables, EndGameVariables,
          FightInfo,
@@ -7,12 +7,13 @@ import { CharacterUpdatedEvent, DamageCharacterVariables, EndGameVariables,
          UpdateFightVariables } from "./signalRTypes";
 import { Item } from "@/entities/item/model/types";
 import { inventoryApi } from "@/features/inventory/api/api";
-import { RootState } from "@/app/appStore";
+import { AppDispatch, RootState } from "@/app/appStore";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { HUB_URL } from "@/shared/configuration/enviromentConstants";
 import { mapDtoToGameCharacter } from "./mapDtoToGameCharter";
 import { GameCharacter as GameCharacterDto } from "./signalRTypes";
 import { WithId } from "@/shared/types/domainTypes";
+import { DeathSaves } from "@/entities/character";
 
 
 export const damageCharacter = createAsyncThunk<void, DamageCharacterVariables, {state: RootState}>(
@@ -146,6 +147,22 @@ export const endGame = createAsyncThunk<boolean, EndGameVariables, {state: RootS
     }
 )
 
+function onCharacterUpdate(args: CharacterUpdatedEvent, dispatch: any) {
+    const { id, stats } = args;
+    dispatch(updateCharacterDynamicStats({
+        armorClass: stats.armorClass,
+        hitDicesLeftCount: stats.hitDicesLeftCount,
+        hp: stats.hp,
+        inspiration: stats.inspiration,
+        isDead: stats.isDead,
+        isDying: stats.isDying,
+        speed: stats.speed,
+        tempHp: stats.tempHp,
+        deathSaves: stats.deathSaves,
+        id: id,
+    }))
+}
+
 export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, { state: RootState }>(
     "game/initGameState",
     async function (args, { dispatch }) {
@@ -159,16 +176,7 @@ export const initGameState = createAsyncThunk<boolean, InitGameStateVariables, {
              (args: FightInfo) => dispatch(setFight(args)));
         connection.on("OnPartyDisband", () => dispatch(setGameEnd(true)));
         connection.on("OnPartyJoin", (args: GameCharacterDto) => dispatch(addGameChracter(mapDtoToGameCharacter(args))));
-        connection.on("OnCharacterUpdate", (args) => {
-            console.log("Message");
-            console.log(args);
-        });
-        /*connection.on("OnCharacterUpdate",
-             (args: CharacterUpdatedEvent) => dispatch(updateCharacterDynamicStats({
-            ...args.stats,
-            id: args.id,
-        })));*/
-
+        connection.on("OnCharacterUpdate", (args) => onCharacterUpdate(args, dispatch));
 
         try {
             const roomState = await connection.start()
@@ -279,6 +287,18 @@ const gameSlice = createSlice({
             mainStats.isDead = payload.isDead;
             mainStats.speed = payload.speed;
             mainStats.tempHp = payload.tempHp;
+
+            let deathSaves: DeathSaves | undefined;
+            if (payload.deathSaves && payload.isDying) {
+                deathSaves = {
+                    failureCount: payload.deathSaves!.failureCount,
+                    successCount: payload.deathSaves!.successCount
+                }
+            } else {
+                deathSaves = undefined;
+            }
+
+            state.state.gameInfo.deathSaves = deathSaves;
         }
     },
 });
