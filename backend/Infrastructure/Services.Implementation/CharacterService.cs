@@ -358,4 +358,19 @@ public class CharacterService : ICharacterService
 
         return new RaceTrait(raceTraitDescriptor.Name, description);
     }
+
+    public Task ResurrectAsync(Guid characterId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task HealAsync(Guid characterId, int hpAddition, int tempHpAddition, int usedDiceCount)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdateDeathSavesAsync(Guid characterId, DeathSavesDto deathSaves)
+    {
+        throw new NotImplementedException();
+    }
 }

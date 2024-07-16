@@ -67,17 +67,8 @@ public class Program
         services.AddSignalR();
         services.AddGraphQlApi();
 
-        services.AddTransient<IEmailService>(provider =>
-            new EmailService(
-                configuration["Smtp:Server"],
-                int.Parse(configuration["Smtp:Port"]),
-                configuration["Smtp:User"],
-                configuration["Smtp:Pass"]
-            ));
-        services.AddTransient<IUserService, UserManagementService>();
-
         services.RegisterDatabaseServices(mongoDbSettings);
-        services.AddDomainServicesImplementations();
+        services.AddDomainServicesImplementations(configuration);
 
         var app = builder.Build();
 
