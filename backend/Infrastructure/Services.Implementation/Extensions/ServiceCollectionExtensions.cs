@@ -27,10 +27,10 @@ public static class ServiceCollectionExtensions
 
         serviceCollection.AddTransient<IEmailService>(provider =>
             new EmailService(
-                configuration["Smtp:Server"],
-                int.Parse(configuration["Smtp:Port"]),
-                configuration["Smtp:User"],
-                configuration["Smtp:Pass"]
+                configuration["Smtp:Server"] ?? throw new InvalidOperationException("Provide smtp settings"),
+                int.Parse(configuration["Smtp:Port"] ?? throw new InvalidOperationException("Provide rabbitmq settings")),
+                configuration["Smtp:User"] ?? throw new InvalidOperationException("Provide smtp settings"),
+                configuration["Smtp:Pass"] ?? throw new InvalidOperationException("Provide smtp settings")
             ));
 
         serviceCollection.AddEntitiesMapping();
@@ -45,16 +45,13 @@ public static class ServiceCollectionExtensions
                 var rabbitMqSettings = configuration.GetSection("RabbitMqSettings");
                 cfg.Host(rabbitMqSettings["Host"], "/", h =>
                 {
-                    h.Username(rabbitMqSettings["Username"]);
-                    h.Password(rabbitMqSettings["Password"]);
+                    h.Username(rabbitMqSettings["Username"] ?? throw new InvalidOperationException("Provide rabbitmq settings"));
+                    h.Password(rabbitMqSettings["Password"] ?? throw new InvalidOperationException("Provide rabbitmq settings"));
                 });
 
                 cfg.ConfigureEndpoints(ctx);
             });
-
-
-        }
-        );
+        });
 
         return serviceCollection;
     }

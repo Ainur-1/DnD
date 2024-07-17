@@ -16,8 +16,8 @@ services:
       - 5672:5672
       - 15672:15672
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER=wowuser
+      - RABBITMQ_DEFAULT_PASS=password
    
   postgresql:
     image: postgres
@@ -42,6 +42,9 @@ services:
       - EnableDataSeed=true
       - MongoDbSettings__Host=host.docker.internal
       - MongoDbSettings__Port=27018
+      - RabbitMqSettings__Host=host.docker.internal
+      - RabbitMqSettings__Username=wowuser
+      - RabbitMqSettings__Password=password
       - ASPNETCORE_ENVIRONMENT=Development
       - FrontendHost ="http://localhost:3000/"
       - ConnectionStrings__LogsPostgresql=Host=host.docker.internal;Database=dnd_postgresql;Username=user;Password=123
@@ -56,8 +59,8 @@ services:
       dockerfile: ./Dockerfile
     container_name: dnd_frontend
     environment:
-      - VITE_GRAPHQL_HOST="http://localhost:8080/graphql"
-      - VITE_HUB_HOST="http://localhost:8080/gamehub"
+      - VITE_GRAPHQL_HOST=http://localhost:8080/graphql
+      - VITE_HUB_HOST=http://localhost:8080/gamehub
     ports:
       - 3000:3000
     
