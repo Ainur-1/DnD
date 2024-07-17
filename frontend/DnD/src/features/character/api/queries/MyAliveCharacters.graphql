@@ -1,0 +1,9 @@
+query myAliveCharacters {
+  myCharacters(where: { and: { isDead: { eq: false }, isInParty: { eq: false } } }) {
+    id
+    personality {
+      name
+      base64Image
+    }
+  }
+}

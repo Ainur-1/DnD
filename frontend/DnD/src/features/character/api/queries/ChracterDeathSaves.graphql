@@ -1,0 +1,12 @@
+query characterDeathSaves($characterId: UUID!) {
+  character(characterId: $characterId) {
+    dynamicStats {
+      deathSaves {
+        failureCount
+        successCount
+      }
+      isDying
+      isDead
+    }
+  }
+}

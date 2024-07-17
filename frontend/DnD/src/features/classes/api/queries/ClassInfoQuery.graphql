@@ -1,0 +1,14 @@
+query classInfo($id: ClassType!) {
+  classInfo(id: $id) {
+    armorProficiency
+    description
+    hitDice
+    id
+    name
+    savingThrowsTraitsMastery
+    skillMasteryToChooseCount
+    skillTraitsMastery
+    startInventoryDescription
+    weaponProficiency
+  }
+} 

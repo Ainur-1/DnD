@@ -1,0 +1,63 @@
+mutation createCharacter(
+  $age: Int!,
+  $alignment: CharacterAlignmentType!,
+  $charisma: Int!,
+  $classId: ClassType!,
+  $coinsAffectOnWeight: Boolean!,
+  $constitution: Int!,
+  $dexterity: Int!,
+  $intelligence: Int!,
+  $isPublic: Boolean!,
+  $background: String,
+  $base64Image: String,
+  $bonds: [String!],
+  $flaws: [String!],
+  $languages: [String!],
+  $name: String,
+  $otherTraits: [String!],
+  $inventory: [CreateInventoryItemDtoInput!],
+  $race: RaceType!,
+  $subrace: String,
+  $raceTraitsAdjustments: [KeyValuePairOfStringAndInt32Input!]!,
+  $speed: Int!,
+  $wallet: StartWealthDtoInput!,
+  $strength: Int!,
+  $wisdom: Int!,
+  $xp: Int!,
+  $selectedSkillTraits: [CharacterSkillType!]!
+) {
+  createCharacter(
+    input: {
+      character: {
+        age: $age,
+        alignment: $alignment,
+        charisma: $charisma,
+        class: $classId,
+        coinsAffectOnWeight: $coinsAffectOnWeight,
+        constitution: $constitution,
+        dexterity: $dexterity,
+        intelligence: $intelligence,
+        isPublic: $isPublic,
+        maybeBackground: $background,
+        maybeBase64Image: $base64Image,
+        maybeBonds: $bonds,
+        maybeFlaws: $flaws,
+        maybeLanguages: $languages,
+        maybeName: $name,
+        maybeOtherTraits: $otherTraits,
+        maybeStartInventory: $inventory,
+        maybeSubrace: $subrace,
+        race: $race
+        raceTraitsAdjustments: $raceTraitsAdjustments,
+        speed: $speed,
+        startWealth: $wallet,
+        strength: $strength,
+        wisdom: $wisdom,
+        xp: $xp,
+        skillTraits: $selectedSkillTraits
+      }
+    }
+  ) {
+    uuid
+  }
+}

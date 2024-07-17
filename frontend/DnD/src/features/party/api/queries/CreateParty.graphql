@@ -1,0 +1,5 @@
+mutation createParty($accessCode: String!){
+  createParty(input: { accessCode: $accessCode }) {
+    uuid
+  }
+}

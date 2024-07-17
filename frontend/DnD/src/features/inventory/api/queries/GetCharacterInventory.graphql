@@ -1,0 +1,50 @@
+query getCharacterInventory($characterId: UUID!){
+  characterInventory(characterId: $characterId) {
+    items {
+      count
+      id
+      inUse
+      isItemProficiencyOn
+      item {
+        armor {
+          armorType
+          baseArmorClass
+          costInGold
+          description
+          hasStealthDisadvantage
+          iconUrl
+          material
+          maxPossibleDexterityModifier
+          name
+          requiredStrength
+          tags
+          weightInPounds
+        }
+        stuff {
+          costInGold
+          description
+          iconUrl
+          name
+          tags
+          weightInPounds
+        }
+        weapon {
+          alternateHitDice
+          attackType
+          costInGold
+          criticalDistanceInFoots
+          damageType
+          description
+          hitDice
+          iconUrl
+          name
+          normalDistanceInFoots
+          proficiencyType
+          properties
+          tags
+          weightInPounds
+        }
+      }
+    }
+  }
+}
